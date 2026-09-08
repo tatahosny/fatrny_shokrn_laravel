@@ -30,6 +30,7 @@ use App\Http\Controllers\Restaurant\DeliveryDriverController as RestaurantDriver
 use App\Http\Controllers\Restaurant\AnalyticsController as RestaurantAnalytics;
 use App\Http\Controllers\Restaurant\DriverStatsController as RestaurantDriverStats;
 use App\Http\Controllers\Restaurant\SettingsController as RestaurantSettings;
+use App\Http\Controllers\Restaurant\BillingController as RestaurantBilling;
 use App\Http\Controllers\Delivery\DashboardController as DeliveryDashboard;
 use App\Http\Controllers\Delivery\OrderController as DeliveryOrder;
 use App\Http\Controllers\Delivery\ProfileController as DeliveryProfile;
@@ -156,9 +157,11 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
     });
 
     // Invoices
+    Route::post('/invoices/auto-generate', [AdminInvoice::class, 'autoGenerateMonthly'])->name('invoices.auto-generate');
     Route::resource('invoices', AdminInvoice::class);
     Route::match(['post', 'patch'], '/invoices/{id}/issue', [AdminInvoice::class, 'issue'])->name('invoices.issue');
     Route::match(['post', 'patch'], '/invoices/{id}/mark-paid', [AdminInvoice::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::match(['post', 'patch'], '/invoices/{id}/suspend-restaurant', [AdminInvoice::class, 'suspendRestaurant'])->name('invoices.suspend-restaurant');
     Route::match(['post', 'patch'], '/invoices/{id}/cancel', [AdminInvoice::class, 'destroy'])->name('invoices.cancel');
     Route::get('/invoices/{id}/pdf', [AdminInvoice::class, 'downloadPdf'])->name('invoices.pdf');
 
@@ -197,9 +200,12 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
 // =====================================================
 // RESTAURANT ROUTES — RESTAURANT_OWNER, RESTAURANT_STAFF
 // =====================================================
-Route::middleware(['auth', 'portal:RESTAURANT'])->prefix('restaurant')->name('restaurant.')->group(function () {
+Route::middleware(['auth', 'portal:RESTAURANT', 'billing.check'])->prefix('restaurant')->name('restaurant.')->group(function () {
 
     Route::get('/dashboard', [RestaurantDashboard::class, 'index'])->name('dashboard');
+
+    // Billing & Invoices
+    Route::get('/billing', [RestaurantBilling::class, 'index'])->name('billing');
 
     // Orders
     Route::get('/orders', [RestaurantOrder::class, 'index'])->name('orders.index');
@@ -237,9 +243,10 @@ Route::middleware(['auth', 'portal:RESTAURANT'])->prefix('restaurant')->name('re
 // =====================================================
 // DELIVERY DRIVER ROUTES — DELIVERY_DRIVER only
 // =====================================================
-Route::middleware(['auth', 'portal:DELIVERY'])->prefix('delivery')->name('delivery.')->group(function () {
+Route::middleware(['auth', 'portal:DELIVERY', 'billing.check'])->prefix('delivery')->name('delivery.')->group(function () {
 
     Route::get('/dashboard', [DeliveryDashboard::class, 'index'])->name('dashboard');
+    Route::get('/suspended', [DeliveryDashboard::class, 'suspended'])->name('suspended');
 
     // Orders — ONLY assigned orders for THIS driver
     Route::get('/orders', [DeliveryOrder::class, 'index'])->name('orders.index');

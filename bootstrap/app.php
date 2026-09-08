@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Portal role enforcement — usage: ->middleware('portal:ADMIN')
         $middleware->alias([
             'portal' => \App\Http\Middleware\EnsurePortalRole::class,
+            'billing.check' => \App\Http\Middleware\CheckBillingStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

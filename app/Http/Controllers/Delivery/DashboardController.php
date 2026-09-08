@@ -54,5 +54,18 @@ class DashboardController extends Controller
             'weekly_stats'    => $weeklyStats,
         ]);
     }
+
+    public function suspended(): Response
+    {
+        $driver = auth()->user()->deliveryDriver;
+        $restaurant = $driver?->restaurant;
+        $supportPhone = \App\Models\SystemSetting::where('key', 'support_phone')->value('value') ?? env('SUPPORT_PHONE', '01027961208');
+
+        return Inertia::render('Delivery/Suspended', [
+            'driver'       => $driver,
+            'restaurant'   => $restaurant ? ['id' => $restaurant->id, 'name' => $restaurant->name] : null,
+            'supportPhone' => $supportPhone,
+        ]);
+    }
 }
 

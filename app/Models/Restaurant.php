@@ -35,6 +35,8 @@ class Restaurant extends Model
         'monthly_subscription_fee',
         'billing_cycle',
         'payment_due_date',
+        'billing_suspended_at',
+        'suspension_reason',
     ];
 
     protected function casts(): array
@@ -48,6 +50,7 @@ class Restaurant extends Model
             'commission_percentage' => 'decimal:2',
             'monthly_subscription_fee' => 'decimal:2',
             'payment_due_date' => 'date',
+            'billing_suspended_at' => 'datetime',
         ];
     }
 
@@ -108,5 +111,10 @@ class Restaurant extends Model
         }
         $now = now()->format('H:i:s');
         return $now >= $this->opening_time && $now <= $this->closing_time;
+    }
+
+    public function isBillingSuspended(): bool
+    {
+        return $this->status === 'SUSPENDED' && $this->billing_suspended_at !== null;
     }
 }

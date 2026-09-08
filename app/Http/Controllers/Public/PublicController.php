@@ -28,8 +28,8 @@ class PublicController extends Controller
             ->take(12)
             ->get();
 
-        // All active restaurants with item counts for landing page
-        $restaurants = Restaurant::where('status', 'ACTIVE')
+        // Restaurants with item counts for landing page
+        $restaurants = Restaurant::whereIn('status', ['ACTIVE', 'SUSPENDED'])
             ->select([
                 'id', 'name', 'slug', 'logo', 'cover_image', 'description',
                 'phone', 'address', 'delivery_fee', 'estimated_delivery_time',
@@ -38,6 +38,7 @@ class PublicController extends Controller
             ])
             ->withCount(['menuItems' => fn($q) => $q->where('is_available', true)])
             ->withCount(['offers' => fn($q) => $q->where('is_active', true)])
+            ->orderByRaw("CASE WHEN status = 'ACTIVE' THEN 0 ELSE 1 END")
             ->latest()
             ->get();
 
@@ -162,11 +163,12 @@ class PublicController extends Controller
 
     public function restaurants(): Response
     {
-        $restaurants = Restaurant::where('status', 'ACTIVE')
+        $restaurants = Restaurant::whereIn('status', ['ACTIVE', 'SUSPENDED'])
             ->select(['id', 'name', 'slug', 'logo', 'cover_image', 'description',
                 'delivery_fee', 'estimated_delivery_time', 'minimum_order_amount',
-                'opening_time', 'closing_time', 'address'])
+                'opening_time', 'closing_time', 'address', 'status', 'student_discount_percentage', 'phone'])
             ->withCount(['offers' => fn($q) => $q->where('is_active', true)])
+            ->orderByRaw("CASE WHEN status = 'ACTIVE' THEN 0 ELSE 1 END")
             ->latest()
             ->paginate(12);
 
@@ -178,7 +180,7 @@ class PublicController extends Controller
     public function restaurantDetails(string $slug): Response
     {
         $restaurant = Restaurant::where('slug', $slug)
-            ->where('status', 'ACTIVE')
+            ->whereIn('status', ['ACTIVE', 'SUSPENDED'])
             ->with([
                 'categories' => function ($q) {
                     $q->where('is_active', true)

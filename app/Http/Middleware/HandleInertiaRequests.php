@@ -32,6 +32,10 @@ class HandleInertiaRequests extends Middleware
             return SystemSetting::where('key', 'app_slogan')->value('value') ?? 'أكلك من برة';
         });
 
+        $supportPhone = cache()->remember('system_setting.support_phone', 3600, function () {
+            return SystemSetting::where('key', 'support_phone')->value('value') ?? env('SUPPORT_PHONE', '01027961208');
+        });
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user'        => $user ? $user->only('id', 'name', 'email', 'phone', 'role', 'is_active', 'avatar') : null,
@@ -43,8 +47,9 @@ class HandleInertiaRequests extends Middleware
                 'warning' => $request->session()->get('warning'),
                 'info'    => $request->session()->get('info'),
             ],
-            'app_name'   => $appName,
-            'app_slogan' => $appSlogan,
+            'app_name'      => $appName,
+            'app_slogan'    => $appSlogan,
+            'support_phone' => $supportPhone,
         ]);
     }
 }

@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import GuestLayout from '../../Layouts/GuestLayout';
 import { Restaurant, Category, MenuItem, MenuItemAddon } from '../../Types';
@@ -183,6 +183,19 @@ export default function RestaurantDetails({ restaurant }: RestaurantDetailsProps
                         )}
                     </div>
                 </div>
+
+                {/* INACTIVE RESTAURANT BANNER */}
+                {restaurant.status !== 'ACTIVE' && (
+                    <div className="p-5 rounded-3xl bg-red-500/10 border-2 border-red-500/30 text-red-600 dark:text-red-400 flex items-center gap-3.5">
+                        <AlertTriangle className="w-7 h-7 shrink-0 text-red-500" />
+                        <div>
+                            <h3 className="font-black text-sm">هذا المطعم غير نشط حالياً</h3>
+                            <p className="text-xs text-red-500/80 mt-0.5">
+                                المطعم متوقف مؤقتاً عن استقبال الطلبات عبر المنصة. يمكنك استعراض الأصناف والأسعار فقط دون إمكانية الطلب.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Search & Filter Bar */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-stone-900 p-4 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-sm">
@@ -387,13 +400,22 @@ export default function RestaurantDetails({ restaurant }: RestaurantDetailsProps
                         </div>
 
                         {/* Confirm Button */}
-                        <button
-                            onClick={handleAddToCartFromModal}
-                            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-500 text-white font-black text-sm shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 hover:from-orange-600 hover:to-red-600 transition-all active:scale-98"
-                        >
-                            <ShoppingBag className="w-4 h-4" />
-                            <span>أضف للسلة — {(currentModalUnitPrice * modalQuantity).toFixed(2)} ج.م</span>
-                        </button>
+                        {restaurant.status === 'ACTIVE' ? (
+                            <button
+                                onClick={handleAddToCartFromModal}
+                                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-500 text-white font-black text-sm shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 hover:from-orange-600 hover:to-red-600 transition-all active:scale-98"
+                            >
+                                <ShoppingBag className="w-4 h-4" />
+                                <span>أضف للسلة — {(currentModalUnitPrice * modalQuantity).toFixed(2)} ج.م</span>
+                            </button>
+                        ) : (
+                            <button
+                                disabled
+                                className="w-full py-3.5 rounded-2xl bg-stone-200 dark:bg-stone-800 text-stone-400 font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed"
+                            >
+                                <span>المطعم غير نشط حالياً ولا يستقبل طلبات</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

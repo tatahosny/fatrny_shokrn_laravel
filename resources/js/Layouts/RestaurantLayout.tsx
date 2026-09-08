@@ -19,7 +19,9 @@ import {
     Sparkles,
     Store,
     Flame,
-    Activity
+    Activity,
+    Receipt,
+    ShieldAlert
 } from 'lucide-react';
 import { SharedInertiaProps } from '../Types';
 
@@ -72,6 +74,7 @@ export default function RestaurantLayout({
         { label: 'العروض وخصومات الطلاب', href: '/restaurant/offers', icon: Tag, highlight: true },
         { label: 'كباتن التوصيل للفرع', href: '/restaurant/delivery-drivers', icon: Bike },
         { label: 'إحصائيات ونشاط الكباتن', href: '/restaurant/driver-stats', icon: Activity },
+        { label: 'الفواتير والاشتراكات', href: '/restaurant/billing', icon: Receipt, highlight: true },
         { label: 'تقارير المبيعات والأرباح', href: '/restaurant/analytics', icon: BarChart3 },
         { label: 'بيانات وإعدادات المطعم', href: '/restaurant/settings', icon: Settings },
     ];

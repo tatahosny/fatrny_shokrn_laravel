@@ -133,24 +133,40 @@ export default function Restaurants({ restaurants }: RestaurantsProps) {
                             <span dir="ltr">{restaurant.phone}</span>
                           </div>
                         )}
-                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mr-auto">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                          متاح للطلب الآن
-                        </span>
+                        {restaurant.status === 'ACTIVE' ? (
+                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mr-auto">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            متاح للطلب الآن
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-black text-red-600 dark:text-red-400 flex items-center gap-1 mr-auto bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-900/50">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            غير نشط
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   {/* Menu Button */}
                   <div className="p-5 pt-0">
-                    <Link
-                      href={`/restaurants/${restaurant.slug}`}
-                      className="w-full py-3 px-4 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-black text-sm shadow-md shadow-orange-500/20 hover:shadow-orange-500/30 transition-all flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500"
-                    >
-                      <UtensilsCrossed className="w-4 h-4" />
-                      <span>تصفح منيو المطعم واطلب الآن</span>
-                      <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    </Link>
+                    {restaurant.status === 'ACTIVE' ? (
+                      <Link
+                        href={`/restaurants/${restaurant.slug}`}
+                        className="w-full py-3 px-4 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-black text-sm shadow-md shadow-orange-500/20 hover:shadow-orange-500/30 transition-all flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500"
+                      >
+                        <UtensilsCrossed className="w-4 h-4" />
+                        <span>تصفح منيو المطعم واطلب الآن</span>
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        className="w-full py-3 px-4 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2 border border-stone-200 dark:border-stone-700"
+                      >
+                        <span>المطعم غير نشط حالياً</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
