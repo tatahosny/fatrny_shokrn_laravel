@@ -93,16 +93,19 @@ export default function UserCreate({ roles }: Props) {
                             الدور والصلاحيات
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {roles.map(role => (
-                                <label key={role}
-                                    className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${data.role === role
-                                        ? 'border-orange-500 bg-orange-500/10'
-                                        : 'border-white/10 bg-white/5 hover:border-white/20'}`}>
-                                    <input type="radio" name="role" value={role} checked={data.role === role}
-                                        onChange={() => setData('role', role)} className="accent-orange-500" />
-                                    <span className="text-sm text-white">{roleLabels[role] ?? role}</span>
-                                </label>
-                            ))}
+                            {(roles || []).map(roleItem => {
+                                const role = typeof roleItem === 'string' ? roleItem : (roleItem as any)?.name ?? String(roleItem);
+                                return (
+                                    <label key={role}
+                                        className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${data.role === role
+                                            ? 'border-orange-500 bg-orange-500/10'
+                                            : 'border-white/10 bg-white/5 hover:border-white/20'}`}>
+                                        <input type="radio" name="role" value={role} checked={data.role === role}
+                                            onChange={() => setData('role', role)} className="accent-orange-500" />
+                                        <span className="text-sm text-white">{roleLabels[role] ?? role}</span>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
 

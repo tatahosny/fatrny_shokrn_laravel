@@ -29,17 +29,31 @@ class UserController extends Controller
             });
         }
 
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        $roles = Role::pluck('name');
+        if ($roles->isEmpty()) {
+            $roles = collect(['SUPER_ADMIN', 'ADMIN', 'PLATFORM_STAFF', 'RESTAURANT_OWNER', 'RESTAURANT_STAFF', 'DELIVERY_DRIVER', 'CUSTOMER']);
+        }
+
         return Inertia::render('Admin/Users/Index', [
             'users'   => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search']),
-            'roles'   => Role::all(['id', 'name']),
+            'filters' => $request->only(['search', 'role']),
+            'roles'   => $roles,
         ]);
     }
 
     public function create(): Response
     {
+        $roles = Role::pluck('name');
+        if ($roles->isEmpty()) {
+            $roles = collect(['ADMIN', 'PLATFORM_STAFF']);
+        }
+
         return Inertia::render('Admin/Users/Create', [
-            'roles' => Role::all(['id', 'name']),
+            'roles' => $roles,
         ]);
     }
 
@@ -75,9 +89,14 @@ class UserController extends Controller
     public function edit(int $id): Response
     {
         $user = User::findOrFail($id);
+        $roles = Role::pluck('name');
+        if ($roles->isEmpty()) {
+            $roles = collect(['SUPER_ADMIN', 'ADMIN', 'PLATFORM_STAFF', 'RESTAURANT_OWNER', 'RESTAURANT_STAFF', 'DELIVERY_DRIVER', 'CUSTOMER']);
+        }
+
         return Inertia::render('Admin/Users/Edit', [
             'user'  => $user,
-            'roles' => Role::all(['id', 'name']),
+            'roles' => $roles,
         ]);
     }
 
