@@ -54,26 +54,51 @@ class OrderService
 
                 $selectedOptions = [];
                 if (!empty($itemInput['options'])) {
-                    foreach ($itemInput['options'] as $optValId) {
-                        $optionValue = MenuItemOptionValue::findOrFail($optValId);
-                        $optionsPrice += (float) $optionValue->price;
-                        $selectedOptions[] = [
-                            'option_name' => $optionValue->option->name,
-                            'value_name' => $optionValue->name,
-                            'price' => (float) $optionValue->price,
-                        ];
+                    foreach ($itemInput['options'] as $opt) {
+                        if (is_array($opt) && (isset($opt['price']) || isset($opt['optionName']) || isset($opt['valueName']))) {
+                            $optPrice = (float) ($opt['price'] ?? 0);
+                            $optionsPrice += $optPrice;
+                            $selectedOptions[] = [
+                                'option_name' => $opt['optionName'] ?? $opt['option_name'] ?? 'خيار',
+                                'value_name' => $opt['valueName'] ?? $opt['value_name'] ?? '',
+                                'price' => $optPrice,
+                            ];
+                        } elseif (is_numeric($opt)) {
+                            $optionValue = MenuItemOptionValue::find($opt);
+                            if ($optionValue) {
+                                $optionsPrice += (float) $optionValue->price;
+                                $selectedOptions[] = [
+                                    'option_name' => $optionValue->option->name ?? 'خيار',
+                                    'value_name' => $optionValue->name,
+                                    'price' => (float) $optionValue->price,
+                                ];
+                            }
+                        }
                     }
                 }
 
                 $selectedAddons = [];
                 if (!empty($itemInput['addons'])) {
-                    foreach ($itemInput['addons'] as $addonId) {
-                        $addon = MenuItemAddon::where('is_available', true)->findOrFail($addonId);
-                        $addonsPrice += (float) $addon->price;
-                        $selectedAddons[] = [
-                            'name' => $addon->name,
-                            'price' => (float) $addon->price,
-                        ];
+                    foreach ($itemInput['addons'] as $add) {
+                        if (is_array($add) && isset($add['id'])) {
+                            $addon = MenuItemAddon::where('is_available', true)->find($add['id']);
+                            if ($addon) {
+                                $addonsPrice += (float) $addon->price;
+                                $selectedAddons[] = [
+                                    'name' => $addon->name,
+                                    'price' => (float) $addon->price,
+                                ];
+                            }
+                        } elseif (is_numeric($add)) {
+                            $addon = MenuItemAddon::where('is_available', true)->find($add);
+                            if ($addon) {
+                                $addonsPrice += (float) $addon->price;
+                                $selectedAddons[] = [
+                                    'name' => $addon->name,
+                                    'price' => (float) $addon->price,
+                                ];
+                            }
+                        }
                     }
                 }
 

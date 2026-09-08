@@ -81,6 +81,7 @@ Route::middleware(['auth', 'portal:CUSTOMER'])->prefix('')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('customer.cart');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('customer.checkout');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('customer.checkout.store');
+    Route::post('/orders', [CheckoutController::class, 'store'])->name('customer.orders.store');
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');
     Route::get('/orders/{orderNumber}', [CustomerOrderController::class, 'show'])->name('customer.order.show');
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('customer.profile');

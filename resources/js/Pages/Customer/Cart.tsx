@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import GuestLayout from '../../Layouts/GuestLayout';
 import { useCartStore } from '../../Stores/cartStore';
@@ -59,11 +59,23 @@ export default function Cart() {
 
     const handleConfirmOrder = () => {
         setModalError('');
-        if (!address.trim() && !locationUrl) { setModalError('يرجى تحديد موقعك أو كتابة العنوان'); return; }
+        const finalAddress = address.trim() || (locationUrl ? `الموقع: ${locationUrl}` : '');
+        if (!finalAddress) { setModalError('يرجى تحديد موقعك أو كتابة العنوان'); return; }
         setIsSubmitting(true);
         router.post('/orders', {
-            restaurant_id: restaurant?.id, notes, delivery_address: address, location_url: locationUrl,
-            items: items.map(item => ({ menu_item_id: item.menuItem.id, quantity: item.quantity, notes: item.notes || '', options: item.selectedOptions, addons: item.selectedAddons.map(a => a.id) }))
+            restaurant_id: restaurant?.id,
+            customer_notes: notes,
+            notes,
+            address: finalAddress,
+            delivery_address: finalAddress,
+            payment_method: 'CASH_ON_DELIVERY',
+            items: items.map(item => ({
+                menu_item_id: item.menuItem.id,
+                quantity: item.quantity,
+                notes: item.notes || '',
+                options: item.selectedOptions,
+                addons: item.selectedAddons.map(a => a.id)
+            }))
         }, {
             onSuccess: () => { clearCart(); setIsLocationModalOpen(false); },
             onError: (errors) => setModalError(Object.values(errors).join(' — ') || 'حدث خطأ'),

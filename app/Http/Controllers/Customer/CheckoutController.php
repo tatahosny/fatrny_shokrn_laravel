@@ -17,8 +17,11 @@ class CheckoutController extends Controller
 
     public function index(): Response
     {
-        $customer = auth()->user()->customer;
-        abort_if(!$customer, 403);
+        $user = auth()->user();
+        $customer = $user->customer ?? \App\Models\Customer::firstOrCreate(
+            ['user_id' => $user->id],
+            ['student_status' => 'PENDING']
+        );
 
         $addresses = $customer->addresses()->get();
 
@@ -30,8 +33,22 @@ class CheckoutController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $customer = auth()->user()->customer;
-        abort_if(!$customer, 403);
+        $user = auth()->user();
+        $customer = $user->customer ?? \App\Models\Customer::firstOrCreate(
+            ['user_id' => $user->id],
+            ['student_status' => 'PENDING']
+        );
+
+        // Normalize payload fields in case called from Cart or Checkout modal
+        if (!$request->has('address') && $request->filled('delivery_address')) {
+            $request->merge(['address' => $request->input('delivery_address')]);
+        }
+        if (!$request->has('payment_method')) {
+            $request->merge(['payment_method' => 'CASH_ON_DELIVERY']);
+        }
+        if (!$request->has('customer_notes') && $request->filled('notes')) {
+            $request->merge(['customer_notes' => $request->input('notes')]);
+        }
 
         $validated = $request->validate([
             'restaurant_id'  => 'required|integer|exists:restaurants,id',
