@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { Restaurant, Category } from '../../../Types';
 import { Layers, Plus, Trash2, Edit2 } from 'lucide-react';
+import ConfirmModal from '../../../Components/ConfirmModal';
 
 interface CategoriesProps {
     categories: (Category & { menu_items_count: number })[];
@@ -11,6 +12,7 @@ interface CategoriesProps {
 
 export default function Index({ categories = [], restaurant }: CategoriesProps) {
     const [showModal, setShowModal] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
     const form = useForm({
         name: '',
         description: '',
@@ -28,9 +30,7 @@ export default function Index({ categories = [], restaurant }: CategoriesProps) 
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('هل أنت متأكد من حذف هذا التصنيف؟')) {
-            router.delete(`/restaurant/categories/${id}`);
-        }
+        setConfirmDelete(id);
     };
 
     return (
@@ -135,6 +135,12 @@ export default function Index({ categories = [], restaurant }: CategoriesProps) 
                     </div>
                 </div>
             )}
+            <ConfirmModal
+                isOpen={confirmDelete !== null}
+                message="هل أنت متأكد من حذف هذا التصنيف؟ لن تتمكن من استعادته."
+                onConfirm={() => { if (confirmDelete) router.delete(`/restaurant/categories/${confirmDelete}`); setConfirmDelete(null); }}
+                onCancel={() => setConfirmDelete(null)}
+            />
         </RestaurantLayout>
     );
 }

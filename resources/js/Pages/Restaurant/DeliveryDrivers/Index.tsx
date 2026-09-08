@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { Restaurant, DeliveryDriver, PaginatedResponse } from '../../../Types';
 import { Bike, Plus, Trash2, Phone, Power, CheckCircle2 } from 'lucide-react';
+import ConfirmModal from '../../../Components/ConfirmModal';
 
 interface DriversProps {
     drivers: PaginatedResponse<DeliveryDriver>;
@@ -12,6 +13,7 @@ interface DriversProps {
 export default function Index({ drivers, restaurant }: DriversProps) {
     const items = drivers?.data || [];
     const [showModal, setShowModal] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
     const form = useForm({
         name: '',
@@ -35,9 +37,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('هل أنت متأكد من حذف هذا الكابتن؟')) {
-            router.delete(`/restaurant/delivery-drivers/${id}`);
-        }
+        setConfirmDelete(id);
     };
 
     return (
@@ -133,6 +133,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                                     onChange={(e) => form.setData('name', e.target.value)}
                                     className="w-full p-2.5 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700"
                                 />
+                                {form.errors.name && <p className="text-red-500 text-xs mt-1">{form.errors.name}</p>}
                             </div>
 
                             <div>
@@ -144,6 +145,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                                     onChange={(e) => form.setData('email', e.target.value)}
                                     className="w-full p-2.5 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700"
                                 />
+                                {form.errors.email && <p className="text-red-500 text-xs mt-1">{form.errors.email}</p>}
                             </div>
 
                             <div>
@@ -155,6 +157,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                                     onChange={(e) => form.setData('phone', e.target.value)}
                                     className="w-full p-2.5 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700"
                                 />
+                                {form.errors.phone && <p className="text-red-500 text-xs mt-1">{form.errors.phone}</p>}
                             </div>
 
                             <div>
@@ -166,6 +169,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                                     onChange={(e) => form.setData('password', e.target.value)}
                                     className="w-full p-2.5 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700"
                                 />
+                                {form.errors.password && <p className="text-red-500 text-xs mt-1">{form.errors.password}</p>}
                             </div>
 
                             <div className="flex gap-2 pt-2">
@@ -188,6 +192,12 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                     </div>
                 </div>
             )}
+            <ConfirmModal
+                isOpen={confirmDelete !== null}
+                message="هل أنت متأكد من حذف هذا الكابتن؟ لن تتمكن من استعادته."
+                onConfirm={() => { if (confirmDelete) router.delete(`/restaurant/delivery-drivers/${confirmDelete}`); setConfirmDelete(null); }}
+                onCancel={() => setConfirmDelete(null)}
+            />
         </RestaurantLayout>
     );
 }

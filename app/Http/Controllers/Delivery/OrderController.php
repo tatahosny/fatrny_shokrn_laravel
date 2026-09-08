@@ -25,12 +25,67 @@ class OrderController extends Controller
     {
         $driver = $this->driver();
 
+        $todayCount = Order::where('assigned_delivery_id', $driver->id)
+            ->where('status', 'DELIVERED')
+            ->whereDate('updated_at', today())
+            ->count();
+
+        $todayEarnings = (float) Order::where('assigned_delivery_id', $driver->id)
+            ->where('status', 'DELIVERED')
+            ->whereDate('updated_at', today())
+            ->sum('total_amount');
+
+        $totalCount = Order::where('assigned_delivery_id', $driver->id)
+            ->where('status', 'DELIVERED')
+            ->count();
+
+        $activeOrders = Order::where('assigned_delivery_id', $driver->id)
+            ->whereIn('status', ['ASSIGNED_TO_DRIVER', 'OUT_FOR_DELIVERY'])
+            ->with(['restaurant:id,name,phone,address', 'customer.user', 'items'])
+            ->latest()
+            ->get();
+
+        $todayOrders = Order::where('assigned_delivery_id', $driver->id)
+            ->whereDate('created_at', today())
+            ->with(['restaurant:id,name,phone,address', 'customer.user', 'items'])
+            ->latest()
+            ->get();
+
         // CRITICAL: All queries MUST scope to this driver only
         return Inertia::render('Delivery/OrderHistory', [
-            'orders' => Order::where('assigned_delivery_id', $driver->id)
-                ->with(['restaurant:id,name', 'customer.user'])
+            'orders'         => Order::where('assigned_delivery_id', $driver->id)
+                ->with(['restaurant:id,name,phone,address', 'customer.user', 'items'])
                 ->latest()
-                ->paginate(15),
+                ->paginate(20),
+            'today_orders'   => $todayOrders,
+            'active_orders'  => $activeOrders,
+            'today_count'    => $todayCount,
+            'today_earnings' => $todayEarnings,
+            'total_count'    => $totalCount,
+        ]);
+    }
+
+    public function activeOrder()
+    {
+        $driver = $this->driver();
+
+        $order = Order::where('assigned_delivery_id', $driver->id)
+            ->whereIn('status', ['ASSIGNED_TO_DRIVER', 'OUT_FOR_DELIVERY'])
+            ->with([
+                'customer.user',
+                'restaurant:id,name,phone,address,latitude,longitude',
+                'items',
+            ])
+            ->latest()
+            ->first();
+
+        if (!$order) {
+            return redirect()->route('delivery.dashboard')->with('error', 'لا يوجد طلب نشط حالياً للتوصيل.');
+        }
+
+        return Inertia::render('Delivery/ActiveOrder', [
+            'order'  => $order,
+            'driver' => $driver,
         ]);
     }
 

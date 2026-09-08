@@ -53,8 +53,11 @@ class AuthController extends Controller
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => 'nullable|string|max:20|unique:users,phone',
             'password' => ['required', 'confirmed', Password::min(8)],
+        ], [
+            'email.unique' => 'البريد الإلكتروني مسجل مسبقاً لدى مستخدم آخر.',
+            'phone.unique' => 'رقم الهاتف مسجل مسبقاً لدى مستخدم آخر.',
         ]);
 
         $user = User::create([

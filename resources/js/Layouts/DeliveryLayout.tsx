@@ -77,6 +77,45 @@ export default function DeliveryLayout({
                         </div>
                     </div>
 
+                    <nav className="hidden sm:flex items-center gap-1 bg-stone-800/80 p-1 rounded-2xl border border-stone-700/60">
+                        <Link
+                            href="/delivery/dashboard"
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                                currentPath === '/delivery/dashboard' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
+                            }`}
+                        >
+                            <Bike className="w-4 h-4" />
+                            <span>الرئيسية</span>
+                        </Link>
+                        <Link
+                            href="/delivery/active-order"
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                                currentPath === '/delivery/active-order' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
+                            }`}
+                        >
+                            <Navigation className="w-4 h-4" />
+                            <span>الطلب النشط</span>
+                        </Link>
+                        <Link
+                            href="/delivery/order-history"
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                                currentPath === '/delivery/order-history' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
+                            }`}
+                        >
+                            <History className="w-4 h-4" />
+                            <span>سجل الطلبات</span>
+                        </Link>
+                        <Link
+                            href="/delivery/profile"
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                                currentPath === '/delivery/profile' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
+                            }`}
+                        >
+                            <User className="w-4 h-4" />
+                            <span>حسابي</span>
+                        </Link>
+                    </nav>
+
                     <div className="flex items-center gap-2">
                         <button
                             onClick={toggleDarkMode}

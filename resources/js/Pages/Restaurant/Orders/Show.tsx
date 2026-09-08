@@ -21,6 +21,7 @@ interface OrderShowProps {
 }
 
 export default function Show({ order, available_drivers = [] }: OrderShowProps) {
+    const driver = order.delivery_driver || order.deliveryDriver;
     const [selectedDriverId, setSelectedDriverId] = useState(order.assigned_delivery_id || '');
 
     const handleAdvanceStatus = (status: string) => {
@@ -35,11 +36,25 @@ export default function Show({ order, available_drivers = [] }: OrderShowProps) 
         });
     };
 
+    const getStatusBadge = (status: string) => {
+        const map: Record<string, { label: string; bg: string }> = {
+            PENDING: { label: 'بانتظار قبول المطعم', bg: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' },
+            CONFIRMED: { label: 'تم التأكيد', bg: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' },
+            PREPARING: { label: 'قيد الطهي والتجهيز', bg: 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300' },
+            READY_FOR_PICKUP: { label: 'جاهز بانتظار الطيار', bg: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' },
+            OUT_FOR_DELIVERY: { label: 'في الطريق للعميل', bg: 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300' },
+            DELIVERED: { label: 'تم التسليم بنجاح', bg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' },
+            CANCELLED: { label: 'طلب ملغي', bg: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300' },
+        };
+        const s = map[status] || { label: status, bg: 'bg-stone-100 text-stone-700' };
+        return <span className={`px-3 py-1 rounded-full text-xs font-black ${s.bg}`}>{s.label}</span>;
+    };
+
     return (
         <RestaurantLayout title={`تفاصيل طلب ${order.order_number}`}>
             <Head title={`تفاصيل طلب ${order.order_number} — بوابة المطعم`} />
 
-            <div className="space-y-6">
+            <div className="space-y-6" dir="rtl">
                 {/* Header card */}
                 <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -47,9 +62,7 @@ export default function Show({ order, available_drivers = [] }: OrderShowProps) 
                             <span className="text-xl font-mono font-black text-orange-600">
                                 {order.order_number}
                             </span>
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300">
-                                {order.status}
-                            </span>
+                            {getStatusBadge(order.status)}
                         </div>
                         <p className="text-xs text-stone-400 mt-1">
                             تاريخ الاستلام: {new Date(order.created_at).toLocaleString('ar-EG')}
@@ -171,11 +184,29 @@ export default function Show({ order, available_drivers = [] }: OrderShowProps) 
                                 <span>كابتن التوصيل</span>
                             </h2>
 
-                            {order.deliveryDriver ? (
-                                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-stone-800 border border-emerald-200 dark:border-stone-700 text-xs space-y-1">
-                                    <p className="text-[10px] text-emerald-700 font-bold uppercase">الطيار المعين</p>
-                                    <p className="font-bold text-sm text-stone-900 dark:text-white">{order.deliveryDriver.name}</p>
-                                    <p className="font-mono text-stone-500">{order.deliveryDriver.phone}</p>
+                            {driver ? (
+                                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-stone-800 border border-emerald-200 dark:border-stone-700 text-xs space-y-2">
+                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase">الطيار المعين</p>
+                                    <p className="font-bold text-sm text-stone-900 dark:text-white">{driver.name}</p>
+                                    <p className="font-mono text-stone-500 font-bold">{driver.phone}</p>
+                                    {driver.phone && (
+                                        <div className="flex items-center gap-2 pt-1">
+                                            <a
+                                                href={`tel:${driver.phone}`}
+                                                className="flex-1 py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold text-center transition"
+                                            >
+                                                اتصال بالطيار
+                                            </a>
+                                            <a
+                                                href={`https://wa.me/2${driver.phone.replace(/^0/, '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="py-1.5 px-3 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition"
+                                            >
+                                                واتساب
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <form onSubmit={handleAssignDriver} className="space-y-3">

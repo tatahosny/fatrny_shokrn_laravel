@@ -39,7 +39,7 @@ class CustomerOrderController extends Controller
             ->with([
                 'restaurant:id,name,phone,logo,address',
                 'items',
-                'deliveryDriver:id,name,phone,profile_image',
+                'deliveryDriver:id,name,phone,profile_image,vehicle_type',
                 'statusHistories' => fn($q) => $q->orderBy('created_at'),
             ])
             ->firstOrFail();

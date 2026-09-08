@@ -47,6 +47,7 @@ interface StepInfo {
 export default function OrderDetails({ order }: OrderDetailsProps) {
     const [copied, setCopied] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
+    const driver = order.delivery_driver || order.deliveryDriver;
 
     const steps: StepInfo[] = [
         { 
@@ -441,6 +442,54 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                     </div>
                 )}
 
+                {/* Driver Contact Alert Banner (if driver assigned) */}
+                {driver && (
+                    <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl shrink-0 shadow-md">
+                                <Bike className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[11px] font-bold text-emerald-200">
+                                        كابتن التوصيل المكلف بالطلب:
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-md bg-white/20 text-white text-[10px] font-black">
+                                        {order.status === 'OUT_FOR_DELIVERY' ? 'في الطريق إليك' : 'تم التعيين'}
+                                    </span>
+                                </div>
+                                <h3 className="text-base font-black text-white mt-0.5">
+                                    {driver.name}
+                                </h3>
+                                <p className="text-xs text-emerald-100 mt-0.5 flex items-center gap-1.5">
+                                    <span>رقم هاتف الكابتن:</span>
+                                    <span className="font-mono font-bold text-white text-sm bg-black/20 px-2 py-0.5 rounded-md">
+                                        {driver.phone}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 shrink-0">
+                            <a
+                                href={`tel:${driver.phone || ''}`}
+                                className="px-4 py-2.5 rounded-2xl bg-white text-emerald-700 hover:bg-emerald-50 font-black text-xs shadow-md transition flex items-center gap-2 active:scale-95"
+                            >
+                                <Phone className="w-4 h-4 text-emerald-600" />
+                                <span>اتصال بالكابتن</span>
+                            </a>
+                            <a
+                                href={`https://wa.me/2${(driver.phone || '').replace(/^0/, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-4 py-2.5 rounded-2xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs backdrop-blur-md transition flex items-center gap-1.5 active:scale-95"
+                            >
+                                <span>واتساب</span>
+                            </a>
+                        </div>
+                    </div>
+                )}
+
                 {/* 4. Two Columns Layout: Items & Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
@@ -544,7 +593,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                     <div className="space-y-6">
                         
                         {/* Assigned Driver Card if exists */}
-                        {order.deliveryDriver ? (
+                        {driver ? (
                             <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/30 shadow-sm space-y-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-emerald-600/20">
@@ -555,7 +604,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                                             كابتن التوصيل المكلف
                                         </span>
                                         <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">
-                                            {order.deliveryDriver.name}
+                                            {driver.name}
                                         </h4>
                                         <span className="text-[10px] text-stone-400">
                                             جاهز لتوصيل طلبك ساخناً
@@ -563,13 +612,30 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                                     </div>
                                 </div>
 
-                                <a
-                                    href={`tel:${order.deliveryDriver.phone}`}
-                                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 active:scale-98"
-                                >
-                                    <Phone className="w-4 h-4" />
-                                    <span>اتصال بالكابتن ({order.deliveryDriver.phone})</span>
-                                </a>
+                                <div className="p-3.5 rounded-2xl bg-white dark:bg-stone-800/80 border border-emerald-200 dark:border-emerald-900/40 space-y-1">
+                                    <span className="text-[10px] font-bold text-stone-400 block">رقم هاتف الكابتن:</span>
+                                    <span className="text-base font-black text-emerald-700 dark:text-emerald-300 font-mono tracking-wider block">
+                                        {driver.phone}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <a
+                                        href={`tel:${driver.phone || ''}`}
+                                        className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 active:scale-98"
+                                    >
+                                        <Phone className="w-4 h-4" />
+                                        <span>اتصال بالكابتن</span>
+                                    </a>
+                                    <a
+                                        href={`https://wa.me/2${(driver.phone || '').replace(/^0/, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full py-2.5 px-3 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 text-xs font-black transition flex items-center justify-center gap-1.5"
+                                    >
+                                        <span>واتساب الكابتن</span>
+                                    </a>
+                                </div>
                             </div>
                         ) : (
                             <div className="p-5 rounded-3xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs flex items-center gap-3">

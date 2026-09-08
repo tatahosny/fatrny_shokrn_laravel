@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
+import ConfirmModal from '../../../Components/ConfirmModal';
 import { ArrowLeft, Plus, Trash2, DollarSign, Tag, Calendar, FileText } from 'lucide-react';
 
 interface Expense {
@@ -27,6 +28,7 @@ interface Props {
 
 export default function AdminFinanceExpenses({ expenses, categories, totalThisMonth, totalThisYear }: Props) {
     const [showForm, setShowForm] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const { data, setData, post, processing, reset, errors } = useForm({
         description: '',
         amount: '',
@@ -44,8 +46,7 @@ export default function AdminFinanceExpenses({ expenses, categories, totalThisMo
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('هل تريد حذف هذا المصروف؟'))
-            router.delete(`/admin/finance/expenses/${id}`);
+        setConfirmDeleteId(id);
     };
 
     return (
@@ -175,6 +176,22 @@ export default function AdminFinanceExpenses({ expenses, categories, totalThisMo
                     </div>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={confirmDeleteId !== null}
+                title="حذف المصروف"
+                message="هل أنت متأكد من رغبتك في حذف هذا المصروف؟ لا يمكن التراجع عن هذا الإجراء."
+                confirmText="نعم، احذف"
+                cancelText="إلغاء"
+                variant="danger"
+                onConfirm={() => {
+                    if (confirmDeleteId !== null) {
+                        router.delete(`/admin/finance/expenses/${confirmDeleteId}`);
+                        setConfirmDeleteId(null);
+                    }
+                }}
+                onCancel={() => setConfirmDeleteId(null)}
+            />
         </AdminLayout>
     );
 }

@@ -44,28 +44,40 @@ class OfferController extends Controller
             'description'        => 'nullable|string',
             'original_price'     => 'required|numeric|min:0',
             'discount_price'     => 'required|numeric|min:0',
-            'is_active'          => 'boolean',
-            'is_student_only'    => 'boolean',
+            'is_active'          => 'nullable|boolean',
+            'is_student_only'    => 'nullable|boolean',
             'start_date'         => 'nullable|date',
             'end_date'           => 'nullable|date|after_or_equal:start_date',
+            'image'              => 'nullable|image|max:10240',
         ]);
 
-        $validated['restaurant_id']       = $restaurant->id;
-        $validated['discount_percentage'] = $validated['original_price'] > 0
-            ? round((($validated['original_price'] - $validated['discount_price']) / $validated['original_price']) * 100, 1)
-            : 0;
+        $orig = (float) $validated['original_price'];
+        $disc = (float) $validated['discount_price'];
 
-        $offer = Offer::create($validated);
+        $offerData = [
+            'restaurant_id'       => $restaurant->id,
+            'title'               => $validated['title'],
+            'description'         => $validated['description'] ?? null,
+            'original_price'      => $orig,
+            'discount_price'      => $disc,
+            'discount_percentage' => $orig > 0 ? round((($orig - $disc) / $orig) * 100, 1) : 0,
+            'is_active'           => $request->boolean('is_active', true),
+            'is_student_only'     => $request->boolean('is_student_only', false),
+            'start_date'          => $validated['start_date'] ?? now(),
+            'end_date'            => $validated['end_date'] ?? now()->addMonths(1),
+        ];
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store("restaurants/{$restaurant->id}/offers", 'public');
-            $offer->update(['image' => $path]);
+            $offerData['image'] = $path;
         }
+
+        Offer::create($offerData);
 
         // Clear public offers cache
         cache()->forget('public.active_offers');
 
-        return redirect()->route('restaurant.offers.index')->with('success', 'تم إنشاء العرض.');
+        return redirect()->route('restaurant.offers.index')->with('success', 'تم إنشاء العرض الترويجي بنجاح.');
     }
 
     public function edit(int $id): Response
@@ -79,28 +91,57 @@ class OfferController extends Controller
     {
         $restaurant = $this->restaurant();
         $offer = Offer::where('restaurant_id', $restaurant->id)->findOrFail($id);
+        
         $validated = $request->validate([
             'title'           => 'required|string|max:255',
             'description'     => 'nullable|string',
             'original_price'  => 'required|numeric|min:0',
             'discount_price'  => 'required|numeric|min:0',
-            'is_active'       => 'boolean',
-            'is_student_only' => 'boolean',
+            'is_active'       => 'nullable|boolean',
+            'is_student_only' => 'nullable|boolean',
             'start_date'      => 'nullable|date',
             'end_date'        => 'nullable|date|after_or_equal:start_date',
+            'image'           => 'nullable|image|max:10240',
         ]);
-        $validated['discount_percentage'] = $validated['original_price'] > 0
-            ? round((($validated['original_price'] - $validated['discount_price']) / $validated['original_price']) * 100, 1)
-            : 0;
-        $offer->update($validated);
+
+        $orig = (float) $validated['original_price'];
+        $disc = (float) $validated['discount_price'];
+
+        $updateData = [
+            'title'               => $validated['title'],
+            'description'         => $validated['description'] ?? null,
+            'original_price'      => $orig,
+            'discount_price'      => $disc,
+            'discount_percentage' => $orig > 0 ? round((($orig - $disc) / $orig) * 100, 1) : 0,
+            'is_active'           => $request->has('is_active') ? $request->boolean('is_active') : $offer->is_active,
+            'is_student_only'     => $request->has('is_student_only') ? $request->boolean('is_student_only') : $offer->is_student_only,
+        ];
+
+        if (!empty($validated['start_date'])) {
+            $updateData['start_date'] = $validated['start_date'];
+        }
+        if (!empty($validated['end_date'])) {
+            $updateData['end_date'] = $validated['end_date'];
+        }
+
+        if ($request->hasFile('image')) {
+            if ($offer->image && !str_starts_with($offer->image, 'http') && \Illuminate\Support\Facades\Storage::disk('public')->exists($offer->image)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($offer->image);
+            }
+            $path = $request->file('image')->store("restaurants/{$restaurant->id}/offers", 'public');
+            $updateData['image'] = $path;
+        }
+
+        $offer->update($updateData);
         cache()->forget('public.active_offers');
-        return back()->with('success', 'تم تحديث العرض.');
+        return back()->with('success', 'تم تحديث العرض بنجاح.');
     }
 
     public function destroy(int $id): RedirectResponse
     {
         $restaurant = $this->restaurant();
-        Offer::where('restaurant_id', $restaurant->id)->findOrFail($id)->delete();
+        $offer = Offer::where('restaurant_id', $restaurant->id)->findOrFail($id);
+        $offer->delete();
         cache()->forget('public.active_offers');
         return back()->with('success', 'تم حذف العرض.');
     }

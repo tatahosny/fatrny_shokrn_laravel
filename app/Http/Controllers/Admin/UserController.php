@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -30,7 +31,7 @@ class UserController extends Controller
 
         return Inertia::render('Admin/Users/Index', [
             'users'   => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only('search'),
+            'filters' => $request->only(['search']),
             'roles'   => Role::all(['id', 'name']),
         ]);
     }
@@ -46,10 +47,13 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users',
-            'phone'    => 'nullable|string|max:20',
+            'email'    => 'required|email|unique:users,email',
+            'phone'    => 'nullable|string|max:20|unique:users,phone',
             'role'     => 'required|in:ADMIN,PLATFORM_STAFF',
             'password' => ['required', Password::min(8)],
+        ], [
+            'email.unique' => 'البريد الإلكتروني مسجل مسبقاً لدى مستخدم آخر.',
+            'phone.unique' => 'رقم الهاتف مسجل مسبقاً لدى مستخدم آخر.',
         ]);
 
         $user = User::create([
@@ -83,9 +87,12 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name'  => 'required|string|max:255',
-            'email' => "required|email|unique:users,email,{$id}",
-            'phone' => 'nullable|string|max:20',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($id)],
+            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($id)],
             'role'  => 'required|in:ADMIN,PLATFORM_STAFF',
+        ], [
+            'email.unique' => 'البريد الإلكتروني مسجل مسبقاً لدى مستخدم آخر.',
+            'phone.unique' => 'رقم الهاتف مسجل مسبقاً لدى مستخدم آخر.',
         ]);
 
         $user->update($validated);

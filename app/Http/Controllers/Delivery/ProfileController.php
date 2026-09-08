@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Delivery;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,7 +26,9 @@ class ProfileController extends Controller
         abort_if(!$driver, 403);
 
         $validated = $request->validate([
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore(auth()->id())],
+        ], [
+            'phone.unique' => 'رقم الهاتف مسجل مسبقاً لدى مستخدم آخر.',
         ]);
 
         $driver->update($validated);

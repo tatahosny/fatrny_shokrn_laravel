@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
+import ConfirmModal from '../../../Components/ConfirmModal';
 import { Database, Plus, Trash2, Download, HardDrive, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface Backup {
@@ -18,14 +19,15 @@ interface Props {
 }
 
 export default function AdminBackupsIndex({ backups }: Props) {
+    const [confirmCreate, setConfirmCreate] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
     const handleCreate = () => {
-        if (confirm('هل تريد إنشاء نسخة احتياطية الآن؟'))
-            router.post('/admin/backups');
+        setConfirmCreate(true);
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('هل تريد حذف هذه النسخة الاحتياطية؟'))
-            router.delete(`/admin/backups/${id}`);
+        setConfirmDeleteId(id);
     };
 
     const fmtSize = (bytes: number) => {
@@ -116,6 +118,36 @@ export default function AdminBackupsIndex({ backups }: Props) {
                     )}
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={confirmCreate}
+                title="إنشاء نسخة احتياطية"
+                message="هل تريد بدء عملية إنشاء نسخة احتياطية لقاعدة البيانات الآن؟ قد يستغرق ذلك بضع لحظات."
+                confirmText="بدء النسخ الاحتياطي"
+                cancelText="إلغاء"
+                variant="info"
+                onConfirm={() => {
+                    router.post('/admin/backups');
+                    setConfirmCreate(false);
+                }}
+                onCancel={() => setConfirmCreate(false)}
+            />
+
+            <ConfirmModal
+                isOpen={confirmDeleteId !== null}
+                title="حذف النسخة الاحتياطية"
+                message="هل أنت متأكد من حذف هذا الملف الاحتياطي نهائياً؟ لا يمكن استعادته بعد الحذف."
+                confirmText="نعم، احذف الملف"
+                cancelText="إلغاء"
+                variant="danger"
+                onConfirm={() => {
+                    if (confirmDeleteId !== null) {
+                        router.delete(`/admin/backups/${confirmDeleteId}`);
+                        setConfirmDeleteId(null);
+                    }
+                }}
+                onCancel={() => setConfirmDeleteId(null)}
+            />
         </AdminLayout>
     );
 }

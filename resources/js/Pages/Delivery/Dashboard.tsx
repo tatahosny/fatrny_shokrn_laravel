@@ -12,16 +12,27 @@ import {
     Store, 
     DollarSign,
     Power,
-    Navigation
+    Navigation,
+    Calendar,
+    History
 } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 interface DeliveryDashboardProps {
     driver: DeliveryDriver;
     active_orders: Order[];
     completed_today: number;
+    earnings_today?: number;
+    weekly_stats?: { date: string; orders: number }[];
 }
 
-export default function Dashboard({ driver, active_orders = [], completed_today }: DeliveryDashboardProps) {
+export default function Dashboard({ 
+    driver, 
+    active_orders = [], 
+    completed_today = 0, 
+    earnings_today = 0,
+    weekly_stats = [] 
+}: DeliveryDashboardProps) {
     const isAvailable = driver.availability_status === 'AVAILABLE';
 
     const toggleStatus = () => {
@@ -64,10 +75,15 @@ export default function Dashboard({ driver, active_orders = [], completed_today 
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
                         <div className="text-center px-4 py-2 bg-stone-50 dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700">
                             <span className="text-[10px] text-stone-400 block font-bold">تم توصيلها اليوم</span>
                             <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">{completed_today} طلبات</span>
+                        </div>
+
+                        <div className="text-center px-4 py-2 bg-stone-50 dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700">
+                            <span className="text-[10px] text-stone-400 block font-bold">كاش اليوم</span>
+                            <span className="text-lg font-black text-amber-600 dark:text-amber-400">{Number(earnings_today).toLocaleString()} ج.م</span>
                         </div>
 
                         <button
@@ -84,6 +100,41 @@ export default function Dashboard({ driver, active_orders = [], completed_today 
                     </div>
                 </div>
 
+                {/* Weekly Activity Chart & History banner */}
+                {weekly_stats.length > 0 && (
+                    <div className="p-5 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-emerald-600" />
+                                <h3 className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                                    نشاط توصيلاتي خلال الأسبوع الماضي
+                                </h3>
+                            </div>
+                            <Link
+                                href="/delivery/order-history"
+                                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                            >
+                                <History className="w-3.5 h-3.5" />
+                                <span>عرض سجل كل الطلبات</span>
+                            </Link>
+                        </div>
+
+                        <div className="h-28 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={weekly_stats} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                                    <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                                    <Tooltip 
+                                        formatter={(val: any) => [`${val} طلبات`, 'تم التوصيل']}
+                                        contentStyle={{ backgroundColor: '#1c1917', borderColor: '#292524', borderRadius: '8px', color: '#fff', fontSize: '11px' }}
+                                    />
+                                    <Bar dataKey="orders" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                )}
+
                 {/* Active Orders Section */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -91,6 +142,14 @@ export default function Dashboard({ driver, active_orders = [], completed_today 
                             <Navigation className="w-4 h-4 text-emerald-600" />
                             <span>الطلبات المكلف بها حالياً ({active_orders.length})</span>
                         </h2>
+
+                        <Link
+                            href="/delivery/order-history"
+                            className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition flex items-center gap-1.5"
+                        >
+                            <History className="w-3.5 h-3.5" />
+                            <span>سجل الطلبات بالكامل</span>
+                        </Link>
                     </div>
 
                     {active_orders.length === 0 ? (

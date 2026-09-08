@@ -27,6 +27,7 @@ use App\Http\Controllers\Restaurant\MenuItemController as RestaurantMenuItem;
 use App\Http\Controllers\Restaurant\OfferController as RestaurantOffer;
 use App\Http\Controllers\Restaurant\DeliveryDriverController as RestaurantDriver;
 use App\Http\Controllers\Restaurant\AnalyticsController as RestaurantAnalytics;
+use App\Http\Controllers\Restaurant\DriverStatsController as RestaurantDriverStats;
 use App\Http\Controllers\Restaurant\SettingsController as RestaurantSettings;
 use App\Http\Controllers\Delivery\DashboardController as DeliveryDashboard;
 use App\Http\Controllers\Delivery\OrderController as DeliveryOrder;
@@ -155,8 +156,9 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
 
     // Invoices
     Route::resource('invoices', AdminInvoice::class);
-    Route::post('/invoices/{id}/issue', [AdminInvoice::class, 'issue'])->name('invoices.issue');
-    Route::post('/invoices/{id}/mark-paid', [AdminInvoice::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::match(['post', 'patch'], '/invoices/{id}/issue', [AdminInvoice::class, 'issue'])->name('invoices.issue');
+    Route::match(['post', 'patch'], '/invoices/{id}/mark-paid', [AdminInvoice::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::match(['post', 'patch'], '/invoices/{id}/cancel', [AdminInvoice::class, 'destroy'])->name('invoices.cancel');
     Route::get('/invoices/{id}/pdf', [AdminInvoice::class, 'downloadPdf'])->name('invoices.pdf');
 
     // Collections
@@ -194,7 +196,7 @@ Route::middleware(['auth', 'portal:RESTAURANT'])->prefix('restaurant')->name('re
     // Orders
     Route::get('/orders', [RestaurantOrder::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [RestaurantOrder::class, 'show'])->name('orders.show');
-    Route::put('/orders/{id}/status', [RestaurantOrder::class, 'updateStatus'])->name('orders.status');
+    Route::match(['put', 'patch'], '/orders/{id}/status', [RestaurantOrder::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{id}/assign-driver', [RestaurantOrder::class, 'assignDriver'])->name('orders.assign-driver');
 
     // Categories
@@ -216,6 +218,9 @@ Route::middleware(['auth', 'portal:RESTAURANT'])->prefix('restaurant')->name('re
     // Analytics
     Route::get('/analytics', [RestaurantAnalytics::class, 'index'])->name('analytics');
 
+    // Driver Statistics
+    Route::get('/driver-stats', [RestaurantDriverStats::class, 'index'])->name('driver-stats');
+
     // Settings
     Route::get('/settings', [RestaurantSettings::class, 'index'])->name('settings.index');
     Route::put('/settings', [RestaurantSettings::class, 'update'])->name('settings.update');
@@ -230,8 +235,10 @@ Route::middleware(['auth', 'portal:DELIVERY'])->prefix('delivery')->name('delive
 
     // Orders — ONLY assigned orders for THIS driver
     Route::get('/orders', [DeliveryOrder::class, 'index'])->name('orders.index');
+    Route::get('/order-history', [DeliveryOrder::class, 'index'])->name('orders.history');
+    Route::get('/active-order', [DeliveryOrder::class, 'activeOrder'])->name('orders.active');
     Route::get('/orders/{id}', [DeliveryOrder::class, 'show'])->name('orders.show');
-    Route::put('/orders/{id}/status', [DeliveryOrder::class, 'updateStatus'])->name('orders.status');
+    Route::match(['put', 'patch'], '/orders/{id}/status', [DeliveryOrder::class, 'updateStatus'])->name('orders.status');
 
     // Profile
     Route::get('/profile', [DeliveryProfile::class, 'index'])->name('profile');

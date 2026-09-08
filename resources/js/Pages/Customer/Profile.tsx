@@ -14,6 +14,7 @@ import {
     Clock, 
     AlertCircle 
 } from 'lucide-react';
+import ConfirmModal from '../../Components/ConfirmModal';
 
 interface ProfileProps {
     customer: Customer;
@@ -36,6 +37,7 @@ export default function Profile({ customer }: ProfileProps) {
 
     // New address form
     const [showAddAddress, setShowAddAddress] = useState(false);
+    const [confirmDeleteAddressId, setConfirmDeleteAddressId] = useState<number | null>(null);
     const addressForm = useForm({
         label: 'سكن الطلاب',
         address: '',
@@ -53,9 +55,7 @@ export default function Profile({ customer }: ProfileProps) {
     };
 
     const handleDeleteAddress = (id: number) => {
-        if (confirm('هل أنت متأكد من حذف هذا العنوان؟')) {
-            router.delete(`/customer/profile/address/${id}`);
-        }
+        setConfirmDeleteAddressId(id);
     };
 
     // Student verification form
@@ -328,6 +328,12 @@ export default function Profile({ customer }: ProfileProps) {
                     )}
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={confirmDeleteAddressId !== null}
+                message="هل أنت متأكد من حذف هذا العنوان؟ لن تتمكن من استعادته."
+                onConfirm={() => { if (confirmDeleteAddressId) router.delete(`/customer/profile/address/${confirmDeleteAddressId}`); setConfirmDeleteAddressId(null); }}
+                onCancel={() => setConfirmDeleteAddressId(null)}
+            />
         </CustomerLayout>
     );
 }

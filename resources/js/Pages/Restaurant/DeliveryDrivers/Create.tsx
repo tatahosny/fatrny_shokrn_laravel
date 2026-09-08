@@ -61,6 +61,7 @@ export default function DeliveryDriverCreate() {
                                 <input type="text" value={data.phone} onChange={e => setData('phone', e.target.value)}
                                     placeholder="01xxxxxxxxx"
                                     className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-stone-600 focus:outline-none focus:border-orange-500 transition-colors" />
+                                {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm text-stone-400 mb-1">كلمة المرور *</label>

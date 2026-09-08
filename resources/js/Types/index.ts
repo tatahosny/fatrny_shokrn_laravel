@@ -131,6 +131,7 @@ export interface Offer {
     discount_percentage: number;
     image?: string;
     is_active: boolean;
+    is_student_only?: boolean;
     start_date?: string;
     end_date?: string;
     created_at: string;
@@ -182,6 +183,7 @@ export interface Order {
     restaurant?: Restaurant;
     items?: OrderItem[];
     deliveryDriver?: DeliveryDriver;
+    delivery_driver?: DeliveryDriver;
     statusHistories?: OrderStatusHistory[];
 }
 

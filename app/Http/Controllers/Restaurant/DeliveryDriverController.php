@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -43,8 +44,11 @@ class DeliveryDriverController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => 'nullable|string|max:20|unique:users,phone',
             'password' => ['required', Password::min(8)],
+        ], [
+            'email.unique' => 'البريد الإلكتروني مسجل مسبقاً لدى مستخدم آخر.',
+            'phone.unique' => 'رقم الهاتف مسجل مسبقاً لدى مستخدم آخر.',
         ]);
 
         $user = User::create([
@@ -88,7 +92,9 @@ class DeliveryDriverController extends Controller
         $driver = DeliveryDriver::where('restaurant_id', $restaurant->id)->findOrFail($id);
         $validated = $request->validate([
             'name'  => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($driver->user_id)],
+        ], [
+            'phone.unique' => 'رقم الهاتف مسجل مسبقاً لدى مستخدم آخر.',
         ]);
         $driver->update($validated);
         $driver->user->update(['name' => $validated['name'], 'phone' => $validated['phone']]);

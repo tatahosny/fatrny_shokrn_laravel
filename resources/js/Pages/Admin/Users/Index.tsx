@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
 import { Plus, Edit, Trash2, Users, Shield, ChevronDown, ChevronUp } from 'lucide-react';
+import ConfirmModal from '../../../Components/ConfirmModal';
 
 interface User {
     id: number;
@@ -37,6 +38,7 @@ const roleLabels: Record<string, string> = {
 export default function AdminUsersIndex({ users, roles, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [roleFilter, setRoleFilter] = useState(filters.role ?? '');
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,8 +50,7 @@ export default function AdminUsersIndex({ users, roles, filters }: Props) {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('هل تريد حذف هذا المستخدم؟'))
-            router.delete(`/admin/users/${id}`);
+        setConfirmDeleteId(id);
     };
 
     return (
@@ -144,6 +145,12 @@ export default function AdminUsersIndex({ users, roles, filters }: Props) {
                     </div>
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={confirmDeleteId !== null}
+                message="هل تريد حذف هذا المستخدم؟ لن تتمكن من استعادته."
+                onConfirm={() => { if (confirmDeleteId) router.delete(`/admin/users/${confirmDeleteId}`); setConfirmDeleteId(null); }}
+                onCancel={() => setConfirmDeleteId(null)}
+            />
         </AdminLayout>
     );
 }

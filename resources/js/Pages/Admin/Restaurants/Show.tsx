@@ -6,6 +6,7 @@ import {
     Edit, ArrowLeft, Ban, CheckCircle, Star, TrendingUp, AlertTriangle,
     Calendar, Percent
 } from 'lucide-react';
+import ConfirmModal from '../../../Components/ConfirmModal';
 
 interface Restaurant {
     id: number;
@@ -48,9 +49,14 @@ interface Props {
 
 export default function RestaurantShow({ restaurant, stats, recentOrders }: Props) {
     const [suspending, setSuspending] = useState(false);
+    const [confirmSuspend, setConfirmSuspend] = useState(false);
 
     const handleSuspend = () => {
-        if (!confirm('هل تريد تعليق هذا المطعم؟')) return;
+        setConfirmSuspend(true);
+    };
+
+    const doSuspend = () => {
+        setConfirmSuspend(false);
         setSuspending(true);
         router.post(`/admin/restaurants/${restaurant.id}/suspend`, {}, {
             onFinish: () => setSuspending(false),
@@ -237,6 +243,15 @@ export default function RestaurantShow({ restaurant, stats, recentOrders }: Prop
                     </div>
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={confirmSuspend}
+                title="تعليق المطعم"
+                message="هل تريد تعليق هذا المطعم؟ سيتوقف عن استقبال الطلبات تلقائياً."
+                confirmText="تعليق المطعم"
+                variant="warning"
+                onConfirm={doSuspend}
+                onCancel={() => setConfirmSuspend(false)}
+            />
         </AdminLayout>
     );
 }

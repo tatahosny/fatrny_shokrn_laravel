@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
+import ConfirmModal from '../../../Components/ConfirmModal';
 import { Invoice, Restaurant, PaginatedResponse } from '../../../Types';
 import { Receipt, Plus, CheckCircle2, XCircle, Search, Filter } from 'lucide-react';
 
@@ -13,6 +14,8 @@ interface InvoicesIndexProps {
 export default function Index({ invoices, restaurants = [], filters }: InvoicesIndexProps) {
     const items = invoices?.data || [];
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [confirmPayId, setConfirmPayId] = useState<number | null>(null);
+    const [confirmCancelId, setConfirmCancelId] = useState<number | null>(null);
 
     const form = useForm({
         restaurant_id: restaurants[0]?.id || '',
@@ -35,15 +38,11 @@ export default function Index({ invoices, restaurants = [], filters }: InvoicesI
     };
 
     const handleMarkPaid = (id: number) => {
-        if (confirm('تأكيد سداد هذه الفاتورة بالكامل؟')) {
-            router.patch(`/admin/invoices/${id}/mark-paid`);
-        }
+        setConfirmPayId(id);
     };
 
     const handleCancel = (id: number) => {
-        if (confirm('هل أنت متأكد من إلغاء الفاتورة؟')) {
-            router.patch(`/admin/invoices/${id}/cancel`);
-        }
+        setConfirmCancelId(id);
     };
 
     return (
@@ -253,6 +252,38 @@ export default function Index({ invoices, restaurants = [], filters }: InvoicesI
                     </div>
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={confirmPayId !== null}
+                title="تأكيد سداد الفاتورة"
+                message="هل أنت متأكد من تسجيل هذه الفاتورة كمسددة بالكامل؟"
+                confirmText="نعم، تم السداد"
+                cancelText="إلغاء"
+                variant="info"
+                onConfirm={() => {
+                    if (confirmPayId !== null) {
+                        router.patch(`/admin/invoices/${confirmPayId}/mark-paid`);
+                        setConfirmPayId(null);
+                    }
+                }}
+                onCancel={() => setConfirmPayId(null)}
+            />
+
+            <ConfirmModal
+                isOpen={confirmCancelId !== null}
+                title="إلغاء الفاتورة"
+                message="هل أنت متأكد من إلغاء هذه الفاتورة؟ لن تكون قابلة للتحصيل بعد ذلك."
+                confirmText="نعم، ألغِ الفاتورة"
+                cancelText="تراجع"
+                variant="danger"
+                onConfirm={() => {
+                    if (confirmCancelId !== null) {
+                        router.patch(`/admin/invoices/${confirmCancelId}/cancel`);
+                        setConfirmCancelId(null);
+                    }
+                }}
+                onCancel={() => setConfirmCancelId(null)}
+            />
         </AdminLayout>
     );
 }
