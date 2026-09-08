@@ -56,9 +56,16 @@ export default function Offers({ offers }: OffersProps) {
                                                 {offer.restaurant.name}
                                             </span>
                                         )}
-                                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-black text-xs shadow-xs">
-                                            خصم {Number(offer.discount_percentage || 0).toFixed(0)}%
-                                        </span>
+                                        <div className="flex items-center gap-1.5">
+                                            {offer.is_student_only && (
+                                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] border border-emerald-200 dark:border-emerald-800">
+                                                    🎓 حصري للطلاب
+                                                </span>
+                                            )}
+                                            <span className="px-3 py-1 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-black text-xs shadow-xs">
+                                                خصم {Number(offer.discount_percentage || 0).toFixed(0)}%
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <h3 className="text-lg font-black text-stone-900 dark:text-white mb-2 group-hover:text-orange-600 transition-colors">

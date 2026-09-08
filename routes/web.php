@@ -136,8 +136,8 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
     // Customers
     Route::get('/customers', [AdminCustomer::class, 'index'])->name('customers.index');
     Route::get('/customers/{id}', [AdminCustomer::class, 'show'])->name('customers.show');
-    Route::post('/customers/{id}/verify-student', [AdminCustomer::class, 'verifyStudent'])->name('customers.verify-student');
-    Route::post('/customers/{id}/reject-student', [AdminCustomer::class, 'rejectStudent'])->name('customers.reject-student');
+    Route::match(['post', 'patch'], '/customers/{id}/verify-student', [AdminCustomer::class, 'verifyStudent'])->name('customers.verify-student');
+    Route::match(['post', 'patch'], '/customers/{id}/reject-student', [AdminCustomer::class, 'rejectStudent'])->name('customers.reject-student');
 
     // Users (admin user management)
     Route::resource('users', AdminUser::class);

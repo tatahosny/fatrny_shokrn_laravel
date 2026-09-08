@@ -5,8 +5,9 @@ import { useCartStore } from '../../Stores/cartStore';
 import { SharedInertiaProps } from '../../Types';
 import {
     ShoppingBag, Trash2, Plus, Minus, GraduationCap,
-    CheckCircle2, MapPin, Navigation, X, AlertCircle, Sparkles, Lock, LogIn, User
+    CheckCircle2, MapPin, Navigation, X, AlertCircle, Sparkles, Lock, LogIn, User, Building2
 } from 'lucide-react';
+import { BORG_EL_ARAB_UNIVERSITIES } from '../../constants/universities';
 
 const QUICK_NOTES = ['طحينة زيادة','بدون شطة','شطة زيادة','ليمون زيادة','كاتشب إضافي','بدون مخلل','العيش محمص'];
 
@@ -21,11 +22,27 @@ export default function Cart() {
     const [notes, setNotes] = useState('');
     const [address, setAddress] = useState('');
     const [locationUrl, setLocationUrl] = useState('');
-    const [locationMode, setLocationMode] = useState<'auto' | 'manual'>('auto');
+    const [locationMode, setLocationMode] = useState<'university' | 'auto' | 'manual'>('university');
+    
+    // University state
+    const [selectedUniId, setSelectedUniId] = useState('BATU');
+    const [selectedLocation, setSelectedLocation] = useState(BORG_EL_ARAB_UNIVERSITIES[0].locations[0]);
+    const [roomDetails, setRoomDetails] = useState('');
+
     const [isLocating, setIsLocating] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [modalError, setModalError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const activeUni = BORG_EL_ARAB_UNIVERSITIES.find(u => u.id === selectedUniId) || BORG_EL_ARAB_UNIVERSITIES[0];
+
+    const handleUniChange = (uniId: string) => {
+        setSelectedUniId(uniId);
+        const uni = BORG_EL_ARAB_UNIVERSITIES.find(u => u.id === uniId);
+        if (uni && uni.locations.length > 0) {
+            setSelectedLocation(uni.locations[0]);
+        }
+    };
 
     const toggleNote = (preset: string) => {
         setNotes((prev) => {
@@ -59,8 +76,17 @@ export default function Cart() {
 
     const handleConfirmOrder = () => {
         setModalError('');
-        const finalAddress = address.trim() || (locationUrl ? `الموقع: ${locationUrl}` : '');
-        if (!finalAddress) { setModalError('يرجى تحديد موقعك أو كتابة العنوان'); return; }
+        let finalAddress = '';
+        if (locationMode === 'university') {
+            const extra = roomDetails.trim() ? ` — (${roomDetails.trim()})` : '';
+            finalAddress = `${activeUni.name} — ${selectedLocation}${extra}`;
+        } else if (locationMode === 'auto') {
+            finalAddress = address.trim() || (locationUrl ? `الموقع: ${locationUrl}` : '');
+        } else {
+            finalAddress = address.trim();
+        }
+
+        if (!finalAddress) { setModalError('يرجى تحديد موقع الاستلام أو إدخال العنوان'); return; }
         setIsSubmitting(true);
         router.post('/orders', {
             restaurant_id: restaurant?.id,
@@ -228,24 +254,118 @@ export default function Cart() {
 
                         {modalError && <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-red-500" /><span>{modalError}</span></div>}
 
-                        <div className="flex items-center bg-stone-100 dark:bg-stone-800 p-1 rounded-2xl text-xs font-black">
-                            <button type="button" onClick={() => setLocationMode('auto')} className={`flex-1 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${locationMode === 'auto' ? 'bg-orange-500 text-white' : 'text-stone-600 dark:text-stone-400'}`}><MapPin className="w-3.5 h-3.5" /><span>تحديد GPS</span></button>
-                            <button type="button" onClick={() => setLocationMode('manual')} className={`flex-1 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${locationMode === 'manual' ? 'bg-orange-500 text-white' : 'text-stone-600 dark:text-stone-400'}`}><span>✏️ كتابة يدوية</span></button>
+                        <div className="grid grid-cols-3 gap-1.5 bg-stone-100 dark:bg-stone-800 p-1 rounded-2xl text-xs font-black">
+                            <button
+                                type="button"
+                                onClick={() => setLocationMode('university')}
+                                className={`py-2 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                                    locationMode === 'university' ? 'bg-orange-500 text-white shadow-xs' : 'text-stone-600 dark:text-stone-400'
+                                }`}
+                            >
+                                <GraduationCap className="w-3.5 h-3.5" />
+                                <span>مقر جامعي 🎓</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLocationMode('auto')}
+                                className={`py-2 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                                    locationMode === 'auto' ? 'bg-orange-500 text-white shadow-xs' : 'text-stone-600 dark:text-stone-400'
+                                }`}
+                            >
+                                <Navigation className="w-3.5 h-3.5" />
+                                <span>تحديد GPS</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLocationMode('manual')}
+                                className={`py-2 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                                    locationMode === 'manual' ? 'bg-orange-500 text-white shadow-xs' : 'text-stone-600 dark:text-stone-400'
+                                }`}
+                            >
+                                <span>✏️ كتابة يدوية</span>
+                            </button>
                         </div>
 
-                        {locationMode === 'auto' ? (
-                            <div className="p-4 rounded-2xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40 space-y-3">
+                        {/* 1. University Selection Mode */}
+                        {locationMode === 'university' && (
+                            <div className="space-y-3.5 p-4 rounded-2xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40 animate-fade-in text-xs">
+                                <div>
+                                    <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                                        اختر جامعتك في برج العرب:
+                                    </label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {BORG_EL_ARAB_UNIVERSITIES.map((uni) => (
+                                            <button
+                                                key={uni.id}
+                                                type="button"
+                                                onClick={() => handleUniChange(uni.id)}
+                                                className={`p-2.5 rounded-xl border text-right transition flex items-center justify-between cursor-pointer ${
+                                                    selectedUniId === uni.id
+                                                        ? 'border-orange-500 bg-white dark:bg-stone-900 text-orange-600 dark:text-orange-400 font-black ring-1 ring-orange-500 shadow-xs'
+                                                        : 'border-stone-200 dark:border-stone-800 bg-white/60 dark:bg-stone-800/60 text-stone-700 dark:text-stone-300'
+                                                }`}
+                                            >
+                                                <span>{uni.name}</span>
+                                                {selectedUniId === uni.id && <CheckCircle2 className="w-4 h-4 text-orange-600 shrink-0" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                                        المبنى أو نقطة الاستلام داخل {activeUni.shortName}:
+                                    </label>
+                                    <select
+                                        value={selectedLocation}
+                                        onChange={(e) => setSelectedLocation(e.target.value)}
+                                        className="w-full p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-medium outline-none focus:border-orange-500"
+                                    >
+                                        {activeUni.locations.map((loc, idx) => (
+                                            <option key={idx} value={loc}>{loc}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block font-bold text-stone-700 dark:text-stone-300 mb-1">
+                                        تفاصيل إضافية (الدور / القاعة / رقم الغرفة بالسكن):
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={roomDetails}
+                                        onChange={(e) => setRoomDetails(e.target.value)}
+                                        placeholder="مثال: الدور الثاني، قاعة 102 أو غرفة 204 بالسكن..."
+                                        className="w-full p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white outline-none focus:border-orange-500"
+                                    />
+                                </div>
+
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-[11px] text-stone-600 dark:text-stone-300 flex items-start gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5" />
+                                    <span>
+                                        <strong>العنوان المحدد:</strong> {activeUni.name} — {selectedLocation} {roomDetails ? `(${roomDetails})` : ''}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 2. GPS Direct Mode */}
+                        {locationMode === 'auto' && (
+                            <div className="p-4 rounded-2xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40 space-y-3 animate-fade-in">
                                 <div className="flex items-center justify-between gap-2">
                                     <span className="text-xs font-bold text-stone-700 dark:text-stone-300">التقاط الموقع تلقائياً:</span>
-                                    <button type="button" onClick={handleGetLocation} disabled={isLocating} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0">
+                                    <button type="button" onClick={handleGetLocation} disabled={isLocating} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0 cursor-pointer">
                                         {isLocating ? <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>جاري...</span></> : <><Navigation className="w-3.5 h-3.5" /><span>{address ? 'تحديث' : 'التقاط موقعي'}</span></>}
                                     </button>
                                 </div>
                                 {address && <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 text-xs"><span className="font-black text-stone-900 dark:text-white block">العنوان:</span><p className="text-stone-600 leading-relaxed font-bold">{address}</p></div>}
                                 {locationUrl && <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200"><span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /><span>تم التقاط الموقع ✓</span></span><a href={locationUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-black text-orange-600 hover:underline">معاينة ↗</a></div>}
                             </div>
-                        ) : (
-                            <div className="space-y-2">
+                        )}
+
+                        {/* 3. Manual Mode */}
+                        {locationMode === 'manual' && (
+                            <div className="space-y-2 animate-fade-in">
                                 <label className="block text-xs font-black text-stone-700 dark:text-stone-300">تفاصيل العنوان:</label>
                                 <textarea rows={3} required placeholder="مثال: مبنى كلية تكنولوجيا الصناعة، الدور الثاني، قاعة 204..." value={address} onChange={(e) => setAddress(e.target.value)} className="w-full text-xs p-3.5 rounded-2xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-orange-500 outline-none" />
                             </div>

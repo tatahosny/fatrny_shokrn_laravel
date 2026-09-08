@@ -127,34 +127,45 @@ export default function Profile({ customer }: ProfileProps) {
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-base font-black text-stone-900 dark:text-white flex items-center gap-2">
                             <GraduationCap className="w-5 h-5 text-orange-500" />
-                            <span>توثيق هوية الطالب الجامعي</span>
+                            <span>توثيق هوية الطالب الجامعي لخصومات المطاعم</span>
                         </h2>
 
                         {customer.student_status === 'APPROVED' && (
                             <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5" /> تم التوثيق بنجاح
+                                <CheckCircle2 className="w-3.5 h-3.5" /> كارنيه موثق (الخصم مفعل)
                             </span>
                         )}
                         {customer.student_status === 'PENDING' && (
                             <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" /> قيد المراجعة الإدارية
+                                <Clock className="w-3.5 h-3.5" /> قيد مراجعة الإدارة
+                            </span>
+                        )}
+                        {customer.student_status === 'REJECTED' && (
+                            <span className="px-3 py-1 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 text-xs font-bold flex items-center gap-1">
+                                <AlertCircle className="w-3.5 h-3.5" /> تم رفض الكارنيه (يرجى إعادة الرفع)
                             </span>
                         )}
                     </div>
 
                     {customer.student_status === 'APPROVED' ? (
-                        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-stone-800/80 border border-emerald-200 dark:border-stone-700 text-xs text-stone-700 dark:text-stone-300 space-y-1">
-                            <p className="font-bold text-emerald-700 dark:text-emerald-400">
-                                أنت مؤهل رسمياً لجميع خصومات الطلاب!
+                        <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-stone-800/80 border border-emerald-200 dark:border-stone-700 text-xs text-stone-700 dark:text-stone-300 space-y-2">
+                            <p className="font-bold text-sm text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>تم تأكيد هويتك الطلابية بنجاح من قبل إدارة المنصة!</span>
                             </p>
-                            <p>الجامعة: {customer.university_name}</p>
-                            <p className="text-[11px] text-stone-500">يتم تفعيل الخصم بنسبة 10-20% على أي طلب تقوم بتقديمه تلقائياً.</p>
+                            <p><strong>الجامعة المسجلة:</strong> {customer.university_name || 'جامعة معتمدة'}</p>
+                            <p className="text-stone-500 dark:text-stone-400">
+                                يتم تطبيق الخصومات الطلابية والعروض الحصرية للطلاب تلقائياً على كل طلب تقوم بتقديمه من مطاعم المنصة.
+                            </p>
                         </div>
                     ) : (
                         <form onSubmit={handleStudentSubmit} className="space-y-4 max-w-lg">
-                            <p className="text-xs text-stone-500 dark:text-stone-400">
-                                ارفع صورة واضحة لوجه كارنيه جامعتك (برج العرب التكنولوجية أو الجامعة المصرية اليابانية) للحصول على خصومات الطلاب الدائمة.
-                            </p>
+                            <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+                                <p className="font-bold">🎓 كيف تحصل على خصم الطلاب والعروض الحصرية؟</p>
+                                <p className="text-[11px] leading-relaxed">
+                                    ارفع صورة واضحة لكارنيه كليتك أو جامعتك (سواء جامعة برج العرب التكنولوجية، الجامعة اليابانية، جامعة سنجور، أو أي جامعة مصرية). فور قبول الكارنيه من إدارة الموقع يتم تفعيل الخصم مباشرة.
+                                </p>
+                            </div>
 
                             <div>
                                 <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
@@ -165,9 +176,20 @@ export default function Profile({ customer }: ProfileProps) {
                                     onChange={(e) => studentForm.setData('university_name', e.target.value)}
                                     className="w-full p-3 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white focus:outline-none focus:border-orange-500"
                                 >
-                                    <option value="جامعة برج العرب التكنولوجية">جامعة برج العرب التكنولوجية (BATU)</option>
-                                    <option value="الجامعة المصرية اليابانية للعلوم والتكنولوجيا">الجامعة المصرية اليابانية للعلوم والتكنولوجيا (E-JUST)</option>
-                                    <option value="أخرى">جامعة / معهد آخر في برج العرب</option>
+                                    <optgroup label="جامعات برج العرب">
+                                        <option value="جامعة برج العرب التكنولوجية (BATU)">جامعة برج العرب التكنولوجية (BATU)</option>
+                                        <option value="الجامعة المصرية اليابانية للعلوم والتكنولوجيا (E-JUST)">الجامعة المصرية اليابانية للعلوم والتكنولوجيا (E-JUST)</option>
+                                        <option value="جامعة سنجور الدولية (Senghor University)">جامعة سنجور الدولية (Senghor University)</option>
+                                    </optgroup>
+                                    <optgroup label="جامعات ومعاهد أخرى">
+                                        <option value="جامعة الإسكندرية">جامعة الإسكندرية</option>
+                                        <option value="جامعة مطروح">جامعة مطروح</option>
+                                        <option value="الأكاديمية العربية للعلوم والتكنولوجيا (AASTMT)">الأكاديمية العربية للعلوم والتكنولوجيا (AASTMT)</option>
+                                        <option value="جامعة فاروس (PUA)">جامعة فاروس (PUA)</option>
+                                        <option value="جامعة العلمين الدولية (AIU)">جامعة العلمين الدولية (AIU)</option>
+                                        <option value="المعهد العالي للهندسة والتكنولوجيا ببرج العرب">المعهد العالي للهندسة والتكنولوجيا ببرج العرب</option>
+                                        <option value="جامعة / معهد آخر في مصر">جامعة / معهد آخر في مصر</option>
+                                    </optgroup>
                                 </select>
                             </div>
 
@@ -184,7 +206,7 @@ export default function Profile({ customer }: ProfileProps) {
                                             studentForm.setData('student_id_image', e.target.files[0]);
                                         }
                                     }}
-                                    className="w-full p-2.5 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-600 file:text-white"
+                                    className="w-full p-2.5 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-600 file:text-white cursor-pointer"
                                 />
                                 {studentForm.errors.student_id_image && (
                                     <p className="text-[11px] text-red-500 mt-1">{studentForm.errors.student_id_image}</p>
@@ -194,10 +216,10 @@ export default function Profile({ customer }: ProfileProps) {
                             <button
                                 type="submit"
                                 disabled={studentForm.processing}
-                                className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 text-white font-bold text-xs shadow transition disabled:opacity-60 flex items-center gap-1.5"
+                                className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 text-white font-bold text-xs shadow transition disabled:opacity-60 flex items-center gap-1.5 cursor-pointer"
                             >
                                 <Upload className="w-3.5 h-3.5" />
-                                <span>{studentForm.processing ? 'جارٍ رفع الكارنيه...' : 'إرسال طلب التوثيق'}</span>
+                                <span>{studentForm.processing ? 'جارٍ رفع الكارنيه للإدارة...' : 'إرسال الكارنيه للمراجعة والتفعيل'}</span>
                             </button>
                         </form>
                     )}

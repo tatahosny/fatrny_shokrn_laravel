@@ -134,10 +134,14 @@ export default function Index({ customers, filters }: CustomersIndexProps) {
                                         <td className="py-4 px-4 text-center space-x-1.5 space-x-reverse">
                                             {c.university_id_card_image && (
                                                 <button
-                                                    onClick={() => setPreviewImage(`/storage/${c.university_id_card_image}`)}
-                                                    className="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 font-bold text-[11px]"
+                                                    onClick={() => {
+                                                        const img = c.university_id_card_image!;
+                                                        const src = img.startsWith('http') || img.startsWith('/') ? img : `/storage/${img}`;
+                                                        setPreviewImage(src);
+                                                    }}
+                                                    className="px-2.5 py-1 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-bold text-[11px] hover:bg-orange-200 transition"
                                                 >
-                                                    معاينة الكارنيه
+                                                    معاينة الكارنيه 🎓
                                                 </button>
                                             )}
 

@@ -23,6 +23,7 @@ class Offer extends Model
         'end_date',
         'image',
         'is_active',
+        'is_student_only',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class Offer extends Model
             'start_date' => 'datetime',
             'end_date' => 'datetime',
             'is_active' => 'boolean',
+            'is_student_only' => 'boolean',
         ];
     }
 

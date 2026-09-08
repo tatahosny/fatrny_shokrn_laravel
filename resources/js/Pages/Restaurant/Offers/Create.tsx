@@ -22,6 +22,7 @@ export default function OfferCreate({ menuItems }: Props) {
         start_date: '',
         end_date: '',
         is_active: true,
+        is_student_only: false,
         menu_item_id: '',
     });
 
@@ -125,11 +126,26 @@ export default function OfferCreate({ menuItems }: Props) {
                             </div>
                         </div>
 
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" checked={data.is_active} onChange={e => setData('is_active', e.target.checked)}
-                                className="w-4 h-4 accent-orange-500" />
-                            <span className="text-sm text-stone-300">تفعيل العرض فوراً</span>
-                        </label>
+                        <div className="space-y-3 pt-2">
+                            <label className="flex items-center gap-2.5 cursor-pointer">
+                                <input type="checkbox" checked={data.is_active} onChange={e => setData('is_active', e.target.checked)}
+                                    className="w-4 h-4 accent-orange-500 rounded" />
+                                <span className="text-sm font-semibold text-stone-200">تفعيل العرض فوراً للجمهور</span>
+                            </label>
+
+                            <label className="flex items-start gap-2.5 p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/30 cursor-pointer">
+                                <input type="checkbox" checked={data.is_student_only} onChange={e => setData('is_student_only', e.target.checked)}
+                                    className="w-4 h-4 mt-0.5 accent-orange-500 rounded" />
+                                <div>
+                                    <span className="text-xs font-bold text-orange-400 block">
+                                        🎓 عرض حصري لطلاب الجامعات الموثقين فقط
+                                    </span>
+                                    <span className="text-[11px] text-stone-400 block mt-0.5">
+                                        ينطبق هذا العرض فقط على الطلاب الذين رفعوا كارنيهاتهم وتم اعتمادها وتوثيقها من إدارة المنصة.
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-4">

@@ -45,6 +45,7 @@ class OfferController extends Controller
             'original_price'     => 'required|numeric|min:0',
             'discount_price'     => 'required|numeric|min:0',
             'is_active'          => 'boolean',
+            'is_student_only'    => 'boolean',
             'start_date'         => 'nullable|date',
             'end_date'           => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -79,13 +80,14 @@ class OfferController extends Controller
         $restaurant = $this->restaurant();
         $offer = Offer::where('restaurant_id', $restaurant->id)->findOrFail($id);
         $validated = $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'original_price' => 'required|numeric|min:0',
-            'discount_price' => 'required|numeric|min:0',
-            'is_active'      => 'boolean',
-            'start_date'     => 'nullable|date',
-            'end_date'       => 'nullable|date|after_or_equal:start_date',
+            'title'           => 'required|string|max:255',
+            'description'     => 'nullable|string',
+            'original_price'  => 'required|numeric|min:0',
+            'discount_price'  => 'required|numeric|min:0',
+            'is_active'       => 'boolean',
+            'is_student_only' => 'boolean',
+            'start_date'      => 'nullable|date',
+            'end_date'        => 'nullable|date|after_or_equal:start_date',
         ]);
         $validated['discount_percentage'] = $validated['original_price'] > 0
             ? round((($validated['original_price'] - $validated['discount_price']) / $validated['original_price']) * 100, 1)
