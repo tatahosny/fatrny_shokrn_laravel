@@ -76,19 +76,43 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // =====================================================
 // CUSTOMER ROUTES — Authenticated customers only
 // =====================================================
-Route::middleware(['auth', 'portal:CUSTOMER'])->prefix('')->group(function () {
+Route::middleware(['auth', 'portal:CUSTOMER'])->group(function () {
+    // Dashboard (both /customer/dashboard and /dashboard)
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
+    Route::get('/customer/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard.alias');
+
+    // Cart & Checkout
     Route::get('/cart', [CartController::class, 'index'])->name('customer.cart');
+    Route::get('/customer/cart', [CartController::class, 'index'])->name('customer.cart.alias');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('customer.checkout');
+    Route::get('/customer/checkout', [CheckoutController::class, 'index'])->name('customer.checkout.alias');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('customer.checkout.store');
     Route::post('/orders', [CheckoutController::class, 'store'])->name('customer.orders.store');
+    Route::post('/customer/orders', [CheckoutController::class, 'store'])->name('customer.orders.store.alias');
+
+    // Orders History & Details
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');
+    Route::get('/customer/orders', [CustomerOrderController::class, 'index'])->name('customer.orders.alias');
     Route::get('/orders/{orderNumber}', [CustomerOrderController::class, 'show'])->name('customer.order.show');
+    Route::get('/customer/orders/{orderNumber}', [CustomerOrderController::class, 'show'])->name('customer.order.show.alias');
+
+    // Profile & Settings
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('customer.profile');
+    Route::get('/customer/profile', [CustomerProfileController::class, 'index'])->name('customer.profile.alias');
     Route::put('/profile', [CustomerProfileController::class, 'update'])->name('customer.profile.update');
+    Route::put('/customer/profile', [CustomerProfileController::class, 'update'])->name('customer.profile.update.alias');
+
+    // Student Verification
     Route::post('/profile/student-verification', [CustomerProfileController::class, 'submitStudentVerification'])->name('customer.student.verify');
+    Route::post('/customer/profile/student-verification', [CustomerProfileController::class, 'submitStudentVerification'])->name('customer.student.verify.alias');
+
+    // Addresses Management
     Route::post('/profile/addresses', [CustomerProfileController::class, 'storeAddress'])->name('customer.address.store');
+    Route::post('/customer/profile/addresses', [CustomerProfileController::class, 'storeAddress'])->name('customer.address.store.alias');
+    Route::post('/customer/profile/address', [CustomerProfileController::class, 'storeAddress'])->name('customer.address.store.single');
     Route::delete('/profile/addresses/{id}', [CustomerProfileController::class, 'deleteAddress'])->name('customer.address.delete');
+    Route::delete('/customer/profile/addresses/{id}', [CustomerProfileController::class, 'deleteAddress'])->name('customer.address.delete.alias');
+    Route::delete('/customer/profile/address/{id}', [CustomerProfileController::class, 'deleteAddress'])->name('customer.address.delete.single');
 });
 
 // =====================================================

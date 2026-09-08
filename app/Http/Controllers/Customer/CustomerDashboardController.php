@@ -11,8 +11,11 @@ class CustomerDashboardController extends Controller
 {
     public function index(): Response
     {
-        $customer = auth()->user()->customer;
-        abort_if(!$customer, 403);
+        $user = auth()->user();
+        $customer = $user->customer ?? \App\Models\Customer::firstOrCreate(
+            ['user_id' => $user->id],
+            ['student_status' => 'PENDING']
+        );
 
         $recentOrders = Order::where('customer_id', $customer->id)
             ->with('restaurant:id,name,logo')

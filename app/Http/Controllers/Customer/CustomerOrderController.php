@@ -11,8 +11,11 @@ class CustomerOrderController extends Controller
 {
     public function index(): Response
     {
-        $customer = auth()->user()->customer;
-        abort_if(!$customer, 403);
+        $user = auth()->user();
+        $customer = $user->customer ?? \App\Models\Customer::firstOrCreate(
+            ['user_id' => $user->id],
+            ['student_status' => 'PENDING']
+        );
 
         $orders = Order::where('customer_id', $customer->id)
             ->with('restaurant:id,name,logo')
@@ -24,8 +27,11 @@ class CustomerOrderController extends Controller
 
     public function show(string $orderNumber): Response
     {
-        $customer = auth()->user()->customer;
-        abort_if(!$customer, 403);
+        $user = auth()->user();
+        $customer = $user->customer ?? \App\Models\Customer::firstOrCreate(
+            ['user_id' => $user->id],
+            ['student_status' => 'PENDING']
+        );
 
         // SECURITY: Ensure customer can only see their own orders
         $order = Order::where('customer_id', $customer->id)
