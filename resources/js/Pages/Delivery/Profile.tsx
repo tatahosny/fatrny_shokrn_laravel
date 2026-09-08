@@ -40,13 +40,19 @@ export default function Profile({ driver }: DriverProfileProps) {
                         <h1 className="text-xl font-black text-stone-900 dark:text-white">
                             {driver.name}
                         </h1>
-                        <p className="text-xs text-stone-500 mt-0.5">
-                            كابتن توصيل معتمد في برج العرب
-                        </p>
-                        {driver.restaurant && (
-                            <p className="text-xs font-bold text-orange-600 dark:text-orange-400 mt-1 flex items-center gap-1">
-                                <Store className="w-3.5 h-3.5" />
-                                <span>تابع لمطعم: {driver.restaurant.name}</span>
+                        {driver.restaurant ? (
+                            <>
+                                <p className="text-xs text-stone-500 mt-0.5">
+                                    كابتن توصيل معتمد
+                                </p>
+                                <p className="text-xs font-bold text-orange-600 dark:text-orange-400 mt-1 flex items-center gap-1">
+                                    <Store className="w-3.5 h-3.5" />
+                                    <span>تابع لمطعم: {driver.restaurant.name}</span>
+                                </p>
+                            </>
+                        ) : (
+                            <p className="text-xs text-stone-500 mt-0.5">
+                                كابتن توصيل
                             </p>
                         )}
                     </div>

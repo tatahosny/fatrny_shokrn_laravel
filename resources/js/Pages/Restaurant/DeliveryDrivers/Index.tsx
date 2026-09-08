@@ -52,7 +52,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                                 طيارو وكباتن المطعم
                             </h1>
                             <p className="text-xs text-stone-400 mt-0.5">
-                                إدارة فريق التوصيل الخاص بفرع برج العرب وحالات الاتصال
+                                إدارة فريق التوصيل الخاص بـ <span className="font-bold text-orange-500">{restaurant.name}</span> وحالات الاتصال
                             </p>
                         </div>
                         <button
@@ -81,6 +81,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                                             <div>
                                                 <h3 className="font-bold text-sm text-stone-900 dark:text-white">{d.name}</h3>
                                                 <p className="text-xs font-mono text-stone-500">{d.phone}</p>
+                                                <p className="text-[10px] text-orange-500 font-bold mt-0.5">تابع لـ {restaurant.name}</p>
                                             </div>
                                         </div>
                                         <button

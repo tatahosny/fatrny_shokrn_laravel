@@ -21,7 +21,8 @@ import {
     X, 
     ExternalLink,
     GraduationCap,
-    Bell
+    Bell,
+    Bike
 } from 'lucide-react';
 import { SharedInertiaProps } from '../Types';
 
@@ -64,6 +65,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         { label: 'طلبات المنصة المباشرة', href: '/admin/orders', icon: ShoppingBag },
         { label: 'قاعدة بيانات الطلاب والعملاء', href: '/admin/customers', icon: GraduationCap },
         { label: 'المستخدمون والصلاحيات', href: '/admin/users', icon: Users },
+        { label: 'كباتن التوصيل', href: '/admin/delivery-drivers', icon: Bike },
         { label: 'المالية والأرباح', href: '/admin/finance', icon: DollarSign },
         { label: 'الفواتير والاشتراكات', href: '/admin/invoices', icon: Receipt },
         { label: 'سندات التحصيل', href: '/admin/collections', icon: CreditCard },

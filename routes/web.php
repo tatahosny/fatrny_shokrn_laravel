@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\CmsController as AdminCms;
 use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLog;
 use App\Http\Controllers\Admin\BackupController as AdminBackup;
 use App\Http\Controllers\Admin\SettingsController as AdminSettings;
+use App\Http\Controllers\Admin\DeliveryDriverController as AdminDriver;
 use App\Http\Controllers\Restaurant\DashboardController as RestaurantDashboard;
 use App\Http\Controllers\Restaurant\OrderController as RestaurantOrder;
 use App\Http\Controllers\Restaurant\CategoryController as RestaurantCategory;
@@ -184,6 +185,13 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
     // Settings
     Route::get('/settings', [AdminSettings::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettings::class, 'update'])->name('settings.update');
+
+    // Delivery Drivers (Admin-level management across all restaurants)
+    Route::get('/delivery-drivers', [AdminDriver::class, 'index'])->name('delivery-drivers.index');
+    Route::get('/delivery-drivers/create', [AdminDriver::class, 'create'])->name('delivery-drivers.create');
+    Route::post('/delivery-drivers', [AdminDriver::class, 'store'])->name('delivery-drivers.store');
+    Route::delete('/delivery-drivers/{id}', [AdminDriver::class, 'destroy'])->name('delivery-drivers.destroy');
+    Route::post('/delivery-drivers/{id}/toggle', [AdminDriver::class, 'toggle'])->name('delivery-drivers.toggle');
 });
 
 // =====================================================
