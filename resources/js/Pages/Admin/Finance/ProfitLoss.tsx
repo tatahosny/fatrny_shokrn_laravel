@@ -25,8 +25,8 @@ export default function AdminFinanceProfitLoss({ monthlyData, summary }: Props) 
     const isProfit = summary.net_profit >= 0;
 
     return (
-        <Head title="الربح والخسارة" />
-
+        <>
+            <Head title="الربح والخسارة — فطرنا" />
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center gap-4">
                     <Link href="/admin/finance" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors">
@@ -118,5 +118,6 @@ export default function AdminFinanceProfitLoss({ monthlyData, summary }: Props) 
                     </div>
                 </div>
             </div>
+        </>
     );
 }

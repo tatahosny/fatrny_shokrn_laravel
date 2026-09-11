@@ -132,46 +132,9 @@ class OrderService
                 $studentDiscount = round(($subtotal * (float) $restaurant->student_discount_percentage) / 100, 2);
             }
 
-            // Delivery fee calculation (Fixed or per-KM based on distance)
-            $deliveryFee = (float) $restaurant->delivery_fee;
-            $feePerKm = (float) ($restaurant->delivery_fee_per_km ?? 0);
-            $baseFee = (float) ($restaurant->delivery_base_fee ?? $restaurant->delivery_fee ?? 10.00);
-
-            $custLat = !empty($orderData['latitude']) ? (float) $orderData['latitude'] : null;
-            $custLng = !empty($orderData['longitude']) ? (float) $orderData['longitude'] : null;
-
-            // If coordinates are missing, resolve from address text
-            if ((empty($custLat) || empty($custLng)) && !empty($orderData['address'])) {
-                $addr = $orderData['address'];
-                if (preg_match('/(الإسكندرية|اسكندرية|Alexandria|سموحة|سيدي بشر|ميامي|محرم بك|المنشية|محطة الرمل|سيدي جابر|العصافرة|المندرة|كامب شيزار|كليوباترا|لوران|جناكليس|سان ستيفانو)/u', $addr)) {
-                    $custLat = 31.2001;
-                    $custLng = 29.9187;
-                } elseif (preg_match('/(العجمي|البيطاش|الهانوفيل|الدخيلة|الكيلو 21)/u', $addr)) {
-                    $custLat = 31.1000;
-                    $custLng = 29.7700;
-                } elseif (preg_match('/(BATU|تكنولوجية|جامعة برج العرب التكنولوجية)/u', $addr)) {
-                    $custLat = 30.8756;
-                    $custLng = 29.5842;
-                } elseif (preg_match('/(EJUST|اليابانية|الجامعة المصرية اليابانية)/u', $addr)) {
-                    $custLat = 30.8648;
-                    $custLng = 29.5741;
-                } elseif (preg_match('/(سنجور|جامعة سنجور)/u', $addr)) {
-                    $custLat = 30.8805;
-                    $custLng = 29.5912;
-                }
-                $orderData['latitude'] = $custLat;
-                $orderData['longitude'] = $custLng;
-            }
-
-            if ($feePerKm > 0 && !empty($custLat) && !empty($custLng)) {
-                $restLat = (float) ($restaurant->latitude ?: 30.8700);
-                $restLng = (float) ($restaurant->longitude ?: 29.5800);
-
-                $distance = $this->calculateDistanceKm($restLat, $restLng, $custLat, $custLng);
-                $deliveryFee = round($baseFee + ($distance * $feePerKm), 2);
-            } elseif (isset($orderData['delivery_fee']) && (float) $orderData['delivery_fee'] > 0) {
-                $deliveryFee = (float) $orderData['delivery_fee'];
-            }
+            // The restaurant sets the delivery price when it accepts the order.
+            // Never trust, calculate, or show a pre-confirmation delivery price.
+            $deliveryFee = 0.00;
 
             $serviceFee = 0.00;
             $totalAmount = max(0, $subtotal - $studentDiscount + $deliveryFee + $serviceFee);
@@ -297,6 +260,12 @@ class OrderService
         if ($order->restaurant_id !== $driver->restaurant_id) {
             throw ValidationException::withMessages([
                 'driver' => __('مندوب التوصيل لا ينتمي إلى نفس مطعم هذا الطلب.'),
+            ]);
+        }
+
+        if (!in_array($order->status, ['READY_FOR_PICKUP', 'ASSIGNED_TO_DRIVER'])) {
+            throw ValidationException::withMessages([
+                'status' => __('لا يمكن إسناد طيار للطلب إلا بعد الانتهاء من تجهيزه بالكامل (جاهز للاستلام).'),
             ]);
         }
 

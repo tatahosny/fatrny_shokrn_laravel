@@ -84,8 +84,8 @@ export default function Index({
     )}`;
 
     return (
-        <Head title="الفواتير والاشتراكات — بوابة المطعم" />
-
+        <>
+            <Head title="الفواتير والاشتراكات — بوابة المطعم — فطرنا" />
             <div className="space-y-6 max-w-7xl mx-auto">
                 {/* 1. SUSPENSION ALERT BANNER */}
                 {isSuspended && (
@@ -352,5 +352,6 @@ export default function Index({
                     )}
                 </div>
             </div>
+        </>
     );
 }

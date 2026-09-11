@@ -31,8 +31,8 @@ export default function OfferCreate({ menuItems }: Props) {
     };
 
     return (
-        <Head title="إضافة عرض جديد" />
-
+        <>
+            <Head title="إضافة عرض جديد — فطرنا" />
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/restaurant/offers"
@@ -159,5 +159,6 @@ export default function OfferCreate({ menuItems }: Props) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

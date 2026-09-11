@@ -19,8 +19,8 @@ export default function DeliveryDriverCreate() {
     };
 
     return (
-        <Head title="إضافة سائق توصيل" />
-
+        <>
+            <Head title="إضافة سائق توصيل — فطرنا" />
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/restaurant/delivery-drivers"
@@ -115,5 +115,6 @@ export default function DeliveryDriverCreate() {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

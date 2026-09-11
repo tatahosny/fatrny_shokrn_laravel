@@ -28,8 +28,8 @@ export default function UserCreate({ roles }: Props) {
     };
 
     return (
-        <Head title="إضافة مستخدم جديد" />
-
+        <>
+            <Head title="إضافة مستخدم جديد — فطرنا" />
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/admin/users" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors">
@@ -119,5 +119,6 @@ export default function UserCreate({ roles }: Props) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

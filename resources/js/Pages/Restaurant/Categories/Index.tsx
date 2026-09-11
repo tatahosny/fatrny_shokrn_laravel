@@ -33,8 +33,8 @@ export default function Index({ categories = [], restaurant }: CategoriesProps) 
     };
 
     return (
-        <Head title="تصنيفات المنيو — بوابة المطعم" />
-
+        <>
+            <Head title="تصنيفات المنيو — بوابة المطعم — فطرنا" />
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
@@ -139,5 +139,6 @@ export default function Index({ categories = [], restaurant }: CategoriesProps) 
                 onConfirm={() => { if (confirmDelete) router.delete(`/restaurant/categories/${confirmDelete}`); setConfirmDelete(null); }}
                 onCancel={() => setConfirmDelete(null)}
             />
+        </>
     );
 }

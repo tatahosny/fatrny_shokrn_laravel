@@ -49,8 +49,8 @@ export default function Index({ invoices, restaurants = [], filters }: InvoicesI
     };
 
     return (
-        <Head title="الفواتير والاشتراكات — الإدارة المركزية" />
-
+        <>
+            <Head title="الفواتير والاشتراكات — فطرنا" />
             <div className="space-y-6">
                 {/* Header Card */}
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
@@ -421,5 +421,6 @@ export default function Index({ invoices, restaurants = [], filters }: InvoicesI
                 }}
                 onCancel={() => setConfirmCancelId(null)}
             />
+        </>
     );
 }

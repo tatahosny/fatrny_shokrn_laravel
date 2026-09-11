@@ -14,8 +14,8 @@ export default function AdminFinanceRevenue({ period, revenueByDay, revenueByRes
     const fmt = (v: number) => (v / 100).toFixed(2);
 
     return (
-        <Head title="تفاصيل الإيرادات" />
-
+        <>
+            <Head title="تفاصيل الإيرادات — فطرنا" />
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center gap-4">
                     <Link href="/admin/finance" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors">
@@ -97,5 +97,6 @@ export default function AdminFinanceRevenue({ period, revenueByDay, revenueByRes
                     </div>
                 </div>
             </div>
+        </>
     );
 }

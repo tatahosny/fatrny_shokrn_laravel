@@ -60,10 +60,10 @@ export default function OrderHistory({
 
         const q = searchQuery.toLowerCase();
         return list.filter((order) => 
-            order.order_number.toLowerCase().includes(q) ||
-            order.restaurant?.name?.toLowerCase().includes(q) ||
-            order.address.toLowerCase().includes(q) ||
-            order.customer?.user?.name?.toLowerCase().includes(q)
+            (order.order_number || '').toLowerCase().includes(q) ||
+            (order.restaurant?.name || '').toLowerCase().includes(q) ||
+            (order.address || '').toLowerCase().includes(q) ||
+            (order.customer?.user?.name || '').toLowerCase().includes(q)
         );
     };
 
@@ -370,7 +370,7 @@ export default function OrderHistory({
                                         {/* Timestamp footer */}
                                         <div className="mt-2 text-[10px] text-stone-400 flex items-center justify-between">
                                             <span>
-                                                تاريخ الطلب: {new Date(order.created_at).toLocaleString('ar-EG')}
+                                                تاريخ الطلب: {order.created_at ? new Date(order.created_at).toLocaleString('ar-EG') : '—'}
                                             </span>
                                             {order.items && order.items.length > 0 && (
                                                 <span>

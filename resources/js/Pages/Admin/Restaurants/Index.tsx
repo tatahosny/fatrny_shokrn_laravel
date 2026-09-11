@@ -27,8 +27,8 @@ export default function Index({ restaurants, filters }: RestaurantsIndexProps) {
     };
 
     return (
-        <Head title="إدارة المطاعم الشريكة — الإدارة المركزية" />
-
+        <>
+            <Head title="المطاعم الشريكة — فطرنا" />
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
@@ -160,5 +160,6 @@ export default function Index({ restaurants, filters }: RestaurantsIndexProps) {
                     </div>
                 </div>
             </div>
+        </>
     );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import DeliveryLayout from '../../Layouts/DeliveryLayout';
+import ErrorBoundary from '../../Components/ErrorBoundary';
 import { DeliveryDriver, Order } from '../../Types';
 import { 
     Bike, 
@@ -140,19 +141,21 @@ export default function Dashboard({
                             </Link>
                         </div>
 
-                        <div className="h-28 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={weekly_stats} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                                    <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-                                    <Tooltip 
-                                        formatter={(val: any) => [`${val} طلبات`, 'تم التوصيل']}
-                                        contentStyle={{ backgroundColor: '#1c1917', borderColor: '#292524', borderRadius: '8px', color: '#fff', fontSize: '11px' }}
-                                    />
-                                    <Bar dataKey="orders" fill="#10b981" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
+                        <ErrorBoundary fallbackMessage="تعذر تحميل رسم النشاط الأسبوعي">
+                            <div className="h-28 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={weekly_stats} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                                        <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                                        <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                                        <Tooltip 
+                                            formatter={(val: any) => [`${val} طلبات`, 'تم التوصيل']}
+                                            contentStyle={{ backgroundColor: '#1c1917', borderColor: '#292524', borderRadius: '8px', color: '#fff', fontSize: '11px' }}
+                                        />
+                                        <Bar dataKey="orders" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </ErrorBoundary>
                     </div>
                 )}
 

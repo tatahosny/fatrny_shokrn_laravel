@@ -173,8 +173,8 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
     });
 
     return (
-        <Head title="إدارة المنيو — بوابة المطعم" />
-
+        <>
+            <Head title="إدارة المنيو — بوابة المطعم — فطرنا" />
             <div className="space-y-6">
                 {/* Header card */}
                 <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl rounded-3xl border border-orange-100/80 dark:border-stone-800 p-6 shadow-xl shadow-orange-500/5">
@@ -954,5 +954,6 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
                 onConfirm={() => { if (confirmDeleteId) router.delete(`/restaurant/menu/${confirmDeleteId}`); setConfirmDeleteId(null); }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
+        </>
     );
 }

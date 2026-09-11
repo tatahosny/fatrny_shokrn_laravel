@@ -41,8 +41,8 @@ export default function Index({ restaurant }: SettingsProps) {
     };
 
     return (
-        <Head title="إعدادات المطعم — بوابة المطعم" />
-
+        <>
+            <Head title="إعدادات المطعم — بوابة المطعم — فطرنا" />
             <div className="space-y-6 max-w-4xl">
                 <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
                     <h1 className="text-xl font-black text-stone-900 dark:text-white mb-1">
@@ -208,5 +208,6 @@ export default function Index({ restaurant }: SettingsProps) {
                     </form>
                 </div>
             </div>
+        </>
     );
 }

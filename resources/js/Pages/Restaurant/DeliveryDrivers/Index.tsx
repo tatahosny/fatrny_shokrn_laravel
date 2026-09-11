@@ -40,8 +40,8 @@ export default function Index({ drivers, restaurant }: DriversProps) {
     };
 
     return (
-        <Head title="كباتن التوصيل — بوابة المطعم" />
-
+        <>
+            <Head title="كباتن التوصيل — بوابة المطعم — فطرنا" />
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
@@ -197,5 +197,6 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                 onConfirm={() => { if (confirmDelete) router.delete(`/restaurant/delivery-drivers/${confirmDelete}`); setConfirmDelete(null); }}
                 onCancel={() => setConfirmDelete(null)}
             />
+        </>
     );
 }

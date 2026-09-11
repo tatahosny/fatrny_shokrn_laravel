@@ -30,8 +30,8 @@ const logColors: Record<string, string> = {
 
 export default function AdminActivityLogs({ logs }: Props) {
     return (
-        <Head title="سجل النشاطات" />
-
+        <>
+            <Head title="سجل النشاطات — فطرنا" />
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <div>
@@ -101,5 +101,6 @@ export default function AdminActivityLogs({ logs }: Props) {
                     )}
                 </div>
             </div>
+        </>
     );
 }

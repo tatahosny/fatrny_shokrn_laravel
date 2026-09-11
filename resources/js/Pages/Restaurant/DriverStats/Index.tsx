@@ -85,8 +85,8 @@ export default function DriverStatsIndex({
     const maxOrders = Math.max(...driver_stats.map((d) => d.total_orders), 1);
 
     return (
-        <Head title="إحصائيات الكباتن — إدارة المطعم" />
-
+        <>
+            <Head title="إحصائيات الكباتن — إدارة المطعم — فطرنا" />
             <div className="space-y-6 pb-12" dir="rtl">
                 {/* Header Banner */}
                 <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-500 text-white shadow-xl">
@@ -474,5 +474,6 @@ export default function DriverStatsIndex({
                     )}
                 </div>
             </div>
+        </>
     );
 }

@@ -44,8 +44,8 @@ const permLabels: Record<string, string> = {
 
 export default function AdminRolesIndex({ roles }: Props) {
     return (
-        <Head title="الأدوار والصلاحيات" />
-
+        <>
+            <Head title="الأدوار والصلاحيات — فطرنا" />
             <div className="space-y-6" dir="rtl">
                 <div>
                     <h1 className="text-2xl font-bold text-white">الأدوار والصلاحيات</h1>
@@ -90,5 +90,6 @@ export default function AdminRolesIndex({ roles }: Props) {
                     ))}
                 </div>
             </div>
+        </>
     );
 }

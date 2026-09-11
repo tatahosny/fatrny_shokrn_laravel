@@ -27,8 +27,8 @@ export default function AdminAnalytics({ ordersByHour, ordersByDay, topRestauran
     const fmt = (v: number) => (v / 100).toFixed(2);
 
     return (
-        <Head title="التحليلات" />
-
+        <>
+            <Head title="التحليلات والمؤشرات — فطرنا" />
             <div className="space-y-6" dir="rtl">
                 <div>
                     <h1 className="text-2xl font-bold text-white">التحليلات والإحصاءات</h1>
@@ -174,5 +174,6 @@ export default function AdminAnalytics({ ordersByHour, ordersByDay, topRestauran
                     </div>
                 </div>
             </div>
+        </>
     );
 }

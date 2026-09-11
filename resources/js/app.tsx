@@ -7,6 +7,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode, type ReactNode } from 'react';
 import AdminLayout from './Layouts/AdminLayout';
 import RestaurantLayout from './Layouts/RestaurantLayout';
+import ErrorBoundary from './Components/ErrorBoundary';
 
 const appName = document.head.querySelector('meta[name="app-name"]')?.getAttribute('content') ?? 'فطرنا شكراً';
 const pages = import.meta.glob('./Pages/**/*.tsx');
@@ -37,13 +38,15 @@ createInertiaApp({
         const root: Root = createRoot(el);
         root.render(
             <StrictMode>
-                <App {...props} />
+                <ErrorBoundary>
+                    <App {...props} />
+                </ErrorBoundary>
             </StrictMode>
         );
     },
     progress: {
         color: '#f97316',
-        showSpinner: false,
-        delay: 120,
+        showSpinner: true,
+        delay: 40,
     },
 });

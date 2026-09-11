@@ -180,7 +180,7 @@ export default function DeliveryRouteMap({
             // Fallback to straight dashed line if OSRM is unreachable
             const map = mapInstanceRef.current;
             if (map) {
-                const fallbackCoords = [[fromLat, fromLng], [toLat, toLng]];
+                const fallbackCoords: L.LatLngTuple[] = [[fromLat, fromLng], [toLat, toLng]];
                 if (!roadPolylineRef.current) {
                     const line = L.polyline(fallbackCoords, {
                         color: '#10b981',
@@ -199,13 +199,30 @@ export default function DeliveryRouteMap({
     // 1. Initialize Leaflet Map
     useEffect(() => {
         if (!mapContainerRef.current) return;
-        if (mapInstanceRef.current) return;
 
-        const map = L.map(mapContainerRef.current, {
-            center: [rLat, rLng],
-            zoom: 15,
-            zoomControl: false,
-        });
+        const container = mapContainerRef.current as HTMLDivElement & { _leaflet_id?: number };
+        if (container._leaflet_id) {
+            delete container._leaflet_id;
+        }
+
+        if (mapInstanceRef.current) {
+            try {
+                mapInstanceRef.current.remove();
+            } catch { /* ignore */ }
+            mapInstanceRef.current = null;
+        }
+
+        let map: L.Map;
+        try {
+            map = L.map(container, {
+                center: [rLat, rLng],
+                zoom: 15,
+                zoomControl: false,
+            });
+        } catch (err) {
+            console.warn('Leaflet map init failed:', err);
+            return;
+        }
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
@@ -270,9 +287,23 @@ export default function DeliveryRouteMap({
 
         mapInstanceRef.current = map;
 
+        const t1 = setTimeout(() => { try { map.invalidateSize(); } catch {} }, 150);
+        const t2 = setTimeout(() => { try { map.invalidateSize(); } catch {} }, 450);
+
         return () => {
-            map.remove();
+            clearTimeout(t1);
+            clearTimeout(t2);
+            driverMarkerRef.current = null;
+            customerMarkerRef.current = null;
+            restaurantMarkerRef.current = null;
+            roadPolylineRef.current = null;
+            try {
+                map.remove();
+            } catch { /* ignore */ }
             mapInstanceRef.current = null;
+            if (container._leaflet_id) {
+                delete container._leaflet_id;
+            }
         };
     }, [rLat, rLng, cLat, cLng, restaurantName, customerName, customerAddress]);
 
@@ -333,23 +364,28 @@ export default function DeliveryRouteMap({
                     iconAnchor: [26, 26],
                 });
 
-                if (!driverMarkerRef.current) {
-                    const marker = L.marker([latitude, longitude], { icon: driverIcon, zIndexOffset: 1000 })
-                        .addTo(map)
-                        .bindPopup(`<strong style="direction:rtl;text-align:right;color:#0284c7;">🛵 موقعك المباشر في الطريق</strong>`);
-                    driverMarkerRef.current = marker;
-                } else {
-                    driverMarkerRef.current.setLatLng([latitude, longitude]);
-                    driverMarkerRef.current.setIcon(driverIcon);
-                }
+                try {
+                    if (!driverMarkerRef.current) {
+                        const marker = L.marker([latitude, longitude], { icon: driverIcon, zIndexOffset: 1000 })
+                            .addTo(map)
+                            .bindPopup(`<strong style="direction:rtl;text-align:right;color:#0284c7;">🛵 موقعك المباشر في الطريق</strong>`);
+                        driverMarkerRef.current = marker;
+                    } else {
+                        driverMarkerRef.current.setLatLng([latitude, longitude]);
+                        driverMarkerRef.current.setIcon(driverIcon);
+                    }
 
-                // 4. In Navigation Mode, keep camera centered directly over the driver at close range (Zoom 17)
-                if (isNavMode) {
-                    map.setView([latitude, longitude], 17, { animate: true, duration: 0.5 });
-                }
+                    // 4. In Navigation Mode, keep camera centered directly over the driver at close range (Zoom 17)
+                    if (isNavMode) {
+                        map.setView([latitude, longitude], 17, { animate: true, duration: 0.5 });
+                    }
 
-                // 5. Fetch Road Routing to Next Stop
-                fetchRoadRoute(latitude, longitude, targetDestinationCoords[0], targetDestinationCoords[1]);
+                    // 5. Fetch Road Routing to Next Stop
+                    fetchRoadRoute(latitude, longitude, targetDestinationCoords[0], targetDestinationCoords[1]);
+                } catch (markerErr) {
+                    console.warn('Driver marker update error:', markerErr);
+                    driverMarkerRef.current = null;
+                }
             }
 
             // 6. Sync Driver Live Coordinates to Backend every 5 seconds

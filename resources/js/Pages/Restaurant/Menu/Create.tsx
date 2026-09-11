@@ -30,8 +30,8 @@ export default function MenuItemCreate({ categories }: Props) {
     };
 
     return (
-        <Head title="إضافة طبق جديد" />
-
+        <>
+            <Head title="إضافة طبق جديد — فطرنا" />
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/restaurant/menu"
@@ -124,5 +124,6 @@ export default function MenuItemCreate({ categories }: Props) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

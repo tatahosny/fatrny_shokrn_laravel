@@ -34,8 +34,6 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
         restaurant, 
         getSubtotal, 
         getStudentDiscountAmount, 
-        getDeliveryFee, 
-        getTotal, 
         clearCart,
         setStudentDiscount
     } = useCartStore();
@@ -69,7 +67,6 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
     // GPS / Map State
     const [gpsAddress, setGpsAddress] = useState('');
     const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
-    const [roadQuote, setRoadQuote] = useState<{ distance_km: number; duration_minutes: number; delivery_fee: number } | null>(null);
 
     const [notes, setNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,48 +74,17 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
 
     const activeUni = BORG_EL_ARAB_UNIVERSITIES.find(u => u.id === selectedUniId) || BORG_EL_ARAB_UNIVERSITIES[0];
 
+    const restLat = restaurant?.latitude ? Number(restaurant.latitude) : undefined;
+    const restLng = restaurant?.longitude ? Number(restaurant.longitude) : undefined;
+
     // Compute Customer Location Coords (University, GPS pin, or Custom)
     const customerCoords = addressMode === 'university'
         ? (gpsCoords || { lat: activeUni.latitude, lng: activeUni.longitude })
         : (gpsCoords || (addressMode === 'saved' ? null : { lat: 30.8752, lng: 29.5841 }));
 
-    // Restaurant coords
-    const restLat = Number(restaurant?.latitude) || 30.8700;
-    const restLng = Number(restaurant?.longitude) || 29.5800;
-
-    // Calculate distance in km
-    const distanceKm = customerCoords
-        ? calculateDistanceKm(restLat, restLng, customerCoords.lat, customerCoords.lng)
-        : null;
-
-    // Calculate delivery fee: base + (distance * per_km)
-    const feePerKm = Number(restaurant?.delivery_fee_per_km) || 0;
-    const baseFee = Number(restaurant?.delivery_base_fee ?? restaurant?.delivery_fee ?? 10);
-
-    const calculatedDeliveryFee = (feePerKm > 0 && distanceKm !== null)
-        ? Math.round(baseFee + (distanceKm * feePerKm))
-        : Number(restaurant?.delivery_fee || 15);
-
-    // The preview price comes from the same driving-route calculation used by dispatch.
-    // This replaces the old crow-flies estimate as soon as a real pin is available.
-    useEffect(() => {
-        if (!restaurant || !customerCoords) return;
-        const controller = new AbortController();
-        fetch('/delivery-quote', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
-            body: JSON.stringify({ restaurant_id: restaurant.id, latitude: customerCoords.lat, longitude: customerCoords.lng }),
-            signal: controller.signal,
-        }).then(r => r.ok ? r.json() : Promise.reject())
-          .then(setRoadQuote)
-          .catch(() => { if (!controller.signal.aborted) setRoadQuote(null); });
-        return () => controller.abort();
-    }, [restaurant?.id, customerCoords?.lat, customerCoords?.lng]);
-
     const subtotal = getSubtotal();
     const studentDiscount = getStudentDiscountAmount();
-    const deliveryFee = roadQuote?.delivery_fee ?? calculatedDeliveryFee;
-    const total = Math.max(0, subtotal - studentDiscount + deliveryFee);
+    const total = Math.max(0, subtotal - studentDiscount);
 
     const handleUniChange = (uniId: string) => {
         setSelectedUniId(uniId);
@@ -177,7 +143,6 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
             address: finalAddress,
             latitude: customerCoords?.lat ?? null,
             longitude: customerCoords?.lng ?? null,
-            delivery_fee: deliveryFee,
             payment_method: 'CASH_ON_DELIVERY',
             customer_notes: notes || null,
         };
@@ -441,11 +406,11 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
                                     <LocationPickerMap
                                         restaurantLat={restLat}
                                         restaurantLng={restLng}
-                                        restaurantName={restaurant.name}
+                                        restaurantName={restaurant?.name || 'المطعم'}
                                         onLocationSelect={handleMapLocationSelect}
                                         initialLat={gpsCoords?.lat}
                                         initialLng={gpsCoords?.lng}
-                                        autoLocateOnMount={true}
+                                        autoLocateOnMount={false}
                                     />
                                     {gpsAddress && (
                                         <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs flex items-start gap-2">
@@ -554,20 +519,9 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
 
                                 <div className="flex items-center justify-between text-stone-500">
                                     <span>رسوم التوصيل</span>
-                                    <span className="font-bold text-stone-800 dark:text-stone-200">{deliveryFee.toFixed(2)} ج.م</span>
+                                    <span className="font-bold text-amber-600">يحددها المطعم عند التأكيد</span>
                                 </div>
 
-                                {distanceKm !== null && (
-                                    <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold border border-orange-500/20">
-                                        <span className="flex items-center gap-1">
-                                            <Bike className="w-3.5 h-3.5" />
-                                            المسافة المقدرة للموقع:
-                                        </span>
-                                        <span>
-                                            {roadQuote ? `${roadQuote.distance_km} كم طريق فعلي • حوالي ${roadQuote.duration_minutes} دقيقة` : `${distanceKm} كم (جارٍ حساب مسار الطريق...)`}
-                                        </span>
-                                    </div>
-                                )}
 
                                 <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between text-base font-black text-stone-900 dark:text-white">
                                     <span>المبلغ الإجمالي</span>

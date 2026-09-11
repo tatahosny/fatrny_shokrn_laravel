@@ -129,8 +129,8 @@ export default function Index({ offers, restaurant }: OffersProps) {
     };
 
     return (
-        <Head title="العروض والخصومات — بوابة المطعم" />
-
+        <>
+            <Head title="العروض والخصومات — بوابة المطعم — فطرنا" />
             <div className="space-y-6">
                 {/* Header Banner */}
                 <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl rounded-3xl border border-orange-100/80 dark:border-stone-800 p-6 sm:p-8 shadow-xl shadow-orange-500/5">
@@ -615,5 +615,6 @@ export default function Index({ offers, restaurant }: OffersProps) {
                 onConfirm={() => { if (confirmDeleteId) router.delete(`/restaurant/offers/${confirmDeleteId}`); setConfirmDeleteId(null); }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
+        </>
     );
 }

@@ -170,6 +170,18 @@ class AuthController extends Controller
         $user = auth()->user();
         $role = $user?->role;
 
+        // When a delivery driver logs out, remove live tracking coordinates
+        if ($user && $role === 'DELIVERY_DRIVER') {
+            $user->deliveryDriver?->update([
+                'current_latitude'    => null,
+                'current_longitude'   => null,
+                'current_heading'     => null,
+                'current_speed'       => null,
+                'availability_status' => 'OFFLINE',
+            ]);
+            \Illuminate\Support\Facades\Cache::forget("dashboard.driver.{$user->deliveryDriver?->id}");
+        }
+
         $this->authService->logout();
 
         // Redirect to appropriate login page based on role

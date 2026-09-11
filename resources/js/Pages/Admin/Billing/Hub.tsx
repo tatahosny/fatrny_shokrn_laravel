@@ -214,6 +214,7 @@ export default function BillingHub({ stats, invoices, collections, overdueRestau
     ] as const;
 
     return (
+        <>
         <Head title="مركز التحصيل — الإدارة المركزية" />
 
             {confirm && (
@@ -844,6 +845,7 @@ export default function BillingHub({ stats, invoices, collections, overdueRestau
                     </div>
                 )}
             </div>
+        </>
     );
 }
 

@@ -48,8 +48,8 @@ export default function RestaurantEdit({ restaurant }: Props) {
     };
 
     return (
-        <Head title={`تعديل ${restaurant.name}`} />
-
+        <>
+            <Head title={`تعديل ${restaurant.name} — فطرنا`} />
             <div className="max-w-4xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href={`/admin/restaurants/${restaurant.id}`}
@@ -186,5 +186,6 @@ export default function RestaurantEdit({ restaurant }: Props) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

@@ -88,8 +88,8 @@ export default function Index({
     const maxDailyOrders = Math.max(...(daily_sales?.map(d => d.delivered_count) || [1]), 1);
 
     return (
-        <Head title="التقارير والتحليلات — بوابة المطعم" />
-
+        <>
+            <Head title="التقارير والتحليلات — بوابة المطعم — فطرنا" />
             <div className="space-y-8 max-w-7xl mx-auto pb-12">
 
                 {/* ═══ Header ═══ */}
@@ -528,5 +528,6 @@ export default function Index({
                 </div>
 
             </div>
+        </>
     );
 }

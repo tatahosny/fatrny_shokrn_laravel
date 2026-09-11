@@ -53,8 +53,8 @@ export default function CustomerShow({ customer, recent_orders = [] }: Props) {
         : null;
 
     return (
-        <Head title={`${customer.user.name} — إدارة العملاء`} />
-
+        <>
+            <Head title={`${customer.user?.name || "عميل"} — إدارة العملاء — فطرنا`} />
             <div className="space-y-6" dir="rtl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-xs">
                     <div className="flex items-center gap-4">
@@ -206,6 +206,7 @@ export default function CustomerShow({ customer, recent_orders = [] }: Props) {
                     </div>
                 </div>
             </div>
+        </>
     );
 }
 

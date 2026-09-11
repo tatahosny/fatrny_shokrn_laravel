@@ -226,6 +226,7 @@ Route::middleware(['auth', 'portal:RESTAURANT', 'billing.check'])->prefix('resta
     Route::get('/orders/{id}', [RestaurantOrder::class, 'show'])->name('orders.show');
     Route::match(['put', 'patch'], '/orders/{id}/status', [RestaurantOrder::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{id}/assign-driver', [RestaurantOrder::class, 'assignDriver'])->name('orders.assign-driver');
+    Route::get('/orders/{id}/driver-location', [RestaurantOrder::class, 'driverLocation'])->name('orders.driver-location');
 
     // Categories
     Route::resource('categories', RestaurantCategory::class);
@@ -269,6 +270,7 @@ Route::middleware(['auth', 'portal:DELIVERY', 'billing.check'])->prefix('deliver
     Route::get('/orders/{id}', [DeliveryOrder::class, 'show'])->name('orders.show');
     Route::match(['put', 'patch'], '/orders/{id}/status', [DeliveryOrder::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{id}/location', [DeliveryOrder::class, 'updateLocation'])->name('orders.location');
+    Route::post('/location', [DeliveryOrder::class, 'updateGlobalLocation'])->name('location');
 
     // Profile
     Route::get('/profile', [DeliveryProfile::class, 'index'])->name('profile');

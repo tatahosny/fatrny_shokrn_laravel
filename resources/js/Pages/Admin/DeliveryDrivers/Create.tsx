@@ -22,8 +22,8 @@ export default function Create({ restaurants }: CreateDriverProps) {
     };
 
     return (
-        <Head title="إضافة مندوب — لوحة الإدارة" />
-
+        <>
+            <Head title="إضافة مندوب — فطرنا" />
             <div className="max-w-2xl space-y-6" dir="rtl">
                 {/* Header */}
                 <div className="flex items-center gap-4">
@@ -180,5 +180,6 @@ export default function Create({ restaurants }: CreateDriverProps) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

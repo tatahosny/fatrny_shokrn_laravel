@@ -76,8 +76,9 @@ export default function RestaurantShow({ restaurant, stats, recentOrders }: Prop
     const sc = statusConfig[restaurant.status] ?? statusConfig.INACTIVE;
 
     return (
-        <Head title={`${restaurant.name} — المطاعم`} />
-
+        <>
+            <Head title={`${restaurant.name} — فطرنا`} />
+            <>
             <div className="space-y-6" dir="rtl">
                 {/* Header */}
                 <div className="flex items-center justify-between">
@@ -250,6 +251,8 @@ export default function RestaurantShow({ restaurant, stats, recentOrders }: Prop
                 onConfirm={doSuspend}
                 onCancel={() => setConfirmSuspend(false)}
             />
+            </>
+        </>
     );
 }
 

@@ -50,8 +50,8 @@ export default function Dashboard({
     top_restaurants = [] 
 }: AdminDashboardProps) {
     return (
-        <Head title="لوحة التحكم المركزية — فطرنا شكراً" />
-
+        <>
+            <Head title="غرفة التحكم — فطرنا" />
             <div className="space-y-8">
                 {/* Operations cockpit header */}
                 <section className="relative overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-7 sm:px-8 sm:py-8 text-white shadow-2xl shadow-stone-950/15">
@@ -283,5 +283,6 @@ export default function Dashboard({
                     </div>
                 </div>
             </div>
+        </>
     );
 }

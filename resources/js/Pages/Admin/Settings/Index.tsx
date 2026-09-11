@@ -48,8 +48,8 @@ export default function AdminSettingsIndex({ settings }: Props) {
     );
 
     return (
-        <Head title="إعدادات النظام" />
-
+        <>
+            <Head title="إعدادات النظام — فطرنا" />
             <div className="max-w-3xl space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <div>
@@ -137,5 +137,6 @@ export default function AdminSettingsIndex({ settings }: Props) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

@@ -22,8 +22,8 @@ export default function Index({ orders, filters }: OrdersIndexProps) {
     };
 
     return (
-        <Head title="جميع طلبات المنصة — الإدارة المركزية" />
-
+        <>
+            <Head title="طلبات المنصة — فطرنا" />
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
@@ -114,5 +114,6 @@ export default function Index({ orders, filters }: OrdersIndexProps) {
                     </div>
                 </div>
             </div>
+        </>
     );
 }

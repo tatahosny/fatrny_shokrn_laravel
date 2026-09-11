@@ -85,7 +85,7 @@ class OrderController extends Controller
 
         // SECURITY: Verify order belongs to this restaurant
         $order = Order::where('restaurant_id', $restaurant->id)
-            ->with(['customer.user', 'items', 'deliveryDriver', 'statusHistories'])
+            ->with(['customer.user', 'items', 'deliveryDriver', 'statusHistories', 'restaurant'])
             ->findOrFail($id);
 
         $availableDrivers = DeliveryDriver::where('restaurant_id', $restaurant->id)
@@ -108,7 +108,16 @@ class OrderController extends Controller
         $request->validate([
             'status' => 'required|string',
             'notes'  => 'nullable|string',
+            'delivery_fee' => 'required_if:status,CONFIRMED|nullable|numeric|min:0|max:9999.99',
         ]);
+
+        if ($request->status === 'CONFIRMED') {
+            $deliveryFee = round((float) $request->input('delivery_fee'), 2);
+            $order->update([
+                'delivery_fee' => $deliveryFee,
+                'total_amount' => max(0, (float) $order->subtotal - (float) $order->student_discount_amount + (float) $order->service_fee + $deliveryFee),
+            ]);
+        }
 
         $this->orderService->updateOrderStatus($order, $request->status, $request->notes, auth()->id());
 
@@ -121,6 +130,10 @@ class OrderController extends Controller
 
         $order = Order::where('restaurant_id', $restaurant->id)->findOrFail($id);
 
+        if (!in_array($order->status, ['READY_FOR_PICKUP', 'ASSIGNED_TO_DRIVER'])) {
+            return back()->with('error', 'لا يمكن إسناد طيار للطلب إلا بعد اكتمال التجهيز وتحويل الطلب إلى (جاهز للاستلام).');
+        }
+
         $request->validate(['driver_id' => 'required|exists:delivery_drivers,id']);
 
         $driver = DeliveryDriver::where('restaurant_id', $restaurant->id)->findOrFail($request->driver_id);
@@ -128,5 +141,37 @@ class OrderController extends Controller
         $this->orderService->assignDriver($order, $driver, auth()->id());
 
         return back()->with('success', "تم تعيين السائق {$driver->name} للطلب.");
+    }
+
+    /**
+     * Return the live driver GPS position for the restaurant map.
+     * Called every ~6 s by the RestaurantOrderMap React component.
+     */
+    public function driverLocation(int $id): \Illuminate\Http\JsonResponse
+    {
+        $restaurant = $this->getRestaurantOrAbort();
+
+        $order = Order::where('restaurant_id', $restaurant->id)
+            ->with('deliveryDriver.user')
+            ->findOrFail($id);
+
+        $driver = $order->deliveryDriver;
+
+        if (!$driver) {
+            return response()->json(['latitude' => null, 'longitude' => null]);
+        }
+
+        // The delivery app saves the driver's live GPS position directly on the driver record.
+        if ($driver->current_latitude && $driver->current_longitude) {
+            return response()->json([
+                'latitude'  => $driver->current_latitude,
+                'longitude' => $driver->current_longitude,
+                'heading'   => $driver->current_heading ?? 0,
+                'speed'     => $driver->current_speed   ?? 0,
+                'updated_at'=> $driver->updated_at,
+            ]);
+        }
+
+        return response()->json(['latitude' => null, 'longitude' => null]);
     }
 }

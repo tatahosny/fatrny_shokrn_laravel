@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import DeliveryFeeConfirmModal from '../../Components/DeliveryFeeConfirmModal';
 import { Restaurant, Order } from '../../Types';
 import { 
     ShoppingBag, 
@@ -48,13 +49,20 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ restaurant, stats, top_items = [], recent_orders = [], billing_info }: DashboardProps) {
+    const [confirmingOrder, setConfirmingOrder] = useState<Order | null>(null);
     const handleAdvanceStatus = (orderId: number, status: string) => {
         router.patch(`/restaurant/orders/${orderId}/status`, { status });
     };
 
-    return (
-        <Head title={`لوحة تحكم ${restaurant.name} — فطرنا شكراً`} />
+    const confirmWithDeliveryFee = (delivery_fee: number) => {
+        if (!confirmingOrder) return;
+        router.patch(`/restaurant/orders/${confirmingOrder.id}/status`, { status: 'CONFIRMED', delivery_fee });
+        setConfirmingOrder(null);
+    };
 
+    return (
+        <>
+            <Head title={`لوحة تحكم ${restaurant.name} — فطرنا`} />
             <div className="space-y-8">
                 {/* Restaurant command header */}
                 <section className="relative overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-7 text-white shadow-2xl shadow-stone-950/15 sm:px-8">
@@ -270,7 +278,7 @@ export default function Dashboard({ restaurant, stats, top_items = [], recent_or
 
                                             {order.status === 'PENDING' && (
                                                 <button
-                                                    onClick={() => handleAdvanceStatus(order.id, 'CONFIRMED')}
+                                                    onClick={() => setConfirmingOrder(order)}
                                                     className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold"
                                                 >
                                                     تأكيد
@@ -339,5 +347,7 @@ export default function Dashboard({ restaurant, stats, top_items = [], recent_or
                     </div>
                 </div>
             </div>
+            <DeliveryFeeConfirmModal isOpen={Boolean(confirmingOrder)} orderNumber={confirmingOrder?.order_number} onClose={() => setConfirmingOrder(null)} onConfirm={confirmWithDeliveryFee} />
+        </>
     );
 }

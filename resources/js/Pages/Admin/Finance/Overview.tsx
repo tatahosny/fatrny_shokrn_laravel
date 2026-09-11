@@ -92,8 +92,8 @@ export default function Overview({ platform_profit, restaurant_profits = [], mon
     }, [restaurant_profits, searchQuery, statusFilter]);
 
     return (
-        <Head title="التقرير المالي وكشف حساب المطاعم — الإدارة المركزية" />
-
+        <>
+            <Head title="التقرير المالي وكشف حساب المطاعم — فطرنا" />
             <div className="space-y-10 max-w-7xl mx-auto pb-12">
 
                 {/* ═══ SECTION 1: GMV Platform Banner ═══ */}
@@ -641,5 +641,6 @@ export default function Overview({ platform_profit, restaurant_profits = [], mon
                 )}
 
             </div>
+        </>
     );
 }

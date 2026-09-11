@@ -249,6 +249,10 @@ export interface DeliveryDriver {
     profile_image?: string;
     is_active: boolean;
     availability_status: 'AVAILABLE' | 'BUSY' | 'OFFLINE';
+    current_latitude?: number | null;
+    current_longitude?: number | null;
+    current_heading?: number | null;
+    current_speed?: number | null;
     created_at: string;
     user?: User;
     restaurant?: Restaurant;

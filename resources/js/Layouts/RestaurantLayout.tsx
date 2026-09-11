@@ -105,6 +105,7 @@ export default function RestaurantLayout({
                             key={item.href}
                             href={item.href}
                             prefetch="hover"
+                            cacheFor="10m"
                             className={`kitchen-tab ${active ? 'is-active' : ''}`}
                         >
                             <Icon className="h-4 w-4" />
@@ -134,6 +135,7 @@ export default function RestaurantLayout({
                                         key={item.href}
                                         href={item.href}
                                         prefetch="hover"
+                                        cacheFor="10m"
                                         onClick={() => setMenuOpen(false)}
                                         className={`kitchen-tab w-full justify-start ${active ? 'is-active' : ''}`}
                                     >

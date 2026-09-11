@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Navigation, Crosshair, Loader2, Sparkles, Check, Info } from 'lucide-react';
+import { MapPin, Navigation, Crosshair, Loader2, Check, Info, AlertTriangle } from 'lucide-react';
 
 interface LocationPickerProps {
     initialLat?: number | null;
@@ -33,7 +33,7 @@ export default function LocationPickerMap({
     restaurantLat,
     restaurantLng,
     restaurantName = 'المطعم',
-    autoLocateOnMount = true,
+    autoLocateOnMount = false,
 }: LocationPickerProps) {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<L.Map | null>(null);
@@ -52,6 +52,8 @@ export default function LocationPickerMap({
     const [isLocating, setIsLocating] = useState(false);
     const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
     const [hasDetectedGps, setHasDetectedGps] = useState(false);
+    const [mapInitError, setMapInitError] = useState(false);
+    const [gpsStatus, setGpsStatus] = useState<{ text: string; type: 'info' | 'success' | 'warning' } | null>(null);
 
     // Haversine distance calculator
     const calcDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -78,6 +80,12 @@ export default function LocationPickerMap({
         });
     }, [restaurantLat, restaurantLng, calcDistance, onLocationSelect]);
 
+    const fallbackAddress = useCallback((lat: number, lng: number) => {
+        const fallback = `موقع محدد في برج العرب (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        setAddressText(fallback);
+        emitChange(lat, lng, fallback);
+    }, [emitChange]);
+
     const reverseGeocode = useCallback(async (lat: number, lng: number) => {
         setIsReverseGeocoding(true);
         try {
@@ -100,13 +108,7 @@ export default function LocationPickerMap({
         } finally {
             setIsReverseGeocoding(false);
         }
-    }, [emitChange]);
-
-    const fallbackAddress = useCallback((lat: number, lng: number) => {
-        const fallback = `موقع محدد في برج العرب (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-        setAddressText(fallback);
-        emitChange(lat, lng, fallback);
-    }, [emitChange]);
+    }, [emitChange, fallbackAddress]);
 
     // Center map & Move pin
     const updateLocation = useCallback((lat: number, lng: number, name?: string, openPopup = true) => {
@@ -131,34 +133,53 @@ export default function LocationPickerMap({
     // GPS Auto-detect handler
     const handleGPS = useCallback(() => {
         if (!navigator.geolocation) {
-            alert('خاصية تحديد الموقع الجغرافي غير مدعومة في متصفحك.');
+            setGpsStatus({ text: 'خاصية تحديد الموقع الجغرافي غير مدعومة في متصفحك.', type: 'warning' });
             return;
         }
 
         setIsLocating(true);
+        setGpsStatus({ text: 'جاري التقاط إحداثيات موقعك عبر GPS...', type: 'info' });
+
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const { latitude, longitude } = pos.coords;
                 setHasDetectedGps(true);
                 setIsLocating(false);
+                setGpsStatus({ text: 'تم تحديد موقعك بالدبوس بنجاح 📍', type: 'success' });
                 updateLocation(latitude, longitude, undefined, true);
+                setTimeout(() => setGpsStatus(null), 4000);
             },
             (err) => {
                 setIsLocating(false);
                 if (err.code === 1) {
-                    alert('يرجى السماح بصلاحية الموقع في المتصفح لتحديد مكانك تلقائياً بالدبوس.');
+                    setGpsStatus({ text: 'يرجى السماح بصلاحية الموقع في المتصفح، أو اختر أحد المعالم بالأسفل.', type: 'warning' });
                 } else {
-                    alert('تعذر قراءة إشارة الـ GPS. يمكنك سحب الدبوس أو النقر على الخريطة يدوياً.');
+                    setGpsStatus({ text: 'تعذر التقاط إشارة GPS بدقة. يمكنك سحب الدبوس يدوياً على الخريطة.', type: 'warning' });
                 }
+                setTimeout(() => setGpsStatus(null), 5000);
             },
-            { enableHighAccuracy: true, timeout: 10000 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
         );
     }, [updateLocation]);
 
     // Initialize Map
     useEffect(() => {
         if (!mapContainerRef.current) return;
-        if (mapInstanceRef.current) return;
+
+        // Clean up previous instance if exists (e.g. StrictMode remount)
+        if (mapInstanceRef.current) {
+            try {
+                mapInstanceRef.current.remove();
+            } catch {
+                // ignore
+            }
+            mapInstanceRef.current = null;
+        }
+
+        const container = mapContainerRef.current as HTMLDivElement & { _leaflet_id?: number };
+        if (container._leaflet_id) {
+            delete container._leaflet_id;
+        }
 
         // Custom High-Visibility Draggable Pin (Uber/Talabat Style)
         const customerPinIcon = L.divIcon({
@@ -178,17 +199,25 @@ export default function LocationPickerMap({
             popupAnchor: [0, -50]
         });
 
-        // Initialize Map
-        const map = L.map(mapContainerRef.current, {
-            center: [defaultLat, defaultLng],
-            zoom: 15,
-            zoomControl: false,
-        });
+        let map: L.Map;
+        try {
+            map = L.map(container, {
+                center: [defaultLat, defaultLng],
+                zoom: 15,
+                zoomControl: false,
+            });
+        } catch (e) {
+            console.error('Map initialization error:', e);
+            setMapInitError(true);
+            return;
+        }
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19,
-        }).addTo(map);
+            subdomains: ['a', 'b', 'c'],
+        });
+        tiles.addTo(map);
 
         L.control.zoom({ position: 'topright' }).addTo(map);
 
@@ -242,6 +271,10 @@ export default function LocationPickerMap({
         mapInstanceRef.current = map;
         customerMarkerRef.current = customerMarker;
 
+        // Invalidate map size after rendering in tab
+        const t1 = window.setTimeout(() => map.invalidateSize(), 100);
+        const t2 = window.setTimeout(() => map.invalidateSize(), 350);
+
         // Auto-locate on initial mount if requested
         if (autoLocateOnMount && !initialLocationAttemptedRef.current && !initialLat) {
             initialLocationAttemptedRef.current = true;
@@ -249,8 +282,17 @@ export default function LocationPickerMap({
         }
 
         return () => {
-            map.remove();
-            mapInstanceRef.current = null;
+            window.clearTimeout(t1);
+            window.clearTimeout(t2);
+            if (mapInstanceRef.current) {
+                try {
+                    mapInstanceRef.current.remove();
+                } catch {
+                    // ignore
+                }
+                mapInstanceRef.current = null;
+            }
+            customerMarkerRef.current = null;
         };
     }, []);
 
@@ -268,13 +310,42 @@ export default function LocationPickerMap({
                 </div>
             </div>
 
-            {/* Map Canvas */}
-            <div className="relative rounded-3xl overflow-hidden border-2 border-orange-400/40 dark:border-orange-500/30 shadow-md">
+            {/* GPS Feedback Toast / Notification */}
+            {gpsStatus && (
+                <div className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all shadow-sm ${
+                    gpsStatus.type === 'success'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        : gpsStatus.type === 'warning'
+                        ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                        : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+                }`}>
+                    {gpsStatus.type === 'success' && <Check className="w-4 h-4 text-emerald-500 shrink-0" />}
+                    {gpsStatus.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />}
+                    {gpsStatus.type === 'info' && <Loader2 className="w-4 h-4 text-blue-500 animate-spin shrink-0" />}
+                    <span>{gpsStatus.text}</span>
+                </div>
+            )}
+
+            {/* Map Canvas Container */}
+            <div className="relative rounded-3xl overflow-hidden border-2 border-orange-400/40 dark:border-orange-500/30 shadow-md bg-stone-100 dark:bg-stone-800">
                 <div
                     ref={mapContainerRef}
                     className="w-full h-80 sm:h-96 z-0"
                     style={{ minHeight: '320px' }}
                 />
+
+                {/* Fallback if map engine fails */}
+                {mapInitError && (
+                    <div className="absolute inset-0 z-[450] flex items-center justify-center bg-stone-100 dark:bg-stone-800 p-6 text-center">
+                        <div className="max-w-sm space-y-3">
+                            <MapPin className="mx-auto h-8 w-8 text-orange-500" />
+                            <p className="text-sm font-black text-stone-800 dark:text-white">حدد موقعك من المعالم بالأسفل</p>
+                            <p className="text-xs leading-6 text-stone-500 dark:text-stone-300">
+                                يمكنك اختيار أحد المعالم السريعة في برج العرب أو إدخال عنوانك بالتفصيل.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* GPS Pin Me Floating Button */}
                 <button

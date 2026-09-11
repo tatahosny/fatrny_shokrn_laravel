@@ -88,8 +88,8 @@ export default function AdminUsersIndex({ users, roles = [], filters = {} }: Pro
     };
 
     return (
-        <Head title="إدارة المستخدمين — الإدارة المركزية" />
-
+        <>
+            <Head title="إدارة المستخدمين — فطرنا" />
             <div className="space-y-6 pb-12" dir="rtl">
                 {/* Header Top Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -303,5 +303,6 @@ export default function AdminUsersIndex({ users, roles = [], filters = {} }: Pro
                 }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
+        </>
     );
 }

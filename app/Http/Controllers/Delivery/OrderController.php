@@ -127,24 +127,40 @@ class OrderController extends Controller
             $driver->update(['availability_status' => 'AVAILABLE']);
         }
 
+        \Illuminate\Support\Facades\Cache::forget("dashboard.driver.{$driver->id}");
+
         return back()->with('success', 'تم تحديث حالة التوصيل.');
     }
 
     public function updateLocation(Request $request, int $id)
     {
+        return $this->updateGlobalLocation($request);
+    }
+
+    /**
+     * Continuously update driver's GPS location while logged in.
+     */
+    public function updateGlobalLocation(Request $request)
+    {
         $driver = $this->driver();
         $validated = $request->validate([
-            'latitude' => 'required|numeric',
+            'latitude'  => 'required|numeric',
             'longitude' => 'required|numeric',
-            'speed' => 'nullable|numeric',
-            'heading' => 'nullable|numeric',
+            'speed'     => 'nullable|numeric',
+            'heading'   => 'nullable|numeric',
         ]);
 
         $driver->update([
-            'current_latitude' => $validated['latitude'],
+            'current_latitude'  => $validated['latitude'],
             'current_longitude' => $validated['longitude'],
+            'current_speed'     => $validated['speed'] ?? $driver->current_speed,
+            'current_heading'   => $validated['heading'] ?? $driver->current_heading,
         ]);
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success'   => true,
+            'latitude'  => $driver->current_latitude,
+            'longitude' => $driver->current_longitude,
+        ]);
     }
 }

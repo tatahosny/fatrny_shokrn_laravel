@@ -51,8 +51,8 @@ export default function AdminOrderShow({ order }: Props) {
     const fmt = (v: number) => (v / 100).toFixed(2);
 
     return (
-        <Head title={`طلب #${order.order_number}`} />
-
+        <>
+            <Head title={`طلب #${order.order_number} — فطرنا`} />
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -215,5 +215,6 @@ export default function AdminOrderShow({ order }: Props) {
                     </div>
                 </div>
             </div>
+        </>
     );
 }

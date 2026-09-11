@@ -5,18 +5,31 @@
 /* Admin control room — platform only */
 .admin-shell {
     background:
-        radial-gradient(circle at 12% -8%, rgba(34, 211, 238, .16), transparent 22rem),
-        radial-gradient(circle at 100% 100%, rgba(14, 165, 233, .12), transparent 24rem),
-        #07111f;
-    color: #e2e8f0;
+        radial-gradient(circle at 15% -10%, rgba(249, 115, 22, .18), transparent 28rem),
+        radial-gradient(circle at 90% 90%, rgba(245, 158, 11, .12), transparent 26rem),
+        radial-gradient(circle at 50% 50%, rgba(234, 88, 12, .06), transparent 40rem),
+        #0f0a05;
+    color: #f5f5f4;
 }
 
-.admin-grid { min-height: 100vh; }
+.admin-grid {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+    .admin-grid {
+        display: grid;
+        grid-template-columns: 17.5rem minmax(0, 1fr);
+    }
+}
 
 .admin-rail {
-    background: linear-gradient(180deg, #0b1c33 0%, #07111f 100%);
-    border-left: 1px solid rgba(125, 211, 252, .16);
-    box-shadow: -20px 0 40px rgba(2, 8, 23, .35);
+    background: linear-gradient(180deg, #1a0d05 0%, #0f0a05 60%, #0c0702 100%);
+    border-left: 1px solid rgba(249, 115, 22, .18);
+    box-shadow: -16px 0 40px rgba(0, 0, 0, .4);
+    z-index: 30;
 }
 
 .admin-brand {
@@ -24,12 +37,14 @@
     align-items: center;
     gap: .9rem;
     padding: 1.4rem 1.25rem 1.1rem;
-    color: #f8fafc;
+    color: #fafaf9;
     text-decoration: none;
+    border-bottom: 1px solid rgba(249, 115, 22, .12);
+    margin-bottom: .5rem;
 }
 
 .admin-brand strong { display: block; font-size: .95rem; letter-spacing: -.02em; }
-.admin-brand small { display: block; margin-top: .15rem; color: #7dd3fc; font-size: .68rem; font-weight: 700; }
+.admin-brand small { display: block; margin-top: .15rem; color: #fb923c; font-size: .68rem; font-weight: 700; }
 
 .admin-mark {
     width: 2.6rem;
@@ -37,20 +52,22 @@
     display: grid;
     place-items: center;
     border-radius: 1rem;
-    background: linear-gradient(135deg, #22d3ee, #0284c7);
-    color: #082f49;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: #fff;
     font-size: 1.2rem;
     font-weight: 900;
+    box-shadow: 0 4px 16px rgba(249, 115, 22, .45);
 }
 
 .admin-nav { flex: 1; overflow: auto; padding: .4rem 1rem 1rem; }
 .admin-nav-group { margin-bottom: 1.1rem; }
 .admin-nav-group > p {
     margin: 0 0 .45rem .35rem;
-    color: #64748b;
+    color: #78716c;
     font-size: .62rem;
     font-weight: 800;
     letter-spacing: .18em;
+    text-transform: uppercase;
 }
 
 .admin-link {
@@ -60,18 +77,25 @@
     margin-bottom: .2rem;
     padding: .7rem .8rem;
     border-radius: .9rem;
-    color: #94a3b8;
+    color: #a8a29e;
     font-size: .8rem;
     font-weight: 700;
     text-decoration: none;
     border: 1px solid transparent;
+    transition: all 0.15s ease;
 }
 
-.admin-link:hover { color: #e2e8f0; background: rgba(148, 163, 184, .08); }
+.admin-link:hover {
+    color: #fafaf9;
+    background: rgba(249, 115, 22, .1);
+    border-color: rgba(249, 115, 22, .15);
+}
+
 .admin-link.is-active {
-    color: #ecfeff;
-    background: linear-gradient(90deg, rgba(6, 182, 212, .22), rgba(14, 165, 233, .08));
-    border-color: rgba(103, 232, 249, .2);
+    color: #fed7aa;
+    background: linear-gradient(90deg, rgba(249, 115, 22, .25), rgba(245, 158, 11, .1));
+    border-color: rgba(249, 115, 22, .3);
+    box-shadow: inset -3px 0 0 #f97316;
 }
 
 .admin-user {
@@ -79,7 +103,7 @@
     align-items: center;
     gap: .75rem;
     padding: 1rem;
-    border-top: 1px solid rgba(125, 211, 252, .12);
+    border-top: 1px solid rgba(249, 115, 22, .14);
 }
 
 .admin-avatar {
@@ -88,9 +112,10 @@
     display: grid;
     place-items: center;
     border-radius: .85rem;
-    background: #164e63;
-    color: #a5f3fc;
+    background: linear-gradient(135deg, #9a3412, #7c2d12);
+    color: #fed7aa;
     font-weight: 800;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, .3);
 }
 
 .admin-topbar {
@@ -99,8 +124,8 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(125, 211, 252, .12);
-    background: rgba(7, 17, 31, .82);
+    border-bottom: 1px solid rgba(249, 115, 22, .14);
+    background: rgba(15, 10, 5, .88);
     backdrop-filter: blur(16px);
     position: sticky;
     top: 0;
@@ -109,10 +134,11 @@
 
 .admin-kicker {
     margin: 0;
-    color: #22d3ee;
+    color: #f97316;
     font-size: .65rem;
     font-weight: 800;
     letter-spacing: .16em;
+    text-transform: uppercase;
 }
 
 .admin-icon-btn, .admin-chip {
@@ -123,9 +149,16 @@
     min-height: 2.4rem;
     padding: 0 .8rem;
     border-radius: .85rem;
-    border: 1px solid rgba(148, 163, 184, .18);
-    background: rgba(15, 23, 42, .7);
-    color: #cbd5e1;
+    border: 1px solid rgba(249, 115, 22, .2);
+    background: rgba(249, 115, 22, .08);
+    color: #d6d3d1;
+    transition: all 0.15s ease;
+}
+
+.admin-icon-btn:hover, .admin-chip:hover {
+    background: rgba(249, 115, 22, .18);
+    border-color: rgba(249, 115, 22, .35);
+    color: #fed7aa;
 }
 
 .admin-chip { font-size: .72rem; font-weight: 700; text-decoration: none; }
@@ -138,35 +171,47 @@
     max-width: none;
 }
 
+/* workspace card theming — override white/stone backgrounds */
 .admin-workspace [class*="bg-white"],
 .admin-workspace [class*="bg-stone-50"],
 .admin-workspace [class*="bg-stone-100"] {
-    background-color: #102033 !important;
-    border-color: rgba(125, 211, 252, .12) !important;
+    background-color: #1c1007 !important;
+    border-color: rgba(249, 115, 22, .14) !important;
 }
 
 .admin-workspace [class*="text-stone-900"],
 .admin-workspace [class*="text-stone-800"],
-.admin-workspace [class*="text-stone-700"] { color: #f8fafc !important; }
+.admin-workspace [class*="text-stone-700"] { color: #fafaf9 !important; }
 .admin-workspace [class*="text-stone-600"],
 .admin-workspace [class*="text-stone-500"],
-.admin-workspace [class*="text-stone-400"] { color: #94a3b8 !important; }
-.admin-workspace [class*="border-stone"] { border-color: rgba(125, 211, 252, .12) !important; }
+.admin-workspace [class*="text-stone-400"] { color: #a8a29e !important; }
+.admin-workspace [class*="border-stone"] { border-color: rgba(249, 115, 22, .14) !important; }
 
 .admin-workspace table thead th {
-    background: #16324d !important;
-    color: #67e8f9 !important;
+    background: #2d1507 !important;
+    color: #fb923c !important;
 }
 
 .admin-workspace table tbody td,
-.admin-workspace table tbody tr { background: #102033 !important; color: #e2e8f0 !important; }
+.admin-workspace table tbody tr { background: #1c1007 !important; color: #f5f5f4 !important; }
+
+.admin-workspace table tbody tr:hover td {
+    background: #2d1507 !important;
+}
 
 .admin-workspace input,
 .admin-workspace select,
 .admin-workspace textarea {
-    background: #0b1a2c !important;
-    color: #f8fafc !important;
-    border-color: rgba(125, 211, 252, .16) !important;
+    background: #150a02 !important;
+    color: #fafaf9 !important;
+    border-color: rgba(249, 115, 22, .2) !important;
+}
+
+.admin-workspace input:focus,
+.admin-workspace select:focus,
+.admin-workspace textarea:focus {
+    border-color: rgba(249, 115, 22, .6) !important;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, .15) !important;
 }
 
 /* Restaurant kitchen pass — restaurant dashboard only */

@@ -35,8 +35,8 @@ export default function AdminBackupsIndex({ backups }: Props) {
     };
 
     return (
-        <Head title="النسخ الاحتياطية" />
-
+        <>
+            <Head title="النسخ الاحتياطية — فطرنا" />
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <div>
@@ -146,5 +146,6 @@ export default function AdminBackupsIndex({ backups }: Props) {
                 }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
+        </>
     );
 }

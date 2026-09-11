@@ -38,8 +38,8 @@ export default function UserEdit({ user, roles }: Props) {
     };
 
     return (
-        <Head title={`تعديل ${user.name}`} />
-
+        <>
+            <Head title={`تعديل ${user.name} — فطرنا`} />
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/admin/users" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors">
@@ -122,5 +122,6 @@ export default function UserEdit({ user, roles }: Props) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }

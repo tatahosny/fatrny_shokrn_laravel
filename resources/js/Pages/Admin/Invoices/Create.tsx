@@ -26,8 +26,8 @@ export default function InvoiceCreate({ restaurants }: Props) {
     };
 
     return (
-        <Head title="إنشاء فاتورة جديدة" />
-
+        <>
+            <Head title="إنشاء فاتورة جديدة — فطرنا" />
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/admin/invoices"
@@ -106,5 +106,6 @@ export default function InvoiceCreate({ restaurants }: Props) {
                     </div>
                 </form>
             </div>
+        </>
     );
 }
