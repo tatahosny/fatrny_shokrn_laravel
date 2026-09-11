@@ -84,8 +84,8 @@ class Order extends Model
     public function getGoogleMapsUrlAttribute(): ?string
     {
         if ($this->latitude && $this->longitude) {
-            return "https://www.google.com/maps/dir/?api=1&destination={$this->latitude},{$this->longitude}";
+            return "https://www.openstreetmap.org/?mlat={$this->latitude}&mlon={$this->longitude}#map=17/{$this->latitude}/{$this->longitude}";
         }
-        return "https://www.google.com/maps/search/?api=1&query=" . urlencode($this->address);
+        return "https://www.openstreetmap.org/search?query=" . urlencode($this->address);
     }
 }

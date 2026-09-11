@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, BarChart2 } from 'lucide-react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -26,8 +25,7 @@ export default function AdminFinanceProfitLoss({ monthlyData, summary }: Props) 
     const isProfit = summary.net_profit >= 0;
 
     return (
-        <AdminLayout>
-            <Head title="الربح والخسارة" />
+        <Head title="الربح والخسارة" />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center gap-4">
@@ -120,6 +118,5 @@ export default function AdminFinanceProfitLoss({ monthlyData, summary }: Props) 
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }

@@ -8,6 +8,7 @@ use App\Models\Order;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -18,6 +19,7 @@ class DashboardController extends Controller
         abort_if(!$restaurant, 403, 'لا يوجد مطعم مرتبط بهذا الحساب.');
 
         $restaurantId = $restaurant->id;
+        $dashboard = Cache::remember("dashboard.restaurant.{$restaurantId}", now()->addSeconds(10), function () use ($restaurant, $restaurantId) {
         $today = Carbon::today();
 
         // Order stats — only THIS restaurant
@@ -49,11 +51,40 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        return Inertia::render('Restaurant/Dashboard', [
-            'restaurant'   => $restaurant,
+        // Subscription & Billing details for the restaurant
+        $pendingInvoice = \App\Models\Invoice::where('restaurant_id', $restaurantId)
+            ->whereNotIn('status', ['PAID', 'CANCELLED'])
+            ->latest('due_date')
+            ->first();
+
+        $daysRemaining = null;
+        $targetDueDate = $pendingInvoice?->due_date 
+            ? Carbon::parse($pendingInvoice->due_date) 
+            : ($restaurant->payment_due_date ? Carbon::parse($restaurant->payment_due_date) : null);
+
+        if ($targetDueDate) {
+            $daysDiff = (int) now()->startOfDay()->diffInDays($targetDueDate->startOfDay(), false);
+            $daysRemaining = $daysDiff;
+        }
+
+        $billingInfo = [
+            'payment_due_date'         => $targetDueDate?->format('Y-m-d'),
+            'days_remaining'           => $daysRemaining,
+            'is_overdue'               => $daysRemaining !== null && $daysRemaining < 0,
+            'monthly_subscription_fee' => (float) ($restaurant->monthly_subscription_fee > 0 ? $restaurant->monthly_subscription_fee : 500.00),
+            'has_unpaid_invoice'       => $pendingInvoice !== null,
+            'unpaid_amount'            => $pendingInvoice ? (float) ($pendingInvoice->total_amount - $pendingInvoice->paid_amount) : 0,
+            'invoice_number'           => $pendingInvoice?->invoice_number,
+        ];
+
+        return [
             'stats'        => $stats,
             'top_items'    => $topItems,
             'recent_orders'=> $recentOrders,
-        ]);
+            'billing_info' => $billingInfo,
+        ];
+        });
+
+        return Inertia::render('Restaurant/Dashboard', ['restaurant' => $restaurant] + $dashboard);
     }
 }

@@ -2,6 +2,11 @@
 
 return [
 
+    'routing' => [
+        // Use a private OSRM/Google Directions-compatible routing service in production.
+        'url' => env('ROUTING_URL', 'https://router.project-osrm.org'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

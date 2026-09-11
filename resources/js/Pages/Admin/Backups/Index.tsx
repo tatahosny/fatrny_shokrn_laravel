@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import ConfirmModal from '../../../Components/ConfirmModal';
 import { Database, Plus, Trash2, Download, HardDrive, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -36,8 +35,7 @@ export default function AdminBackupsIndex({ backups }: Props) {
     };
 
     return (
-        <AdminLayout>
-            <Head title="النسخ الاحتياطية" />
+        <Head title="النسخ الاحتياطية" />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
@@ -148,6 +146,5 @@ export default function AdminBackupsIndex({ backups }: Props) {
                 }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
-        </AdminLayout>
     );
 }

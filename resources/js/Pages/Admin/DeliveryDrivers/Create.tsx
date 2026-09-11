@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Restaurant } from '../../../Types';
 import { ArrowRight, Save, User, Phone, Store, Lock } from 'lucide-react';
 
@@ -23,8 +22,7 @@ export default function Create({ restaurants }: CreateDriverProps) {
     };
 
     return (
-        <AdminLayout title="إضافة مندوب توصيل جديد">
-            <Head title="إضافة مندوب — لوحة الإدارة" />
+        <Head title="إضافة مندوب — لوحة الإدارة" />
 
             <div className="max-w-2xl space-y-6" dir="rtl">
                 {/* Header */}
@@ -182,6 +180,5 @@ export default function Create({ restaurants }: CreateDriverProps) {
                     </div>
                 </form>
             </div>
-        </AdminLayout>
     );
 }

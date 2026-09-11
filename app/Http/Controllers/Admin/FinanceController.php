@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Collection;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Invoice;
+use App\Models\Order;
 use App\Models\Restaurant;
 use App\Services\FinancialService;
 use Illuminate\Http\RedirectResponse;
@@ -22,15 +24,77 @@ class FinanceController extends Controller
         $startDate = $request->get('start_date');
         $endDate   = $request->get('end_date');
 
-        $summary = $this->financialService->getPlatformSummary($startDate, $endDate);
-        $restaurantTable = $this->financialService->getRestaurantFinancialTable();
-        $monthlyPnl = $this->financialService->getMonthlyProfitAndLoss();
+        $summary     = $this->financialService->getPlatformSummary($startDate, $endDate);
+        $monthlyPnl  = $this->financialService->getMonthlyProfitAndLoss();
+
+        // ── Platform-only profits (our earnings from subscriptions + commissions) ──
+        $platformProfit = [
+            'subscription_revenue' => $summary['subscription_revenue'],
+            'commission_revenue'   => $summary['commission_revenue'],
+            'total_platform_earn'  => $summary['total_revenue'],
+            'total_expenses'       => $summary['total_expenses'],
+            'net_profit'           => $summary['net_profit'],
+            'outstanding'          => $summary['outstanding_receivables'],
+        ];
+
+        // ── Per-restaurant profits (their earnings from orders on the platform) ──
+        $restaurants = Restaurant::select(
+            'id', 'name', 'slug', 'status',
+            'commission_type', 'commission_percentage', 'monthly_subscription_fee'
+        )->get();
+
+        $restaurantProfits = $restaurants->map(function ($r) {
+            $base      = Order::where('restaurant_id', $r->id);
+            $delivered = (clone $base)->where('status', 'DELIVERED');
+            $cancelled = (clone $base)->whereIn('status', ['CANCELLED', 'REJECTED']);
+            $pending   = (clone $base)->where('status', 'PENDING');
+
+            $grossRevenue  = (float) (clone $delivered)->sum('total_amount');
+            $deliveryFees  = (float) (clone $delivered)->sum('delivery_fee');
+            $platformCut   = (float) (clone $delivered)->sum('platform_commission_amount');
+            // Net = what the restaurant actually earns (gross - delivery - platform cut)
+            $netEarn       = max(0, $grossRevenue - $deliveryFees - $platformCut);
+
+            // Invoices & commission dues
+            $invoices = Invoice::where('restaurant_id', $r->id)->where('status', '!=', 'CANCELLED')->get();
+            $unpaidInvoices = $invoices->where('status', '!=', 'PAID');
+            $dueAmount = $unpaidInvoices->sum(fn($inv) => (float)($inv->total_amount - $inv->paid_amount));
+            $paidInvoicesAmount = $invoices->sum(fn($inv) => (float)$inv->paid_amount);
+            $overdueCount = $unpaidInvoices->count();
+            $totalCollected = (float) Collection::where('restaurant_id', $r->id)->sum('amount');
+
+            return [
+                'id'                  => $r->id,
+                'name'                => $r->name,
+                'slug'                => $r->slug,
+                'status'              => $r->status,
+                'commission_type'     => $r->commission_type,
+                'commission_rate'     => (float) $r->commission_percentage,
+                'subscription_fee'    => (float) $r->monthly_subscription_fee,
+                'total_orders'        => (clone $base)->count(),
+                'delivered_orders'    => (clone $delivered)->count(),
+                'cancelled_orders'    => (clone $cancelled)->count(),
+                'pending_orders'      => (clone $pending)->count(),
+                'gross_revenue'       => round($grossRevenue, 2),
+                'delivery_fees'       => round($deliveryFees, 2),
+                'platform_cut'        => round($platformCut, 2),
+                'net_restaurant_earn' => round($netEarn, 2),
+                'unpaid_due'          => round($dueAmount, 2),
+                'paid_amount'         => round(max($paidInvoicesAmount, $totalCollected), 2),
+                'overdue_count'       => $overdueCount,
+            ];
+        })->toArray();
+
+        // Total GMV across all delivered orders
+        $totalGmv = Order::where('status', 'DELIVERED')->sum('total_amount');
 
         return Inertia::render('Admin/Finance/Overview', [
-            'summary'          => $summary,
-            'restaurant_table' => $restaurantTable,
-            'monthly_pnl'      => $monthlyPnl,
-            'filters'          => $request->only('start_date', 'end_date'),
+            'summary'            => $summary,
+            'platform_profit'    => $platformProfit,
+            'restaurant_profits' => $restaurantProfits,
+            'monthly_pnl'        => $monthlyPnl,
+            'total_gmv'          => (float) $totalGmv,
+            'filters'            => $request->only('start_date', 'end_date'),
         ]);
     }
 
@@ -112,9 +176,9 @@ class FinanceController extends Controller
         $monthlyPnl = $this->financialService->getMonthlyProfitAndLoss();
 
         return Inertia::render('Admin/Finance/ProfitLoss', [
-            'summary'    => $summary,
-            'monthly_pnl'=> $monthlyPnl,
-            'filters'    => $request->only('start_date', 'end_date'),
+            'summary'     => $summary,
+            'monthly_pnl' => $monthlyPnl,
+            'filters'     => $request->only('start_date', 'end_date'),
         ]);
     }
 }

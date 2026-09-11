@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import ConfirmModal from '../../../Components/ConfirmModal';
 import { Invoice, Restaurant, PaginatedResponse } from '../../../Types';
 import {
@@ -17,15 +16,9 @@ import {
     PhoneCall
 } from 'lucide-react';
 
-interface ExtendedRestaurant extends Restaurant {
-    commission_type?: string;
-    commission_percentage?: number;
-    monthly_subscription_fee?: number;
-}
-
 interface InvoicesIndexProps {
     invoices: PaginatedResponse<Invoice>;
-    restaurants: ExtendedRestaurant[];
+    restaurants: Restaurant[];
     filters: { status?: string; restaurant_id?: string };
 }
 
@@ -56,8 +49,7 @@ export default function Index({ invoices, restaurants = [], filters }: InvoicesI
     };
 
     return (
-        <AdminLayout title="إدارة الفواتير والاشتراكات">
-            <Head title="الفواتير والاشتراكات — الإدارة المركزية" />
+        <Head title="الفواتير والاشتراكات — الإدارة المركزية" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -275,7 +267,7 @@ export default function Index({ invoices, restaurants = [], filters }: InvoicesI
                                         form.setData('restaurant_id', rId);
                                         const found = restaurants.find(r => String(r.id) === rId);
                                         if (found) {
-                                            if (found.commission_type === 'MONTHLY_SUBSCRIPTION' || (found.monthly_subscription_fee && found.monthly_subscription_fee > 0)) {
+                                            if (found.commission_type === 'SUBSCRIPTION' || (found.monthly_subscription_fee && found.monthly_subscription_fee > 0)) {
                                                 form.setData(data => ({
                                                     ...data,
                                                     restaurant_id: rId,
@@ -429,6 +421,5 @@ export default function Index({ invoices, restaurants = [], filters }: InvoicesI
                 }}
                 onCancel={() => setConfirmCancelId(null)}
             />
-        </AdminLayout>
     );
 }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { Order, DeliveryDriver } from '../../../Types';
 import { 
     Clock, 
@@ -18,6 +17,28 @@ import {
 interface OrderShowProps {
     order: Order;
     available_drivers: DeliveryDriver[];
+}
+
+function ItemSelections({ item }: { item: Order['items'][number] }) {
+    const options = Array.isArray(item.selected_options) ? item.selected_options : [];
+    const addons = Array.isArray(item.selected_addons) ? item.selected_addons : [];
+
+    if (options.length === 0 && addons.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="mt-1 space-y-0.5 text-[11px] text-stone-500 dark:text-stone-400">
+            {options.map((option, index) => (
+                <p key={`option-${index}`}>
+                    {option.option_name}: {option.value_name}
+                </p>
+            ))}
+            {addons.map((addon, index) => (
+                <p key={`addon-${index}`}>إضافة: {addon.name}</p>
+            ))}
+        </div>
+    );
 }
 
 export default function Show({ order, available_drivers = [] }: OrderShowProps) {
@@ -51,8 +72,7 @@ export default function Show({ order, available_drivers = [] }: OrderShowProps) 
     };
 
     return (
-        <RestaurantLayout title={`تفاصيل طلب ${order.order_number}`}>
-            <Head title={`تفاصيل طلب ${order.order_number} — بوابة المطعم`} />
+        <Head title={`تفاصيل طلب ${order.order_number} — بوابة المطعم`} />
 
             <div className="space-y-6" dir="rtl">
                 {/* Header card */}
@@ -124,11 +144,7 @@ export default function Show({ order, available_drivers = [] }: OrderShowProps) 
                                                 <h3 className="font-bold text-stone-900 dark:text-white text-sm">
                                                     {item.name}
                                                 </h3>
-                                                {item.selected_options && (
-                                                    <p className="text-[11px] text-stone-500">
-                                                        {JSON.stringify(item.selected_options)}
-                                                    </p>
-                                                )}
+                                                <ItemSelections item={item} />
                                                 {item.notes && (
                                                     <p className="text-[11px] text-amber-600 font-bold">
                                                         ملاحظة: {item.notes}
@@ -256,6 +272,5 @@ export default function Show({ order, available_drivers = [] }: OrderShowProps) 
                     </div>
                 </div>
             </div>
-        </RestaurantLayout>
     );
 }

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '../../Layouts/AdminLayout';
 import { 
     Store, 
     ShoppingBag, 
@@ -51,13 +50,35 @@ export default function Dashboard({
     top_restaurants = [] 
 }: AdminDashboardProps) {
     return (
-        <AdminLayout title="لوحة التحكم المركزية">
-            <Head title="لوحة التحكم المركزية — فطرنا شكراً" />
+        <Head title="لوحة التحكم المركزية — فطرنا شكراً" />
 
             <div className="space-y-8">
+                {/* Operations cockpit header */}
+                <section className="relative overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-7 sm:px-8 sm:py-8 text-white shadow-2xl shadow-stone-950/15">
+                    <div className="absolute -left-16 -top-20 h-56 w-56 rounded-full bg-orange-500/25 blur-3xl" />
+                    <div className="absolute bottom-0 right-1/3 h-32 w-32 rounded-full bg-amber-400/10 blur-2xl" />
+                    <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div>
+                            <p className="mb-2 text-[11px] font-black tracking-[0.22em] text-orange-300 uppercase">مركز قيادة المنصة</p>
+                            <h1 className="text-2xl font-black sm:text-3xl">صباح الخير، كل عملياتك في مكان واحد</h1>
+                            <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-300">راقب الطلبات والتحصيل والشركاء بسرعة، ثم تحرك مباشرة إلى المهمة المهمة الآن.</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 sm:flex">
+                            <div className="rounded-2xl border border-white/10 bg-white/7 px-4 py-3 backdrop-blur">
+                                <p className="text-[10px] font-bold text-stone-400">طلبات اليوم</p>
+                                <p className="mt-1 text-xl font-black">{stats.orders_today}</p>
+                            </div>
+                            <Link href="/admin/orders" prefetch className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-xs font-black text-white transition hover:bg-orange-400">
+                                متابعة الطلبات
+                                <ArrowRight className="mr-1 h-4 w-4" />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
                 {/* KPI Cards Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
+                    <div className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10">
                         <div className="flex items-center justify-between text-xs text-stone-400 font-bold mb-2">
                             <span>إجمالي المبيعات (GMV هذا الشهر)</span>
                             <DollarSign className="w-4 h-4 text-emerald-500" />
@@ -70,7 +91,7 @@ export default function Dashboard({
                         </p>
                     </div>
 
-                    <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
+                    <div className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/10">
                         <div className="flex items-center justify-between text-xs text-stone-400 font-bold mb-2">
                             <span>صافي أرباح المنصة (العمولات)</span>
                             <TrendingUp className="w-4 h-4 text-orange-500" />
@@ -83,7 +104,7 @@ export default function Dashboard({
                         </p>
                     </div>
 
-                    <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
+                    <div className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/10">
                         <div className="flex items-center justify-between text-xs text-stone-400 font-bold mb-2">
                             <span>المطاعم الشريكة النشطة</span>
                             <Store className="w-4 h-4 text-purple-500" />
@@ -96,7 +117,7 @@ export default function Dashboard({
                         </p>
                     </div>
 
-                    <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
+                    <div className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
                         <div className="flex items-center justify-between text-xs text-stone-400 font-bold mb-2">
                             <span>الطلاب والعملاء المسجلين</span>
                             <GraduationCap className="w-4 h-4 text-blue-500" />
@@ -262,6 +283,5 @@ export default function Dashboard({
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }

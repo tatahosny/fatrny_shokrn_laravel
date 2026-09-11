@@ -37,13 +37,36 @@ class CustomerOrderController extends Controller
         $order = Order::where('customer_id', $customer->id)
             ->where('order_number', $orderNumber)
             ->with([
-                'restaurant:id,name,phone,logo,address',
+                'restaurant:id,name,phone,logo,address,latitude,longitude',
                 'items',
-                'deliveryDriver:id,name,phone,profile_image,vehicle_type',
+                'deliveryDriver:id,name,phone,profile_image,vehicle_type,current_latitude,current_longitude',
                 'statusHistories' => fn($q) => $q->orderBy('created_at'),
             ])
             ->firstOrFail();
 
         return Inertia::render('Customer/OrderDetails', ['order' => $order]);
+    }
+
+    public function driverLocation(string $orderNumber)
+    {
+        $user = auth()->user();
+        $customer = $user->customer;
+        abort_if(!$customer, 403);
+
+        $order = Order::where('customer_id', $customer->id)
+            ->where('order_number', $orderNumber)
+            ->with('deliveryDriver:id,name,phone,current_latitude,current_longitude')
+            ->firstOrFail();
+
+        return response()->json([
+            'driver' => $order->deliveryDriver ? [
+                'id' => $order->deliveryDriver->id,
+                'name' => $order->deliveryDriver->name,
+                'phone' => $order->deliveryDriver->phone,
+                'latitude' => $order->deliveryDriver->current_latitude ? (float) $order->deliveryDriver->current_latitude : null,
+                'longitude' => $order->deliveryDriver->current_longitude ? (float) $order->deliveryDriver->current_longitude : null,
+            ] : null,
+            'status' => $order->status,
+        ]);
     }
 }

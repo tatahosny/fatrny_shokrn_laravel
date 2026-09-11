@@ -59,7 +59,7 @@ export default function Cart() {
         navigator.geolocation.getCurrentPosition(
             async (pos) => {
                 const { latitude: lat, longitude: lng } = pos.coords;
-                setLocationUrl(`https://www.google.com/maps?q=${lat},${lng}`);
+                setLocationUrl(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`);
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`, { headers: { 'User-Agent': 'Fatrny-App' } });
                     if (res.ok) { const d = await res.json(); setAddress(d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`); }
@@ -232,11 +232,11 @@ export default function Cart() {
                                 <Lock className="w-5 h-5" /><span>سجل دخولك لتأكيد الطلب</span>
                             </Link>
                         ) : (
-                            <button onClick={handleOpenModal} disabled={isSubmitting} className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-base shadow-xl shadow-orange-500/25 flex items-center justify-center gap-2 transition-all active:scale-98 disabled:opacity-50">
-                                <CheckCircle2 className="w-5 h-5" /><span>تأكيد الطلب وتحديد موقع الاستلام</span>
-                            </button>
+                            <Link href="/checkout" className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-base shadow-xl shadow-orange-500/25 flex items-center justify-center gap-2 transition-all active:scale-98">
+                                <CheckCircle2 className="w-5 h-5" /><span>المتابعة لتحديد الموقع بالخريطة وإتمام الطلب 🚀</span>
+                            </Link>
                         )}
-                        <p className="text-[11px] text-center text-stone-400">سيتم طلب تأكيد مكان استلام الطلب داخل الجامعة</p>
+                        <p className="text-[11px] text-center text-stone-400">تحديد دقيق لموقع الاستلام بالـ GPS أو المقر الجامعي مع حساب رسوم التوصيل بالكيلومتر</p>
                     </div>
                 </div>
             </div>

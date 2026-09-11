@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, FileText, Eye, DollarSign, CheckCircle, Clock, Download } from 'lucide-react';
 
 interface Invoice {
@@ -33,8 +32,7 @@ export default function InvoiceShow({ invoice }: Props) {
     const sc = statusMap[invoice.status] ?? statusMap.DRAFT;
 
     return (
-        <AdminLayout>
-            <Head title={`فاتورة ${invoice.invoice_number}`} />
+        <Head title={`فاتورة ${invoice.invoice_number}`} />
 
             <div className="max-w-3xl" dir="rtl">
                 <div className="flex items-center justify-between mb-6">
@@ -132,6 +130,5 @@ export default function InvoiceShow({ invoice }: Props) {
                     )}
                 </div>
             </div>
-        </AdminLayout>
     );
 }

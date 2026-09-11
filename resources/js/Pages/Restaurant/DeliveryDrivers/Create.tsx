@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { ArrowLeft, Save, User, Phone, Car } from 'lucide-react';
 
 export default function DeliveryDriverCreate() {
@@ -20,8 +19,7 @@ export default function DeliveryDriverCreate() {
     };
 
     return (
-        <RestaurantLayout>
-            <Head title="إضافة سائق توصيل" />
+        <Head title="إضافة سائق توصيل" />
 
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
@@ -117,6 +115,5 @@ export default function DeliveryDriverCreate() {
                     </div>
                 </form>
             </div>
-        </RestaurantLayout>
     );
 }

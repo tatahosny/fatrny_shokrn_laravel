@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import {
     Store, MapPin, Phone, Mail, Clock, DollarSign, Users, ShoppingBag,
     Edit, ArrowLeft, Ban, CheckCircle, Star, TrendingUp, AlertTriangle,
@@ -77,8 +76,7 @@ export default function RestaurantShow({ restaurant, stats, recentOrders }: Prop
     const sc = statusConfig[restaurant.status] ?? statusConfig.INACTIVE;
 
     return (
-        <AdminLayout>
-            <Head title={`${restaurant.name} — المطاعم`} />
+        <Head title={`${restaurant.name} — المطاعم`} />
 
             <div className="space-y-6" dir="rtl">
                 {/* Header */}
@@ -252,7 +250,6 @@ export default function RestaurantShow({ restaurant, stats, recentOrders }: Prop
                 onConfirm={doSuspend}
                 onCancel={() => setConfirmSuspend(false)}
             />
-        </AdminLayout>
     );
 }
 

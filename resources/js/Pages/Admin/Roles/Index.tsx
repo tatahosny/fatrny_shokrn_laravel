@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Shield, Users, Check } from 'lucide-react';
 
 interface Role {
@@ -45,8 +44,7 @@ const permLabels: Record<string, string> = {
 
 export default function AdminRolesIndex({ roles }: Props) {
     return (
-        <AdminLayout>
-            <Head title="الأدوار والصلاحيات" />
+        <Head title="الأدوار والصلاحيات" />
 
             <div className="space-y-6" dir="rtl">
                 <div>
@@ -92,6 +90,5 @@ export default function AdminRolesIndex({ roles }: Props) {
                     ))}
                 </div>
             </div>
-        </AdminLayout>
     );
 }

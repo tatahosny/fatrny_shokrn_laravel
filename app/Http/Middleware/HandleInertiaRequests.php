@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Tightenco\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -23,7 +22,6 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
 
-        // Get app name from system settings (cached)
         $appName = cache()->remember('system_setting.app_name', 3600, function () {
             return SystemSetting::where('key', 'app_name')->value('value') ?? 'فطرنا شكراً';
         });
@@ -36,10 +34,35 @@ class HandleInertiaRequests extends Middleware
             return SystemSetting::where('key', 'support_phone')->value('value') ?? env('SUPPORT_PHONE', '01027961208');
         });
 
+        $permissions = [];
+        $shellRestaurant = null;
+
+        if ($user) {
+            $permissions = cache()->remember(
+                "user.{$user->id}.permissions",
+                300,
+                fn () => $user->getAllPermissions()->pluck('name')->values()->all()
+            );
+
+            if ($user->isRestaurantStaff()) {
+                $shellRestaurant = cache()->remember(
+                    "user.{$user->id}.shell_restaurant",
+                    60,
+                    function () use ($user) {
+                        $restaurant = $user->restaurantStaff()
+                            ->with('restaurant:id,name,status,logo')
+                            ->first()?->restaurant;
+
+                        return $restaurant?->only('id', 'name', 'status', 'logo');
+                    }
+                );
+            }
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user'        => $user ? $user->only('id', 'name', 'email', 'phone', 'role', 'is_active', 'avatar') : null,
-                'permissions' => $user ? $user->getAllPermissions()->pluck('name')->toArray() : [],
+                'permissions' => $permissions,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),
@@ -47,9 +70,10 @@ class HandleInertiaRequests extends Middleware
                 'warning' => $request->session()->get('warning'),
                 'info'    => $request->session()->get('info'),
             ],
-            'app_name'      => $appName,
-            'app_slogan'    => $appSlogan,
-            'support_phone' => $supportPhone,
+            'app_name'           => $appName,
+            'app_slogan'         => $appSlogan,
+            'support_phone'      => $supportPhone,
+            'shell_restaurant'   => $shellRestaurant,
         ]);
     }
 }

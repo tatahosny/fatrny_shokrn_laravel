@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { Restaurant, DeliveryDriver, PaginatedResponse } from '../../../Types';
 import { Bike, Plus, Trash2, Phone, Power, CheckCircle2 } from 'lucide-react';
 import ConfirmModal from '../../../Components/ConfirmModal';
@@ -41,8 +40,7 @@ export default function Index({ drivers, restaurant }: DriversProps) {
     };
 
     return (
-        <RestaurantLayout title="كباتن التوصيل" restaurantName={restaurant.name}>
-            <Head title="كباتن التوصيل — بوابة المطعم" />
+        <Head title="كباتن التوصيل — بوابة المطعم" />
 
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
@@ -199,6 +197,5 @@ export default function Index({ drivers, restaurant }: DriversProps) {
                 onConfirm={() => { if (confirmDelete) router.delete(`/restaurant/delivery-drivers/${confirmDelete}`); setConfirmDelete(null); }}
                 onCancel={() => setConfirmDelete(null)}
             />
-        </RestaurantLayout>
     );
 }

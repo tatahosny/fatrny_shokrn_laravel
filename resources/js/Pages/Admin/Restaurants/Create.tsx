@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, Save, Store, DollarSign, Clock } from 'lucide-react';
 
 export default function RestaurantCreate() {
@@ -29,8 +28,7 @@ export default function RestaurantCreate() {
     };
 
     return (
-        <AdminLayout>
-            <Head title="إضافة مطعم جديد" />
+        <Head title="إضافة مطعم جديد" />
 
             <div className="max-w-4xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
@@ -190,6 +188,5 @@ export default function RestaurantCreate() {
                     </div>
                 </form>
             </div>
-        </AdminLayout>
     );
 }

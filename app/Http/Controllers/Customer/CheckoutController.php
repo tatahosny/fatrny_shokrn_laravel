@@ -61,6 +61,7 @@ class CheckoutController extends Controller
             'address'        => 'required|string|max:500',
             'latitude'       => 'nullable|numeric',
             'longitude'      => 'nullable|numeric',
+            'delivery_fee'   => 'nullable|numeric|min:0',
             'payment_method' => 'required|in:CASH_ON_DELIVERY',
             'customer_notes' => 'nullable|string|max:500',
         ]);

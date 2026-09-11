@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Customer, PaginatedResponse } from '../../../Types';
 import { GraduationCap, Search, CheckCircle2, XCircle, Clock, AlertCircle, Eye } from 'lucide-react';
 
@@ -32,8 +31,7 @@ export default function Index({ customers, filters }: CustomersIndexProps) {
     };
 
     return (
-        <AdminLayout title="إدارة الطلاب والعملاء">
-            <Head title="إدارة الطلاب والعملاء — الإدارة المركزية" />
+        <Head title="إدارة الطلاب والعملاء — الإدارة المركزية" />
 
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
@@ -190,6 +188,5 @@ export default function Index({ customers, filters }: CustomersIndexProps) {
                     </div>
                 </div>
             )}
-        </AdminLayout>
     );
 }

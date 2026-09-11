@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Save, Globe, Phone, Mail, MapPin, GraduationCap, Settings2 } from 'lucide-react';
 
 interface Props {
@@ -40,8 +39,7 @@ export default function AdminCmsIndex({ settings }: Props) {
     );
 
     return (
-        <AdminLayout>
-            <Head title="إدارة محتوى الصفحة الرئيسية" />
+        <Head title="إدارة محتوى الصفحة الرئيسية" />
 
             <div className="max-w-3xl space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
@@ -116,6 +114,5 @@ export default function AdminCmsIndex({ settings }: Props) {
                     </div>
                 </form>
             </div>
-        </AdminLayout>
     );
 }

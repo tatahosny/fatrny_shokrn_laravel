@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import ConfirmModal from '../../../Components/ConfirmModal';
 import { ArrowLeft, Plus, Trash2, DollarSign, Tag, Calendar, FileText } from 'lucide-react';
 
@@ -50,8 +49,7 @@ export default function AdminFinanceExpenses({ expenses, categories, totalThisMo
     };
 
     return (
-        <AdminLayout>
-            <Head title="المصروفات" />
+        <Head title="المصروفات" />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
@@ -192,6 +190,5 @@ export default function AdminFinanceExpenses({ expenses, categories, totalThisMo
                 }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
-        </AdminLayout>
     );
 }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, Save, FileText, Calendar, DollarSign, Store } from 'lucide-react';
 
 interface Restaurant {
@@ -27,8 +26,7 @@ export default function InvoiceCreate({ restaurants }: Props) {
     };
 
     return (
-        <AdminLayout>
-            <Head title="إنشاء فاتورة جديدة" />
+        <Head title="إنشاء فاتورة جديدة" />
 
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
@@ -108,6 +106,5 @@ export default function InvoiceCreate({ restaurants }: Props) {
                     </div>
                 </form>
             </div>
-        </AdminLayout>
     );
 }

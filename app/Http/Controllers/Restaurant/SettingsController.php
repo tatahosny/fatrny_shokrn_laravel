@@ -33,6 +33,10 @@ class SettingsController extends Controller
             'closing_time'            => 'nullable|date_format:H:i',
             'minimum_order_amount'    => 'nullable|numeric|min:0',
             'estimated_delivery_time' => 'nullable|integer|min:1',
+            'delivery_fee_per_km'     => 'nullable|numeric|min:0',
+            'delivery_base_fee'       => 'nullable|numeric|min:0',
+            'latitude'                => 'nullable|numeric',
+            'longitude'               => 'nullable|numeric',
         ]);
 
         if ($request->hasFile('logo')) {

@@ -141,12 +141,13 @@ class InvoiceController extends Controller
                     'status'               => 'ACTIVE',
                     'billing_suspended_at' => null,
                     'suspension_reason'    => null,
+                    'payment_due_date'     => now()->addMonth()->startOfDay(),
                 ]);
             }
         }
 
         ActivityLog::log('INVOICE_MARKED_PAID', 'Invoice', $invoice->id);
-        return back()->with('success', 'تم تسجيل الفاتورة كمدفوعة وإعادة تفعيل حساب المطعم والكباتن التابعين له بنجاح.');
+        return back()->with('success', 'تم تسجيل الفاتورة كمدفوعة وتحديث موعد السداد القادم للشهر المقبل.');
     }
 
     public function suspendRestaurant(int $id): RedirectResponse
@@ -182,24 +183,18 @@ class InvoiceController extends Controller
                 continue;
             }
 
-            $amount = 0;
-            $type = $restaurant->commission_type ?? 'SUBSCRIPTION';
-
-            if ($type === 'MONTHLY_SUBSCRIPTION' || (float)$restaurant->monthly_subscription_fee > 0) {
-                $amount = (float)$restaurant->monthly_subscription_fee;
+            if ($restaurant->commission_type === 'SUBSCRIPTION' || (float)$restaurant->monthly_subscription_fee > 0) {
+                $amount = (float)$restaurant->monthly_subscription_fee > 0 ? (float)$restaurant->monthly_subscription_fee : 500.00;
                 $type = 'SUBSCRIPTION';
-            } elseif ($type === 'PERCENTAGE' && (float)$restaurant->commission_percentage > 0) {
-                // Calculate from orders in the last 30 days
-                $ordersTotal = Order::where('restaurant_id', $restaurant->id)
+                $desc = 'اشتراك شهري في منصة فطرني شكراً لشهر ' . now()->translatedFormat('F Y');
+            } else {
+                $comm = (float) \App\Models\Order::where('restaurant_id', $restaurant->id)
                     ->where('status', 'DELIVERED')
-                    ->where('created_at', '>=', now()->subDays(30))
-                    ->sum('total_amount');
-                $amount = round($ordersTotal * ((float)$restaurant->commission_percentage / 100), 2);
+                    ->where('created_at', 'like', "{$currentMonth}%")
+                    ->sum('platform_commission_amount');
+                $amount = $comm > 0 ? $comm : 100.00;
                 $type = 'COMMISSION';
-            }
-
-            if ($amount <= 0) {
-                $amount = 100.00; // Default minimum monthly platform fee
+                $desc = 'عمولة مبيعات طلبات شهر ' . now()->translatedFormat('F Y');
             }
 
             $dueDate = now()->addDays(7)->toDateString();
@@ -219,7 +214,7 @@ class InvoiceController extends Controller
             ]);
 
             $invoice->items()->create([
-                'description' => 'مستحقات منصة فطرني شكراً لشهر ' . now()->translatedFormat('F Y'),
+                'description' => $desc,
                 'amount'      => $amount,
             ]);
 
@@ -239,7 +234,27 @@ class InvoiceController extends Controller
     public function destroy(int $id): RedirectResponse
     {
         $invoice = Invoice::findOrFail($id);
-        $invoice->update(['status' => 'CANCELLED']);
-        return back()->with('success', 'تم إلغاء الفاتورة.');
+        $restaurant = $invoice->restaurant;
+        $restaurantId = $invoice->restaurant_id;
+
+        $invoice->items()->delete();
+        $invoice->collections()->delete();
+        $invoice->delete();
+
+        if ($restaurant) {
+            $hasOtherOverdue = Invoice::where('restaurant_id', $restaurantId)
+                ->whereNotIn('status', ['PAID', 'CANCELLED'])
+                ->exists();
+
+            if (!$hasOtherOverdue && $restaurant->status === 'SUSPENDED') {
+                $restaurant->update([
+                    'status'               => 'ACTIVE',
+                    'billing_suspended_at' => null,
+                    'suspension_reason'    => null,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'تم حذف وإلغاء الفاتورة نهائياً.');
     }
 }

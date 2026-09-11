@@ -1,0 +1,300 @@
+.pulse-glow {
+  animation: pulseGlow 2.5s infinite;
+}
+
+/* Admin control room — platform only */
+.admin-shell {
+    background:
+        radial-gradient(circle at 12% -8%, rgba(34, 211, 238, .16), transparent 22rem),
+        radial-gradient(circle at 100% 100%, rgba(14, 165, 233, .12), transparent 24rem),
+        #07111f;
+    color: #e2e8f0;
+}
+
+.admin-grid { min-height: 100vh; }
+
+.admin-rail {
+    background: linear-gradient(180deg, #0b1c33 0%, #07111f 100%);
+    border-left: 1px solid rgba(125, 211, 252, .16);
+    box-shadow: -20px 0 40px rgba(2, 8, 23, .35);
+}
+
+.admin-brand {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1.4rem 1.25rem 1.1rem;
+    color: #f8fafc;
+    text-decoration: none;
+}
+
+.admin-brand strong { display: block; font-size: .95rem; letter-spacing: -.02em; }
+.admin-brand small { display: block; margin-top: .15rem; color: #7dd3fc; font-size: .68rem; font-weight: 700; }
+
+.admin-mark {
+    width: 2.6rem;
+    height: 2.6rem;
+    display: grid;
+    place-items: center;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #22d3ee, #0284c7);
+    color: #082f49;
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.admin-nav { flex: 1; overflow: auto; padding: .4rem 1rem 1rem; }
+.admin-nav-group { margin-bottom: 1.1rem; }
+.admin-nav-group > p {
+    margin: 0 0 .45rem .35rem;
+    color: #64748b;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+}
+
+.admin-link {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin-bottom: .2rem;
+    padding: .7rem .8rem;
+    border-radius: .9rem;
+    color: #94a3b8;
+    font-size: .8rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+.admin-link:hover { color: #e2e8f0; background: rgba(148, 163, 184, .08); }
+.admin-link.is-active {
+    color: #ecfeff;
+    background: linear-gradient(90deg, rgba(6, 182, 212, .22), rgba(14, 165, 233, .08));
+    border-color: rgba(103, 232, 249, .2);
+}
+
+.admin-user {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1rem;
+    border-top: 1px solid rgba(125, 211, 252, .12);
+}
+
+.admin-avatar {
+    width: 2.3rem;
+    height: 2.3rem;
+    display: grid;
+    place-items: center;
+    border-radius: .85rem;
+    background: #164e63;
+    color: #a5f3fc;
+    font-weight: 800;
+}
+
+.admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(125, 211, 252, .12);
+    background: rgba(7, 17, 31, .82);
+    backdrop-filter: blur(16px);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.admin-kicker {
+    margin: 0;
+    color: #22d3ee;
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+}
+
+.admin-icon-btn, .admin-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    min-height: 2.4rem;
+    padding: 0 .8rem;
+    border-radius: .85rem;
+    border: 1px solid rgba(148, 163, 184, .18);
+    background: rgba(15, 23, 42, .7);
+    color: #cbd5e1;
+}
+
+.admin-chip { font-size: .72rem; font-weight: 700; text-decoration: none; }
+.admin-flash { padding: .8rem 1.25rem; font-size: .8rem; font-weight: 700; }
+.admin-flash.is-success { background: #065f46; color: #d1fae5; }
+.admin-flash.is-error { background: #991b1b; color: #fee2e2; }
+
+.admin-workspace {
+    padding: 1.25rem clamp(1rem, 3vw, 2.5rem) 2.5rem;
+    max-width: none;
+}
+
+.admin-workspace [class*="bg-white"],
+.admin-workspace [class*="bg-stone-50"],
+.admin-workspace [class*="bg-stone-100"] {
+    background-color: #102033 !important;
+    border-color: rgba(125, 211, 252, .12) !important;
+}
+
+.admin-workspace [class*="text-stone-900"],
+.admin-workspace [class*="text-stone-800"],
+.admin-workspace [class*="text-stone-700"] { color: #f8fafc !important; }
+.admin-workspace [class*="text-stone-600"],
+.admin-workspace [class*="text-stone-500"],
+.admin-workspace [class*="text-stone-400"] { color: #94a3b8 !important; }
+.admin-workspace [class*="border-stone"] { border-color: rgba(125, 211, 252, .12) !important; }
+
+.admin-workspace table thead th {
+    background: #16324d !important;
+    color: #67e8f9 !important;
+}
+
+.admin-workspace table tbody td,
+.admin-workspace table tbody tr { background: #102033 !important; color: #e2e8f0 !important; }
+
+.admin-workspace input,
+.admin-workspace select,
+.admin-workspace textarea {
+    background: #0b1a2c !important;
+    color: #f8fafc !important;
+    border-color: rgba(125, 211, 252, .16) !important;
+}
+
+/* Restaurant kitchen pass — restaurant dashboard only */
+.restaurant-shell {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 90% -10%, rgba(251, 146, 60, .18), transparent 22rem),
+        repeating-linear-gradient(0deg, rgba(180, 83, 9, .04), rgba(180, 83, 9, .04) 1px, transparent 1px, transparent 28px),
+        #fff4e8;
+    color: #3b2416;
+}
+
+.kitchen-mast {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .9rem 1.1rem;
+    background: #fffaf3;
+    border-bottom: 3px dashed #edc8a3;
+}
+
+.kitchen-seal {
+    width: 2.6rem;
+    height: 2.6rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: #ea580c;
+    color: white;
+    font-weight: 900;
+    box-shadow: 0 8px 18px rgba(234, 88, 12, .28);
+}
+
+.kitchen-kicker {
+    margin: 0;
+    color: #c2410c;
+    font-size: .62rem;
+    font-weight: 900;
+    letter-spacing: .18em;
+}
+
+.kitchen-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: .8rem;
+    border: 1px solid #edc8a3;
+    background: #fff7ed;
+    color: #7c2d12;
+}
+
+.kitchen-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .75rem;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 800;
+}
+
+.kitchen-status span {
+    width: .55rem;
+    height: .55rem;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.kitchen-status.is-open { background: #dcfce7; color: #166534; }
+.kitchen-status.is-closed { background: #fee2e2; color: #991b1b; }
+
+.kitchen-tabs {
+    gap: .4rem;
+    overflow-x: auto;
+    padding: .7rem 1rem;
+    background: #3b2416;
+}
+
+.kitchen-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    white-space: nowrap;
+    padding: .65rem .9rem;
+    border-radius: 999px;
+    color: #fde7d1;
+    font-size: .78rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.kitchen-tab:hover { background: rgba(255,255,255,.08); }
+.kitchen-tab.is-active { background: #ea580c; color: white; }
+
+.kitchen-flash { padding: .75rem 1.1rem; font-size: .8rem; font-weight: 800; }
+.kitchen-flash.is-success { background: #166534; color: #dcfce7; }
+.kitchen-flash.is-error { background: #991b1b; color: #fee2e2; }
+
+.kitchen-pass {
+    padding: 1.1rem clamp(1rem, 3vw, 2rem) 2.4rem;
+}
+
+.kitchen-station {
+    display: inline-block;
+    margin: 0 0 1rem;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    background: #ffedd5;
+    color: #9a3412;
+    font-size: .7rem;
+    font-weight: 900;
+}
+
+.restaurant-workspace { max-width: none; }
+
+.dark .restaurant-shell {
+    background: #1c140f;
+    color: #fff7ed;
+}
+
+.dark .kitchen-mast {
+    background: #241910;
+    border-bottom-color: #5c4030;
+}
+
+.dark .kitchen-mast h1 { color: #fff7ed !important; }
+.dark .kitchen-tabs { background: #140e0a; }
+.dark .kitchen-station { background: #431407; color: #fdba74; }

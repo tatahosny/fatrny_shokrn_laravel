@@ -23,6 +23,7 @@ class BillingController extends Controller
         }
 
         $invoices = Invoice::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'CANCELLED')
             ->with('items')
             ->latest()
             ->paginate(10);
@@ -33,7 +34,9 @@ class BillingController extends Controller
             ->first();
 
         $daysUntilDue = null;
-        if ($restaurant->payment_due_date) {
+        if ($pendingInvoice && $pendingInvoice->due_date) {
+            $daysUntilDue = (int) now()->startOfDay()->diffInDays(Carbon::parse($pendingInvoice->due_date)->startOfDay(), false);
+        } elseif ($restaurant->payment_due_date) {
             $daysUntilDue = (int) now()->startOfDay()->diffInDays(Carbon::parse($restaurant->payment_due_date)->startOfDay(), false);
         }
 

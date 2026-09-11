@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Cache;
 
 class CustomerDashboardController extends Controller
 {
@@ -17,6 +18,7 @@ class CustomerDashboardController extends Controller
             ['student_status' => 'PENDING']
         );
 
+        $dashboard = Cache::remember("dashboard.customer.{$customer->id}", now()->addSeconds(10), function () use ($customer) {
         $recentOrders = Order::where('customer_id', $customer->id)
             ->with('restaurant:id,name,logo')
             ->latest()
@@ -29,10 +31,12 @@ class CustomerDashboardController extends Controller
             ->latest()
             ->first();
 
-        return Inertia::render('Customer/Dashboard', [
-            'customer'      => $customer,
+        return [
             'recent_orders' => $recentOrders,
             'active_order'  => $activeOrder,
-        ]);
+        ];
+        });
+
+        return Inertia::render('Customer/Dashboard', ['customer' => $customer] + $dashboard);
     }
 }

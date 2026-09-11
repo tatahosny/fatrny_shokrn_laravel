@@ -3,7 +3,8 @@ import { Head, Link, router } from '@inertiajs/react';
 import GuestLayout from '../../Layouts/GuestLayout';
 import { Customer, CustomerAddress } from '../../Types';
 import { useCartStore } from '../../Stores/cartStore';
-import { BORG_EL_ARAB_UNIVERSITIES } from '../../constants/universities';
+import { BORG_EL_ARAB_UNIVERSITIES, calculateDistanceKm } from '../../constants/universities';
+import LocationPickerMap from '../../Components/LocationPickerMap';
 import { 
     MapPin, 
     Bike, 
@@ -65,21 +66,59 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
     // Custom text address
     const [customAddress, setCustomAddress] = useState('');
 
-    // GPS State
+    // GPS / Map State
     const [gpsAddress, setGpsAddress] = useState('');
-    const [gpsUrl, setGpsUrl] = useState('');
-    const [isLocating, setIsLocating] = useState(false);
+    const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
+    const [roadQuote, setRoadQuote] = useState<{ distance_km: number; duration_minutes: number; delivery_fee: number } | null>(null);
 
     const [notes, setNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
+    const activeUni = BORG_EL_ARAB_UNIVERSITIES.find(u => u.id === selectedUniId) || BORG_EL_ARAB_UNIVERSITIES[0];
+
+    // Compute Customer Location Coords (University, GPS pin, or Custom)
+    const customerCoords = addressMode === 'university'
+        ? (gpsCoords || { lat: activeUni.latitude, lng: activeUni.longitude })
+        : (gpsCoords || (addressMode === 'saved' ? null : { lat: 30.8752, lng: 29.5841 }));
+
+    // Restaurant coords
+    const restLat = Number(restaurant?.latitude) || 30.8700;
+    const restLng = Number(restaurant?.longitude) || 29.5800;
+
+    // Calculate distance in km
+    const distanceKm = customerCoords
+        ? calculateDistanceKm(restLat, restLng, customerCoords.lat, customerCoords.lng)
+        : null;
+
+    // Calculate delivery fee: base + (distance * per_km)
+    const feePerKm = Number(restaurant?.delivery_fee_per_km) || 0;
+    const baseFee = Number(restaurant?.delivery_base_fee ?? restaurant?.delivery_fee ?? 10);
+
+    const calculatedDeliveryFee = (feePerKm > 0 && distanceKm !== null)
+        ? Math.round(baseFee + (distanceKm * feePerKm))
+        : Number(restaurant?.delivery_fee || 15);
+
+    // The preview price comes from the same driving-route calculation used by dispatch.
+    // This replaces the old crow-flies estimate as soon as a real pin is available.
+    useEffect(() => {
+        if (!restaurant || !customerCoords) return;
+        const controller = new AbortController();
+        fetch('/delivery-quote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
+            body: JSON.stringify({ restaurant_id: restaurant.id, latitude: customerCoords.lat, longitude: customerCoords.lng }),
+            signal: controller.signal,
+        }).then(r => r.ok ? r.json() : Promise.reject())
+          .then(setRoadQuote)
+          .catch(() => { if (!controller.signal.aborted) setRoadQuote(null); });
+        return () => controller.abort();
+    }, [restaurant?.id, customerCoords?.lat, customerCoords?.lng]);
+
     const subtotal = getSubtotal();
     const studentDiscount = getStudentDiscountAmount();
-    const deliveryFee = getDeliveryFee();
-    const total = getTotal();
-
-    const activeUni = BORG_EL_ARAB_UNIVERSITIES.find(u => u.id === selectedUniId) || BORG_EL_ARAB_UNIVERSITIES[0];
+    const deliveryFee = roadQuote?.delivery_fee ?? calculatedDeliveryFee;
+    const total = Math.max(0, subtotal - studentDiscount + deliveryFee);
 
     const handleUniChange = (uniId: string) => {
         setSelectedUniId(uniId);
@@ -89,38 +128,10 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
         }
     };
 
-    const handleGetLocation = () => {
-        if (!navigator.geolocation) {
-            setErrorMsg('تحديد الموقع عبر GPS غير مدعوم في متصفحك.');
-            return;
-        }
-        setIsLocating(true);
-        setErrorMsg('');
-        navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-                const { latitude: lat, longitude: lng } = pos.coords;
-                setGpsUrl(`https://www.google.com/maps?q=${lat},${lng}`);
-                try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`, {
-                        headers: { 'User-Agent': 'Fatrny-App' }
-                    });
-                    if (res.ok) {
-                        const d = await res.json();
-                        setGpsAddress(d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-                    } else {
-                        setGpsAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-                    }
-                } catch {
-                    setGpsAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-                }
-                setIsLocating(false);
-            },
-            (err) => {
-                setIsLocating(false);
-                setErrorMsg(err.code === 1 ? 'يرجى السماح بالوصول للموقع في المتصفح' : 'تعذر التقاط موقعك الجغرافي');
-            },
-            { enableHighAccuracy: true, timeout: 12000 }
-        );
+    // Callback from LocationPickerMap
+    const handleMapLocationSelect = ({ lat, lng, address }: { lat: number; lng: number; address: string; distanceKm?: number }) => {
+        setGpsCoords({ lat, lng });
+        setGpsAddress(address);
     };
 
     const buildFinalAddress = (): string => {
@@ -132,7 +143,7 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
             return selectedSavedAddress;
         }
         if (addressMode === 'gps') {
-            return gpsAddress || (gpsUrl ? `موقع GPS: ${gpsUrl}` : '');
+            return gpsAddress || (gpsCoords ? `موقع GPS: ${gpsCoords.lat.toFixed(6)},${gpsCoords.lng.toFixed(6)}` : '');
         }
         return customAddress;
     };
@@ -164,8 +175,9 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
                 notes: item.notes || null,
             })),
             address: finalAddress,
-            latitude: null,
-            longitude: null,
+            latitude: customerCoords?.lat ?? null,
+            longitude: customerCoords?.lng ?? null,
+            delivery_fee: deliveryFee,
             payment_method: 'CASH_ON_DELIVERY',
             customer_notes: notes || null,
         };
@@ -283,8 +295,8 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
                                             : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                                     }`}
                                 >
-                                    <Navigation className="w-4 h-4" />
-                                    <span>تحديد GPS</span>
+                                    <MapPin className="w-4 h-4" />
+                                    <span>خريطة ودبوس GPS 📍</span>
                                 </button>
 
                                 <button
@@ -419,41 +431,29 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
                                 </div>
                             )}
 
-                            {/* 3. GPS DIRECT LOCATION MODE */}
+                            {/* 3. MAP / GPS LOCATION MODE */}
                             {addressMode === 'gps' && (
-                                <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 space-y-3 animate-fade-in">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <div>
-                                            <h4 className="text-xs font-bold text-stone-900 dark:text-white">التقاط موقعك الجغرافي عبر القمر الصناعي:</h4>
-                                            <p className="text-[11px] text-stone-500">يتيح للطيار الوصول لموقعك بدقة عبر خرائط جوجل</p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={handleGetLocation}
-                                            disabled={isLocating}
-                                            className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
-                                        >
-                                            <Navigation className="w-3.5 h-3.5" />
-                                            <span>{isLocating ? 'جارٍ التحديد...' : (gpsAddress ? 'تحديث الموقع' : 'تحديد موقعي الآن')}</span>
-                                        </button>
-                                    </div>
-
+                                <div className="space-y-3 animate-fade-in">
+                                    <p className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center gap-1">
+                                        <Navigation className="w-3.5 h-3.5 text-orange-500" />
+                                        اسحب الدبوس أو اضغط على الخريطة لتحديد موقعك بدقة، أو اضغط زر GPS لتحديد موقعك الحالي تلقائياً.
+                                    </p>
+                                    <LocationPickerMap
+                                        restaurantLat={restLat}
+                                        restaurantLng={restLng}
+                                        restaurantName={restaurant.name}
+                                        onLocationSelect={handleMapLocationSelect}
+                                        initialLat={gpsCoords?.lat}
+                                        initialLng={gpsCoords?.lng}
+                                        autoLocateOnMount={true}
+                                    />
                                     {gpsAddress && (
-                                        <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs">
-                                            <span className="font-bold text-stone-900 dark:text-white block mb-0.5">العنوان المكتشف:</span>
-                                            <p className="text-stone-600 dark:text-stone-300 leading-relaxed font-semibold">{gpsAddress}</p>
-                                        </div>
-                                    )}
-
-                                    {gpsUrl && (
-                                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
-                                            <span className="flex items-center gap-1.5">
-                                                <CheckCircle2 className="w-4 h-4" />
-                                                <span>تم تثبيت الإحداثيات بدقة ✓</span>
-                                            </span>
-                                            <a href={gpsUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-orange-600 hover:underline">
-                                                معاينة الخريطة ↗
-                                            </a>
+                                        <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs flex items-start gap-2">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                                            <div>
+                                                <span className="font-bold text-stone-900 dark:text-white block">العنوان المحدد:</span>
+                                                <p className="text-stone-600 dark:text-stone-300 leading-relaxed">{gpsAddress}</p>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -556,6 +556,18 @@ export default function Checkout({ customer, addresses = [] }: CheckoutProps) {
                                     <span>رسوم التوصيل</span>
                                     <span className="font-bold text-stone-800 dark:text-stone-200">{deliveryFee.toFixed(2)} ج.م</span>
                                 </div>
+
+                                {distanceKm !== null && (
+                                    <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold border border-orange-500/20">
+                                        <span className="flex items-center gap-1">
+                                            <Bike className="w-3.5 h-3.5" />
+                                            المسافة المقدرة للموقع:
+                                        </span>
+                                        <span>
+                                            {roadQuote ? `${roadQuote.distance_km} كم طريق فعلي • حوالي ${roadQuote.duration_minutes} دقيقة` : `${distanceKm} كم (جارٍ حساب مسار الطريق...)`}
+                                        </span>
+                                    </div>
+                                )}
 
                                 <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between text-base font-black text-stone-900 dark:text-white">
                                     <span>المبلغ الإجمالي</span>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { Restaurant, Order, PaginatedResponse, DeliveryDriver } from '../../../Types';
 import { 
     ShoppingBag, 
@@ -160,8 +159,7 @@ export default function Index({ orders, restaurant, filters, counts, available_d
     };
 
     return (
-        <RestaurantLayout title="إدارة الطلبات الواردة" restaurantName={restaurant.name}>
-            <Head title="إدارة الطلبات الواردة — بوابة المطعم" />
+        <Head title="إدارة الطلبات الواردة — بوابة المطعم" />
 
             <div className="space-y-6 pb-12" dir="rtl">
                 
@@ -183,7 +181,7 @@ export default function Index({ orders, restaurant, filters, counts, available_d
 
                         <div className="flex items-center gap-3">
                             <button
-                                onClick={() => router.reload({ preserveScroll: true })}
+                                onClick={() => router.reload({ preserveUrl: true })}
                                 className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-md transition flex items-center gap-1.5 shadow-xs"
                             >
                                 <RefreshCw className="w-4 h-4" />
@@ -715,6 +713,5 @@ export default function Index({ orders, restaurant, filters, counts, available_d
                     </div>
                 )}
             </div>
-        </RestaurantLayout>
     );
 }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { 
     Bike, 
     TrendingUp, 
@@ -86,8 +85,7 @@ export default function DriverStatsIndex({
     const maxOrders = Math.max(...driver_stats.map((d) => d.total_orders), 1);
 
     return (
-        <RestaurantLayout title="إحصائيات ونشاط كباتن التوصيل">
-            <Head title="إحصائيات الكباتن — إدارة المطعم" />
+        <Head title="إحصائيات الكباتن — إدارة المطعم" />
 
             <div className="space-y-6 pb-12" dir="rtl">
                 {/* Header Banner */}
@@ -476,6 +474,5 @@ export default function DriverStatsIndex({
                     )}
                 </div>
             </div>
-        </RestaurantLayout>
     );
 }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { Restaurant, Category } from '../../../Types';
 import { Layers, Plus, Trash2, Edit2 } from 'lucide-react';
 import ConfirmModal from '../../../Components/ConfirmModal';
@@ -34,8 +33,7 @@ export default function Index({ categories = [], restaurant }: CategoriesProps) 
     };
 
     return (
-        <RestaurantLayout title="تصنيفات المنيو" restaurantName={restaurant.name}>
-            <Head title="تصنيفات المنيو — بوابة المطعم" />
+        <Head title="تصنيفات المنيو — بوابة المطعم" />
 
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
@@ -141,6 +139,5 @@ export default function Index({ categories = [], restaurant }: CategoriesProps) 
                 onConfirm={() => { if (confirmDelete) router.delete(`/restaurant/categories/${confirmDelete}`); setConfirmDelete(null); }}
                 onCancel={() => setConfirmDelete(null)}
             />
-        </RestaurantLayout>
     );
 }

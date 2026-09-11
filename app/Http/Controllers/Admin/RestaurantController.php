@@ -129,6 +129,8 @@ class RestaurantController extends Controller
             'closing_time'              => 'nullable|date_format:H:i',
             'minimum_order_amount'      => 'nullable|numeric|min:0',
             'delivery_fee'              => 'nullable|numeric|min:0',
+            'delivery_fee_per_km'       => 'nullable|numeric|min:0',
+            'delivery_base_fee'         => 'nullable|numeric|min:0',
             'estimated_delivery_time'   => 'nullable|integer|min:0',
             'student_discount_percentage'=> 'nullable|numeric|min:0|max:100',
             'commission_type'           => 'required|in:PERCENTAGE,FIXED,SUBSCRIPTION,HYBRID,NONE',

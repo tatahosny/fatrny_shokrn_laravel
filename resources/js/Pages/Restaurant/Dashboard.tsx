@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import RestaurantLayout from '../../Layouts/RestaurantLayout';
 import { Restaurant, Order } from '../../Types';
 import { 
     ShoppingBag, 
@@ -12,7 +11,9 @@ import {
     AlertCircle, 
     ArrowRight,
     Utensils,
-    Eye
+    Eye,
+    CreditCard,
+    Calendar
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -35,22 +36,50 @@ interface DashboardProps {
         total_revenue: number;
     }[];
     recent_orders: Order[];
+    billing_info?: {
+        payment_due_date?: string;
+        days_remaining?: number | null;
+        is_overdue: boolean;
+        monthly_subscription_fee: number;
+        has_unpaid_invoice: boolean;
+        unpaid_amount: number;
+        invoice_number?: string;
+    };
 }
 
-export default function Dashboard({ restaurant, stats, top_items = [], recent_orders = [] }: DashboardProps) {
+export default function Dashboard({ restaurant, stats, top_items = [], recent_orders = [], billing_info }: DashboardProps) {
     const handleAdvanceStatus = (orderId: number, status: string) => {
         router.patch(`/restaurant/orders/${orderId}/status`, { status });
     };
 
     return (
-        <RestaurantLayout 
-            title="نظرة عامة والطلبات الحية" 
-            restaurantName={restaurant.name}
-            isOpen={restaurant.status === 'ACTIVE'}
-        >
-            <Head title={`لوحة تحكم ${restaurant.name} — فطرنا شكراً`} />
+        <Head title={`لوحة تحكم ${restaurant.name} — فطرنا شكراً`} />
 
             <div className="space-y-8">
+                {/* Restaurant command header */}
+                <section className="relative overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-7 text-white shadow-2xl shadow-stone-950/15 sm:px-8">
+                    <div className="absolute -right-12 -top-16 h-52 w-52 rounded-full bg-orange-500/25 blur-3xl" />
+                    <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div>
+                            <div className="mb-3 flex items-center gap-2">
+                                <span className={`h-2.5 w-2.5 rounded-full ${restaurant.status === 'ACTIVE' ? 'bg-emerald-400 shadow-[0_0_0_5px_rgba(52,211,153,.15)]' : 'bg-red-400'}`} />
+                                <span className="text-[11px] font-black tracking-[0.18em] text-stone-300 uppercase">{restaurant.status === 'ACTIVE' ? 'المطعم يستقبل الطلبات' : 'المطعم متوقف مؤقتًا'}</span>
+                            </div>
+                            <h1 className="text-2xl font-black sm:text-3xl">{restaurant.name}</h1>
+                            <p className="mt-2 text-sm text-stone-300">لوحة تشغيل المطبخ — اعطِ الأولوية للطلبات الجديدة حتى يخرج كل طلب في وقته.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Link href="/restaurant/menu" prefetch className="rounded-xl border border-white/15 bg-white/8 px-4 py-2.5 text-xs font-bold transition hover:bg-white/15">إدارة المنيو</Link>
+                            <Link href="/restaurant/orders?status=PENDING" prefetch className="rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-black transition hover:bg-orange-400">الطلبات الجديدة ({stats.pending_orders})</Link>
+                        </div>
+                    </div>
+                    <div className="relative mt-7 grid grid-cols-3 divide-x divide-x-reverse divide-white/10 rounded-2xl border border-white/10 bg-white/5 text-center backdrop-blur sm:max-w-xl">
+                        <div className="px-3 py-3"><p className="text-lg font-black text-amber-300">{stats.pending_orders}</p><p className="text-[10px] text-stone-400">بانتظار التأكيد</p></div>
+                        <div className="px-3 py-3"><p className="text-lg font-black text-orange-300">{stats.preparing_orders}</p><p className="text-[10px] text-stone-400">قيد التجهيز</p></div>
+                        <div className="px-3 py-3"><p className="text-lg font-black text-emerald-300">{stats.ready_orders}</p><p className="text-[10px] text-stone-400">جاهزة للاستلام</p></div>
+                    </div>
+                </section>
+
                 {/* Pending Orders Alert Banner */}
                 {stats.pending_orders > 0 && (
                     <div className="p-4 sm:p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-pulse">
@@ -73,6 +102,74 @@ export default function Dashboard({ restaurant, stats, top_items = [], recent_or
                         </Link>
                     </div>
                 )}
+
+                {/* Billing & Subscription Status Card */}
+                {billing_info && (() => {
+                    const days = typeof billing_info.days_remaining === 'number' ? billing_info.days_remaining : null;
+                    return (
+                    <div className={`p-5 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                        billing_info.is_overdue
+                            ? 'bg-red-500/10 border-red-500/30'
+                            : (days !== null && days <= 3)
+                            ? 'bg-amber-500/10 border-amber-500/30'
+                            : 'bg-stone-900 border-stone-800'
+                    }`}>
+                        <div className="flex items-start sm:items-center gap-3.5">
+                            <div className={`p-3 rounded-2xl shrink-0 ${
+                                billing_info.is_overdue
+                                    ? 'bg-red-500/20 text-red-400'
+                                    : 'bg-orange-500/20 text-orange-400'
+                            }`}>
+                                <CreditCard className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="text-white font-bold text-sm sm:text-base">
+                                        اشتراك المنصة: {billing_info.monthly_subscription_fee} ج.م شهرياً
+                                    </h3>
+                                    {billing_info.is_overdue ? (
+                                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-red-500/20 text-red-400 border border-red-500/30">
+                                            ⚠️ مطلوب السداد (متأخر)
+                                        </span>
+                                    ) : (
+                                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                            ✅ الحساب نشط
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-4 text-xs mt-1 text-stone-400 flex-wrap">
+                                    {billing_info.payment_due_date && (
+                                        <span className="flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5 text-stone-400" />
+                                            موعد السداد (يوم الدفع): <strong className="text-white">{billing_info.payment_due_date}</strong>
+                                        </span>
+                                    )}
+                                    {days !== null && (
+                                        <span className={`font-bold ${days < 0 ? 'text-red-400' : (days <= 3 ? 'text-amber-400' : 'text-emerald-400')}`}>
+                                            ⏳ {days < 0
+                                                ? `متأخر منذ ${Math.abs(days)} يوم`
+                                                : (days === 0 ? 'مستحق اليوم!' : `فاضل ${days} يوم على الانتهاء`)}
+                                        </span>
+                                    )}
+                                    {billing_info.has_unpaid_invoice && (
+                                        <span className="text-orange-400 font-semibold">
+                                            فاتورة غير مسددة: {billing_info.unpaid_amount} ج.م
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <Link
+                            href="/restaurant/billing"
+                            className="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition shrink-0 text-center flex items-center justify-center gap-1.5"
+                        >
+                            <span>تفاصيل الفاتورة والسداد</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
+                    );
+                })()}
 
                 {/* KPI Cards Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -242,6 +339,5 @@ export default function Dashboard({ restaurant, stats, top_items = [], recent_or
                     </div>
                 </div>
             </div>
-        </RestaurantLayout>
     );
 }

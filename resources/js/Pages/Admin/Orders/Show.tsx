@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, MapPin, ShoppingBag, Clock, User, Phone, DollarSign, CheckCircle, XCircle } from 'lucide-react';
 
 interface Order {
@@ -52,8 +51,7 @@ export default function AdminOrderShow({ order }: Props) {
     const fmt = (v: number) => (v / 100).toFixed(2);
 
     return (
-        <AdminLayout>
-            <Head title={`طلب #${order.order_number}`} />
+        <Head title={`طلب #${order.order_number}`} />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
@@ -217,6 +215,5 @@ export default function AdminOrderShow({ order }: Props) {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }

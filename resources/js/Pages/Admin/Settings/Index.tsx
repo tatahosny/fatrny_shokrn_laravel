@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Save, Settings, Globe, Mail, Phone, CreditCard, Clock } from 'lucide-react';
 
 interface Props {
@@ -49,8 +48,7 @@ export default function AdminSettingsIndex({ settings }: Props) {
     );
 
     return (
-        <AdminLayout>
-            <Head title="إعدادات النظام" />
+        <Head title="إعدادات النظام" />
 
             <div className="max-w-3xl space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
@@ -139,6 +137,5 @@ export default function AdminSettingsIndex({ settings }: Props) {
                     </div>
                 </form>
             </div>
-        </AdminLayout>
     );
 }

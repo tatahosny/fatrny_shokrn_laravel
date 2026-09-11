@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, User, ShoppingBag, MapPin, Calendar, GraduationCap, CheckCircle, XCircle, Phone, CheckCircle2, AlertCircle, Eye } from 'lucide-react';
 
 interface Customer {
@@ -54,8 +53,7 @@ export default function CustomerShow({ customer, recent_orders = [] }: Props) {
         : null;
 
     return (
-        <AdminLayout title={`بيانات العميل: ${customer.user.name}`}>
-            <Head title={`${customer.user.name} — إدارة العملاء`} />
+        <Head title={`${customer.user.name} — إدارة العملاء`} />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-xs">
@@ -208,7 +206,6 @@ export default function CustomerShow({ customer, recent_orders = [] }: Props) {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }
 

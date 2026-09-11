@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { Restaurant, MenuItem, Category, PaginatedResponse } from '../../../Types';
 import { 
     Utensils, 
@@ -174,8 +173,7 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
     });
 
     return (
-        <RestaurantLayout title="قائمة الطعام والوجبات (المنيو)" restaurantName={restaurant.name}>
-            <Head title="إدارة المنيو — بوابة المطعم" />
+        <Head title="إدارة المنيو — بوابة المطعم" />
 
             <div className="space-y-6">
                 {/* Header card */}
@@ -956,6 +954,5 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
                 onConfirm={() => { if (confirmDeleteId) router.delete(`/restaurant/menu/${confirmDeleteId}`); setConfirmDeleteId(null); }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
-        </RestaurantLayout>
     );
 }

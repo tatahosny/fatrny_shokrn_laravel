@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\UserController as AdminUser;
 use App\Http\Controllers\Admin\FinanceController as AdminFinance;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoice;
 use App\Http\Controllers\Admin\CollectionController as AdminCollection;
+use App\Http\Controllers\Admin\BillingHubController as AdminBillingHub;
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalytics;
 use App\Http\Controllers\Admin\CmsController as AdminCms;
 use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLog;
@@ -90,6 +91,7 @@ Route::middleware(['auth', 'portal:CUSTOMER'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('customer.checkout');
     Route::get('/customer/checkout', [CheckoutController::class, 'index'])->name('customer.checkout.alias');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('customer.checkout.store');
+    Route::post('/delivery-quote', \App\Http\Controllers\Customer\DeliveryQuoteController::class)->name('customer.delivery-quote');
     Route::post('/orders', [CheckoutController::class, 'store'])->name('customer.orders.store');
     Route::post('/customer/orders', [CheckoutController::class, 'store'])->name('customer.orders.store.alias');
 
@@ -98,6 +100,7 @@ Route::middleware(['auth', 'portal:CUSTOMER'])->group(function () {
     Route::get('/customer/orders', [CustomerOrderController::class, 'index'])->name('customer.orders.alias');
     Route::get('/orders/{orderNumber}', [CustomerOrderController::class, 'show'])->name('customer.order.show');
     Route::get('/customer/orders/{orderNumber}', [CustomerOrderController::class, 'show'])->name('customer.order.show.alias');
+    Route::get('/orders/{orderNumber}/driver-location', [CustomerOrderController::class, 'driverLocation'])->name('customer.order.driver-location');
 
     // Profile & Settings
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('customer.profile');
@@ -170,6 +173,17 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
     Route::post('/collections', [AdminCollection::class, 'store'])->name('collections.store');
     Route::get('/collections/{id}', [AdminCollection::class, 'show'])->name('collections.show');
 
+    // ─── Billing Hub (replaces Invoices + Collections pages) ─────
+    Route::get('/billing', [AdminBillingHub::class, 'index'])->name('billing.index');
+    Route::post('/billing/auto-generate', [AdminBillingHub::class, 'autoGenerate'])->name('billing.auto-generate');
+    Route::post('/billing/auto-lock-overdue', [AdminBillingHub::class, 'autoLockOverdue'])->name('billing.auto-lock');
+    Route::post('/billing/collection', [AdminBillingHub::class, 'recordCollection'])->name('billing.collection.store');
+    Route::post('/billing/invoice', [AdminBillingHub::class, 'createInvoice'])->name('billing.invoice.store');
+    Route::put('/billing/invoice/{id}', [AdminBillingHub::class, 'updateInvoice'])->name('billing.invoice.update');
+    Route::post('/billing/invoice/{id}/mark-paid', [AdminBillingHub::class, 'markInvoicePaid'])->name('billing.invoice.mark-paid');
+    Route::post('/billing/invoice/{id}/suspend', [AdminBillingHub::class, 'suspendRestaurant'])->name('billing.invoice.suspend');
+    Route::post('/billing/invoice/{id}/cancel', [AdminBillingHub::class, 'cancelInvoice'])->name('billing.invoice.cancel');
+
     // Analytics
     Route::get('/analytics', [AdminAnalytics::class, 'index'])->name('analytics');
 
@@ -187,7 +201,7 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
 
     // Settings
     Route::get('/settings', [AdminSettings::class, 'index'])->name('settings.index');
-    Route::put('/settings', [AdminSettings::class, 'update'])->name('settings.update');
+    Route::match(['put', 'post'], '/settings', [AdminSettings::class, 'update'])->name('settings.update');
 
     // Delivery Drivers (Admin-level management across all restaurants)
     Route::get('/delivery-drivers', [AdminDriver::class, 'index'])->name('delivery-drivers.index');
@@ -237,7 +251,7 @@ Route::middleware(['auth', 'portal:RESTAURANT', 'billing.check'])->prefix('resta
 
     // Settings
     Route::get('/settings', [RestaurantSettings::class, 'index'])->name('settings.index');
-    Route::put('/settings', [RestaurantSettings::class, 'update'])->name('settings.update');
+    Route::match(['put', 'post'], '/settings', [RestaurantSettings::class, 'update'])->name('settings.update');
 });
 
 // =====================================================
@@ -254,6 +268,7 @@ Route::middleware(['auth', 'portal:DELIVERY', 'billing.check'])->prefix('deliver
     Route::get('/active-order', [DeliveryOrder::class, 'activeOrder'])->name('orders.active');
     Route::get('/orders/{id}', [DeliveryOrder::class, 'show'])->name('orders.show');
     Route::match(['put', 'patch'], '/orders/{id}/status', [DeliveryOrder::class, 'updateStatus'])->name('orders.status');
+    Route::post('/orders/{id}/location', [DeliveryOrder::class, 'updateLocation'])->name('orders.location');
 
     // Profile
     Route::get('/profile', [DeliveryProfile::class, 'index'])->name('profile');

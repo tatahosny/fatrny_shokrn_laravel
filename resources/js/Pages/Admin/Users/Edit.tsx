@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, Save, User, Shield } from 'lucide-react';
 
 interface UserData {
@@ -39,8 +38,7 @@ export default function UserEdit({ user, roles }: Props) {
     };
 
     return (
-        <AdminLayout>
-            <Head title={`تعديل ${user.name}`} />
+        <Head title={`تعديل ${user.name}`} />
 
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
@@ -124,6 +122,5 @@ export default function UserEdit({ user, roles }: Props) {
                     </div>
                 </form>
             </div>
-        </AdminLayout>
     );
 }

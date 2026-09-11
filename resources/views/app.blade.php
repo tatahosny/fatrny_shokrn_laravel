@@ -13,8 +13,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.tsx'])
+    {{-- The HMR client is useful only while Vite is actively running. Loading it
+         against a normal Laravel server makes every navigation wait for a dev
+         server that may not exist. CSS is already imported by app.tsx. --}}
+    @if (app()->environment('local') && is_file(public_path('hot')))
+        @viteReactRefresh
+    @endif
+    @vite(['resources/js/app.tsx'])
     @inertiaHead
 </head>
 <body class="font-sans antialiased bg-[#fafaf9] dark:bg-[#0c0a09] text-[#1c1917] dark:text-[#f5f5f4] selection:bg-orange-500 selection:text-white">

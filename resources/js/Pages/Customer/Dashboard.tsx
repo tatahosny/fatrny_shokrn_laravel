@@ -44,6 +44,23 @@ export default function Dashboard({ customer, recent_orders = [], active_order }
             <Head title="لوحة تحكم الطالب والعميل — فطرنا شكراً" />
 
             <div className="space-y-8">
+                <section className="relative isolate overflow-hidden rounded-[2rem] bg-orange-600 px-6 py-7 text-white shadow-xl shadow-orange-500/20 sm:px-8">
+                    <div className="absolute -left-12 -top-16 h-44 w-44 rounded-full bg-amber-300/35 blur-3xl" />
+                    <div className="absolute bottom-0 right-0 h-28 w-2/3 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,.22),transparent_60%)]" />
+                    <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p className="text-[10px] font-black tracking-[.22em] text-orange-100 uppercase">طلباتك، على مزاجك</p>
+                            <h1 className="mt-2 text-2xl font-black sm:text-3xl">ماذا تريد أن تطلب اليوم؟</h1>
+                            <p className="mt-2 max-w-lg text-sm text-orange-50/85">اختر مطعمك، حدّد مكانك، وتابع كل خطوة حتى يصل طلبك.</p>
+                        </div>
+                        <Link href="/restaurants" prefetch className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-black text-orange-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-orange-50">اكتشف المطاعم <ArrowRight className="h-4 w-4 rotate-180" /></Link>
+                    </div>
+                    <div className="relative mt-6 flex items-center gap-3 text-xs text-orange-50/90">
+                        <span className="grid h-8 w-8 place-items-center rounded-xl bg-white/15"><ShoppingBag className="h-4 w-4" /></span>
+                        <span>{active_order ? `لديك طلب جاري من ${active_order.restaurant?.name || 'مطعم شريك'}` : 'اطلب الآن من مطاعمك المفضلة في دقائق'}</span>
+                    </div>
+                </section>
+
                 {/* Student Status Banner */}
                 {isStudentApproved ? (
                     <div className="p-6 rounded-3xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-transparent border border-orange-500/30 flex items-center justify-between gap-4">

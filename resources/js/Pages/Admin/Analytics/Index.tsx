@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { BarChart2, TrendingUp, ShoppingBag, Users, Store, Clock, Star } from 'lucide-react';
 import {
     BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -28,8 +27,7 @@ export default function AdminAnalytics({ ordersByHour, ordersByDay, topRestauran
     const fmt = (v: number) => (v / 100).toFixed(2);
 
     return (
-        <AdminLayout>
-            <Head title="التحليلات" />
+        <Head title="التحليلات" />
 
             <div className="space-y-6" dir="rtl">
                 <div>
@@ -176,6 +174,5 @@ export default function AdminAnalytics({ ordersByHour, ordersByDay, topRestauran
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }

@@ -4,6 +4,8 @@ export interface UniversityLocation {
     shortName: string;
     description: string;
     badge: string;
+    latitude: number;
+    longitude: number;
     locations: string[];
 }
 
@@ -14,6 +16,8 @@ export const BORG_EL_ARAB_UNIVERSITIES: UniversityLocation[] = [
         shortName: 'برج العرب التكنولوجية',
         description: 'الحرم الجامعي الرئيسي - برج العرب الجديدة',
         badge: 'تكنولوجية',
+        latitude: 30.8756,
+        longitude: 29.5842,
         locations: [
             'البوابة الرئيسية (الاستقبال والأمن)',
             'المبنى الإداري ورعاية الشباب',
@@ -31,6 +35,8 @@ export const BORG_EL_ARAB_UNIVERSITIES: UniversityLocation[] = [
         shortName: 'الجامعة المصرية اليابانية',
         description: 'الحرم الرئيسي - الحي السكني الثالث - برج العرب',
         badge: 'يابانية',
+        latitude: 30.8648,
+        longitude: 29.5741,
         locations: [
             'البوابة الرئيسية (Gate 1 - الاستقبال)',
             'بوابة 2 (Gate 2)',
@@ -48,6 +54,8 @@ export const BORG_EL_ARAB_UNIVERSITIES: UniversityLocation[] = [
         shortName: 'جامعة سنجور',
         description: 'المقر الجديد - برج العرب الجديدة',
         badge: 'دولية فرنسية',
+        latitude: 30.8805,
+        longitude: 29.5912,
         locations: [
             'البوابة الرئيسية للجامعة',
             'المبنى التعليمي الرئيسي والإدارة المركزية',
@@ -57,6 +65,22 @@ export const BORG_EL_ARAB_UNIVERSITIES: UniversityLocation[] = [
         ],
     },
 ];
+
+/**
+ * Calculate geographical distance in kilometers between two GPS coordinates using the Haversine formula.
+ */
+export function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return Math.max(0.5, Math.round(distance * 10) / 10);
+}
 
 export const OTHER_UNIVERSITIES_OPTIONS = [
     'جامعة الإسكندرية',

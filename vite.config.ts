@@ -22,6 +22,15 @@ export default defineConfig({
         chunkSizeWarningLimit: 1500,
         rollupOptions: {
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            output: {
+                manualChunks(id) {
+                    if (!id.includes('node_modules')) return;
+                    if (id.includes('leaflet')) return 'maps';
+                    if (id.includes('recharts')) return 'charts';
+                    if (id.includes('lucide-react')) return 'icons';
+                    if (id.includes('react') || id.includes('inertia')) return 'framework';
+                },
+            },
         },
     },
     server: {

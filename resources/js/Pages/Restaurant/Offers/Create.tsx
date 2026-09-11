@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { ArrowLeft, Save, Tag, Calendar, Percent, DollarSign } from 'lucide-react';
 
 interface MenuItem {
@@ -32,8 +31,7 @@ export default function OfferCreate({ menuItems }: Props) {
     };
 
     return (
-        <RestaurantLayout>
-            <Head title="إضافة عرض جديد" />
+        <Head title="إضافة عرض جديد" />
 
             <div className="max-w-2xl" dir="rtl">
                 <div className="flex items-center gap-4 mb-6">
@@ -161,6 +159,5 @@ export default function OfferCreate({ menuItems }: Props) {
                     </div>
                 </form>
             </div>
-        </RestaurantLayout>
     );
 }

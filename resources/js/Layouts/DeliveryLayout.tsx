@@ -80,6 +80,7 @@ export default function DeliveryLayout({
                     <nav className="hidden sm:flex items-center gap-1 bg-stone-800/80 p-1 rounded-2xl border border-stone-700/60">
                         <Link
                             href="/delivery/dashboard"
+                            prefetch
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                                 currentPath === '/delivery/dashboard' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
                             }`}
@@ -89,6 +90,7 @@ export default function DeliveryLayout({
                         </Link>
                         <Link
                             href="/delivery/active-order"
+                            prefetch
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                                 currentPath === '/delivery/active-order' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
                             }`}
@@ -98,6 +100,7 @@ export default function DeliveryLayout({
                         </Link>
                         <Link
                             href="/delivery/order-history"
+                            prefetch
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                                 currentPath === '/delivery/order-history' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
                             }`}
@@ -107,6 +110,7 @@ export default function DeliveryLayout({
                         </Link>
                         <Link
                             href="/delivery/profile"
+                            prefetch
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                                 currentPath === '/delivery/profile' ? 'bg-emerald-600 text-white shadow-xs' : 'text-stone-300 hover:text-white'
                             }`}
@@ -158,6 +162,7 @@ export default function DeliveryLayout({
             <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 py-2 px-4 flex items-center justify-around shadow-lg sm:hidden">
                 <Link
                     href="/delivery/dashboard"
+                    prefetch
                     className={`flex flex-col items-center gap-1 text-[11px] font-semibold transition ${
                         currentPath === '/delivery/dashboard' ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500 dark:text-stone-400'
                     }`}
@@ -168,6 +173,7 @@ export default function DeliveryLayout({
 
                 <Link
                     href="/delivery/active-order"
+                    prefetch
                     className={`flex flex-col items-center gap-1 text-[11px] font-semibold transition ${
                         currentPath === '/delivery/active-order' ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500 dark:text-stone-400'
                     }`}
@@ -178,6 +184,7 @@ export default function DeliveryLayout({
 
                 <Link
                     href="/delivery/order-history"
+                    prefetch
                     className={`flex flex-col items-center gap-1 text-[11px] font-semibold transition ${
                         currentPath === '/delivery/order-history' ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500 dark:text-stone-400'
                     }`}
@@ -188,6 +195,7 @@ export default function DeliveryLayout({
 
                 <Link
                     href="/delivery/profile"
+                    prefetch
                     className={`flex flex-col items-center gap-1 text-[11px] font-semibold transition ${
                         currentPath === '/delivery/profile' ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500 dark:text-stone-400'
                     }`}

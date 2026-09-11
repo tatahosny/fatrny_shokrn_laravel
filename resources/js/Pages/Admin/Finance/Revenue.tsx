@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { ArrowLeft, DollarSign, TrendingUp, TrendingDown, BarChart2, Calendar } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 
@@ -15,8 +14,7 @@ export default function AdminFinanceRevenue({ period, revenueByDay, revenueByRes
     const fmt = (v: number) => (v / 100).toFixed(2);
 
     return (
-        <AdminLayout>
-            <Head title="تفاصيل الإيرادات" />
+        <Head title="تفاصيل الإيرادات" />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center gap-4">
@@ -99,6 +97,5 @@ export default function AdminFinanceRevenue({ period, revenueByDay, revenueByRes
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import CustomerLayout from '../../Layouts/CustomerLayout';
+import CustomerLiveTrackingMap from '../../Components/CustomerLiveTrackingMap';
 import { Order, OrderStatus } from '../../Types';
 import { 
     Clock, 
@@ -488,6 +489,24 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                             </a>
                         </div>
                     </div>
+                )}
+
+                {/* Live Driver Tracking Map on Customer Screen */}
+                {driver && ['ASSIGNED_TO_DRIVER', 'OUT_FOR_DELIVERY'].includes(order.status) && (
+                    <CustomerLiveTrackingMap
+                        orderNumber={order.order_number}
+                        customerLat={order.latitude ? Number(order.latitude) : null}
+                        customerLng={order.longitude ? Number(order.longitude) : null}
+                        customerAddress={order.address}
+                        restaurantLat={order.restaurant?.latitude ? Number(order.restaurant.latitude) : null}
+                        restaurantLng={order.restaurant?.longitude ? Number(order.restaurant.longitude) : null}
+                        restaurantName={order.restaurant?.name || 'المطعم'}
+                        initialDriverLat={driver.current_latitude ? Number(driver.current_latitude) : null}
+                        initialDriverLng={driver.current_longitude ? Number(driver.current_longitude) : null}
+                        driverName={driver.name}
+                        driverPhone={driver.phone}
+                        orderStatus={order.status}
+                    />
                 )}
 
                 {/* 4. Two Columns Layout: Items & Info */}

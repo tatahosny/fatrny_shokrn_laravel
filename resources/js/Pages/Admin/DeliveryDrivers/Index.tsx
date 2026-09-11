@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { DeliveryDriver, Restaurant, PaginatedResponse } from '../../../Types';
 import { Bike, Plus, Search, Filter, Trash2, Power, Store, Phone, ToggleLeft, ToggleRight } from 'lucide-react';
 
@@ -27,8 +26,7 @@ export default function Index({ drivers, restaurants, filters }: DriversIndexPro
     };
 
     return (
-        <AdminLayout title="إدارة كباتن التوصيل">
-            <Head title="كباتن التوصيل — لوحة الإدارة" />
+        <Head title="كباتن التوصيل — لوحة الإدارة" />
 
             <div className="space-y-6">
                 {/* Header */}
@@ -195,6 +193,5 @@ export default function Index({ drivers, restaurants, filters }: DriversIndexPro
                     </div>
                 </div>
             )}
-        </AdminLayout>
     );
 }

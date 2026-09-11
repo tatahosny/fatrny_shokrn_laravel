@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import RestaurantLayout from '../../../Layouts/RestaurantLayout';
 import { PaginatedResponse } from '../../../Types';
 import {
     Receipt,
@@ -85,8 +84,7 @@ export default function Index({
     )}`;
 
     return (
-        <RestaurantLayout title="الفواتير والمستحقات الشهرية">
-            <Head title="الفواتير والاشتراكات — بوابة المطعم" />
+        <Head title="الفواتير والاشتراكات — بوابة المطعم" />
 
             <div className="space-y-6 max-w-7xl mx-auto">
                 {/* 1. SUSPENSION ALERT BANNER */}
@@ -162,16 +160,16 @@ export default function Index({
                             <CreditCard className="w-5 h-5 text-orange-500" />
                         </div>
                         <div className="text-base font-black text-stone-900 dark:text-white">
-                            {restaurant.commission_type === 'MONTHLY_SUBSCRIPTION' || (restaurant.monthly_subscription_fee && restaurant.monthly_subscription_fee > 0)
+                            {restaurant.commission_type === 'SUBSCRIPTION' || restaurant.commission_type === 'MONTHLY_SUBSCRIPTION' || (restaurant.monthly_subscription_fee && restaurant.monthly_subscription_fee > 0 && !restaurant.commission_percentage)
                                 ? 'اشتراك شهري ثابت'
                                 : restaurant.commission_type === 'PERCENTAGE'
                                 ? `نسبة عمولة (%${restaurant.commission_percentage || 0})`
                                 : 'حسب الاتفاق'}
                         </div>
                         <p className="text-[11px] text-stone-400 mt-1">
-                            {restaurant.monthly_subscription_fee
-                                ? `${Number(restaurant.monthly_subscription_fee).toLocaleString()} ج.م شهرياً`
-                                : 'يتم احتسابها من إجمالي المبيعات'}
+                            {restaurant.commission_type === 'SUBSCRIPTION' || (restaurant.monthly_subscription_fee && restaurant.monthly_subscription_fee > 0)
+                                ? `${Number(restaurant.monthly_subscription_fee).toLocaleString()} ج.م شهرياً (بدون عمولة على المبيعات)`
+                                : 'نسبة مقتطعة من إجمالي مبيعات الطلبات'}
                         </p>
                     </div>
 
@@ -206,12 +204,14 @@ export default function Index({
                             <Calendar className="w-5 h-5 text-indigo-500" />
                         </div>
                         <div className="text-base font-black font-mono text-stone-900 dark:text-white">
-                            {restaurant.payment_due_date || 'غير محدد'}
+                            {restaurant.payment_due_date ? restaurant.payment_due_date.split('T')[0] : 'غير محدد'}
                         </div>
                         <p className="text-[11px] text-stone-400 mt-1">
-                            {daysUntilDue !== null && daysUntilDue !== undefined
+                            {!pendingInvoice
+                                ? `تم سداد اشتراك هذا الشهر بنجاح ✅ (التجديد القادم بعد ${typeof daysUntilDue === 'number' && daysUntilDue > 0 ? daysUntilDue : 30} يوم)`
+                                : typeof daysUntilDue === 'number'
                                 ? daysUntilDue > 0
-                                    ? `متبقي ${daysUntilDue} يوم`
+                                    ? `متبقي ${daysUntilDue} يوم على الاستحقاق`
                                     : daysUntilDue === 0
                                     ? 'اليوم هو موعد الاستحقاق'
                                     : `متأخر منذ ${Math.abs(daysUntilDue)} يوم`
@@ -319,7 +319,7 @@ export default function Index({
                                                 {inv.invoice_number}
                                             </td>
                                             <td className="py-4 px-4 text-stone-500 font-mono">
-                                                {inv.issue_date}
+                                                {inv.issue_date ? inv.issue_date.split('T')[0] : '—'}
                                             </td>
                                             <td className="py-4 px-4 font-bold text-stone-700 dark:text-stone-300">
                                                 {inv.invoice_type === 'SUBSCRIPTION' ? 'اشتراك شهري' : 'عمولة مبيعات'}
@@ -328,7 +328,7 @@ export default function Index({
                                                 {Number(inv.total_amount).toLocaleString()} ج.م
                                             </td>
                                             <td className="py-4 px-4 font-mono text-stone-500">
-                                                {inv.due_date}
+                                                {inv.due_date ? inv.due_date.split('T')[0] : '—'}
                                             </td>
                                             <td className="py-4 px-4">
                                                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-black inline-flex items-center gap-1 ${
@@ -352,6 +352,5 @@ export default function Index({
                     )}
                 </div>
             </div>
-        </RestaurantLayout>
     );
 }

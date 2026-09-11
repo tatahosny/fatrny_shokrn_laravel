@@ -7,6 +7,7 @@ use App\Models\Order;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -16,6 +17,7 @@ class DashboardController extends Controller
         abort_if(!$driver, 403, 'لا يوجد ملف مندوب توصيل مرتبط.');
 
         // CRITICAL: Only show orders assigned to THIS driver
+        $dashboard = Cache::remember("dashboard.driver.{$driver->id}", now()->addSeconds(10), function () use ($driver) {
         $activeOrders = Order::where('assigned_delivery_id', $driver->id)
             ->whereIn('status', ['ASSIGNED_TO_DRIVER', 'OUT_FOR_DELIVERY'])
             ->with(['customer.user', 'restaurant:id,name,phone,address', 'items'])
@@ -46,13 +48,16 @@ class DashboardController extends Controller
             ];
         }
 
-        return Inertia::render('Delivery/Dashboard', [
+        return [
             'driver'          => $driver->load('restaurant:id,name,logo'),
             'active_orders'   => $activeOrders,
             'completed_today' => $completedToday,
             'earnings_today'  => $earningsToday,
             'weekly_stats'    => $weeklyStats,
-        ]);
+        ];
+        });
+
+        return Inertia::render('Delivery/Dashboard', $dashboard);
     }
 
     public function suspended(): Response
@@ -68,4 +73,3 @@ class DashboardController extends Controller
         ]);
     }
 }
-

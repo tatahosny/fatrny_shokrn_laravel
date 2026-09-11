@@ -129,4 +129,22 @@ class OrderController extends Controller
 
         return back()->with('success', 'تم تحديث حالة التوصيل.');
     }
+
+    public function updateLocation(Request $request, int $id)
+    {
+        $driver = $this->driver();
+        $validated = $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'speed' => 'nullable|numeric',
+            'heading' => 'nullable|numeric',
+        ]);
+
+        $driver->update([
+            'current_latitude' => $validated['latitude'],
+            'current_longitude' => $validated['longitude'],
+        ]);
+
+        return response()->json(['success' => true]);
+    }
 }

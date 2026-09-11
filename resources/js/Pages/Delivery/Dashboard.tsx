@@ -52,6 +52,27 @@ export default function Dashboard({
             <Head title="لوحة كابتن التوصيل — فطرنا شكراً" />
 
             <div className="space-y-6">
+                <section className="relative isolate overflow-hidden rounded-[2rem] bg-emerald-950 px-5 py-6 text-white shadow-xl shadow-emerald-950/20 sm:px-7">
+                    <div className="absolute -left-12 top-0 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
+                    <div className="absolute -bottom-16 right-10 h-48 w-48 rounded-full bg-teal-300/10 blur-3xl" />
+                    <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="grid h-14 w-14 place-items-center rounded-2xl border border-white/15 bg-white/10 shadow-inner"><Navigation className="h-7 w-7 text-emerald-300" /></div>
+                            <div>
+                                <p className="text-[10px] font-black tracking-[.22em] text-emerald-300 uppercase">وضع الرحلة</p>
+                                <h1 className="mt-1 text-xl font-black">{isAvailable ? 'أنت جاهز للطريق' : 'أنت غير متصل الآن'}</h1>
+                                <p className="mt-1 text-xs text-emerald-100/70">{active_orders.length ? `لديك ${active_orders.length} طلب يحتاج متابعة الآن` : 'شغّل الاستقبال لتصلك الطلبات الجديدة فورًا'}</p>
+                            </div>
+                        </div>
+                        <button onClick={toggleStatus} className={`rounded-2xl px-4 py-3 text-xs font-black transition ${isAvailable ? 'bg-white text-emerald-950 hover:bg-emerald-50' : 'bg-emerald-400 text-emerald-950 hover:bg-emerald-300'}`}>{isAvailable ? 'إيقاف الاستقبال' : 'بدء الاستقبال'}</button>
+                    </div>
+                    <div className="relative mt-6 grid grid-cols-3 divide-x divide-x-reverse divide-white/10 rounded-2xl border border-white/10 bg-black/10 text-center">
+                        <div className="px-2 py-3"><p className="text-lg font-black">{active_orders.length}</p><p className="text-[10px] text-emerald-100/60">طلبات نشطة</p></div>
+                        <div className="px-2 py-3"><p className="text-lg font-black">{completed_today}</p><p className="text-[10px] text-emerald-100/60">تم اليوم</p></div>
+                        <div className="px-2 py-3"><p className="text-lg font-black">{Number(earnings_today).toLocaleString()}</p><p className="text-[10px] text-emerald-100/60">كاش اليوم</p></div>
+                    </div>
+                </section>
+
                 {/* Status & KPI Banner */}
                 <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">

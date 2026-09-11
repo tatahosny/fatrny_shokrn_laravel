@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Restaurant, PaginatedResponse } from '../../../Types';
 import { Store, Plus, Search, Filter, Eye, Edit2, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
@@ -28,8 +27,7 @@ export default function Index({ restaurants, filters }: RestaurantsIndexProps) {
     };
 
     return (
-        <AdminLayout title="إدارة المطاعم الشريكة">
-            <Head title="إدارة المطاعم الشريكة — الإدارة المركزية" />
+        <Head title="إدارة المطاعم الشريكة — الإدارة المركزية" />
 
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
@@ -162,6 +160,5 @@ export default function Index({ restaurants, filters }: RestaurantsIndexProps) {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }

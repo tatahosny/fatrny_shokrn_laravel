@@ -2,18 +2,14 @@ import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import DeliveryLayout from '../../Layouts/DeliveryLayout';
 import { DeliveryDriver, Order } from '../../Types';
+import DeliveryRouteMap from '../../Components/DeliveryRouteMap';
 import { 
     Bike, 
-    Navigation, 
     Phone, 
     MapPin, 
     Store, 
     CheckCircle2, 
-    Clock, 
-    DollarSign, 
-    ArrowRight,
-    ExternalLink,
-    AlertCircle
+    ArrowRight
 } from 'lucide-react';
 
 interface ActiveOrderProps {
@@ -28,9 +24,6 @@ export default function ActiveOrder({ order, driver }: ActiveOrderProps) {
         });
     };
 
-    const mapsUrl = order.latitude && order.longitude
-        ? `https://www.google.com/maps/dir/?api=1&destination=${order.latitude},${order.longitude}`
-        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address + ' برج العرب')}`;
 
     return (
         <DeliveryLayout title={`تفاصيل توصيل طلب ${order.order_number}`}>
@@ -139,18 +132,24 @@ export default function ActiveOrder({ order, driver }: ActiveOrderProps) {
                                 ملاحظة العميل: {order.customer_notes}
                             </p>
                         )}
-                        <a
-                            href={mapsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-xs font-bold text-stone-800 dark:text-stone-200 transition"
-                        >
-                            <Navigation className="w-4 h-4 text-blue-500" />
-                            <span>فتح الاتجاهات على خرائط Google</span>
-                            <ExternalLink className="w-3 h-3 text-stone-400" />
-                        </a>
                     </div>
                 </div>
+
+                {/* Route Map */}
+                <DeliveryRouteMap
+                    restaurantLat={Number(order.restaurant?.latitude) || 30.8700}
+                    restaurantLng={Number(order.restaurant?.longitude) || 29.5800}
+                    restaurantName={order.restaurant?.name || 'المطعم'}
+                    restaurantAddress={order.restaurant?.address}
+                    restaurantPhone={order.restaurant?.phone}
+                    customerLat={order.latitude ? Number(order.latitude) : undefined}
+                    customerLng={order.longitude ? Number(order.longitude) : undefined}
+                    customerAddress={order.address}
+                    customerName={order.customer?.user?.name || 'العميل'}
+                    customerPhone={order.customer?.user?.phone}
+                    orderStatus={order.status}
+                    orderId={order.id}
+                />
 
                 {/* Items Checklist */}
                 <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs space-y-4">

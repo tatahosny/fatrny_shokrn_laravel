@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { 
     Plus, 
     Edit, 
@@ -89,8 +88,7 @@ export default function AdminUsersIndex({ users, roles = [], filters = {} }: Pro
     };
 
     return (
-        <AdminLayout title="إدارة المستخدمين والصلاحيات">
-            <Head title="إدارة المستخدمين — الإدارة المركزية" />
+        <Head title="إدارة المستخدمين — الإدارة المركزية" />
 
             <div className="space-y-6 pb-12" dir="rtl">
                 {/* Header Top Section */}
@@ -305,6 +303,5 @@ export default function AdminUsersIndex({ users, roles = [], filters = {} }: Pro
                 }}
                 onCancel={() => setConfirmDeleteId(null)}
             />
-        </AdminLayout>
     );
 }

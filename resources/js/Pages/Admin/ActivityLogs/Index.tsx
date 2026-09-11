@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Activity, User, Clock, Info } from 'lucide-react';
 
 interface Log {
@@ -31,8 +30,7 @@ const logColors: Record<string, string> = {
 
 export default function AdminActivityLogs({ logs }: Props) {
     return (
-        <AdminLayout>
-            <Head title="سجل النشاطات" />
+        <Head title="سجل النشاطات" />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
@@ -103,6 +101,5 @@ export default function AdminActivityLogs({ logs }: Props) {
                     )}
                 </div>
             </div>
-        </AdminLayout>
     );
 }

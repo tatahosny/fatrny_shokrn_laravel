@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Plus, Eye, Store, DollarSign, Calendar, CheckCircle, Clock } from 'lucide-react';
 
 interface Collection {
@@ -50,8 +49,7 @@ export default function AdminCollectionsIndex({ collections, restaurants, totalC
     };
 
     return (
-        <AdminLayout>
-            <Head title="التحصيلات" />
+        <Head title="التحصيلات" />
 
             <div className="space-y-6" dir="rtl">
                 <div className="flex items-center justify-between">
@@ -171,6 +169,5 @@ export default function AdminCollectionsIndex({ collections, restaurants, totalC
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }

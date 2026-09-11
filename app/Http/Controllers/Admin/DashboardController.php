@@ -13,6 +13,7 @@ use App\Services\FinancialService;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -20,6 +21,7 @@ class DashboardController extends Controller
 
     public function index(): Response
     {
+        $data = Cache::remember('dashboard.admin.overview', now()->addSeconds(20), function () {
         $today = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
 
@@ -71,12 +73,15 @@ class DashboardController extends Controller
         ->take(5)
         ->get(['id', 'name', 'logo', 'status']);
 
-        return Inertia::render('Admin/Dashboard', [
+        return [
             'stats'           => $stats,
             'revenue_chart'   => $revenueChart,
             'profit_chart'    => $profitChart,
             'recent_orders'   => $recentOrders,
             'top_restaurants' => $topRestaurants,
-        ]);
+        ];
+        });
+
+        return Inertia::render('Admin/Dashboard', $data);
     }
 }

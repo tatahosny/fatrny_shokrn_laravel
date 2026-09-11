@@ -67,7 +67,7 @@
 }
 
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     font-size: 16px;
 }
 
@@ -499,3 +499,5 @@ body {
   animation: pulseGlow 2.5s infinite;
 }
 
+
+@import "./dashboard-shells.css";

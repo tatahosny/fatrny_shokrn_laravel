@@ -44,6 +44,8 @@ export interface Restaurant {
     closing_time?: string;
     minimum_order_amount: number;
     delivery_fee: number;
+    delivery_base_fee?: number;
+    delivery_fee_per_km?: number;
     estimated_delivery_time?: number;
     student_discount_percentage: number;
     commission_type: CommissionType;
@@ -383,6 +385,13 @@ export interface SharedProps extends Record<string, unknown> {
     };
     app_name: string;
     app_slogan?: string;
+    support_phone?: string;
+    shell_restaurant?: {
+        id: number;
+        name: string;
+        status: RestaurantStatus;
+        logo?: string | null;
+    } | null;
     errors: Record<string, string>;
 }
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
 import { Order, PaginatedResponse } from '../../../Types';
 import { ShoppingBag, Search, Eye, Filter } from 'lucide-react';
 
@@ -23,8 +22,7 @@ export default function Index({ orders, filters }: OrdersIndexProps) {
     };
 
     return (
-        <AdminLayout title="جميع طلبات المنصة">
-            <Head title="جميع طلبات المنصة — الإدارة المركزية" />
+        <Head title="جميع طلبات المنصة — الإدارة المركزية" />
 
             <div className="space-y-6">
                 <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs">
@@ -116,6 +114,5 @@ export default function Index({ orders, filters }: OrdersIndexProps) {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }
