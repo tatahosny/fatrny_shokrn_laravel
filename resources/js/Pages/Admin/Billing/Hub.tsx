@@ -4,7 +4,7 @@ import {
     Zap, Lock, CheckCircle2, Clock, AlertTriangle, Plus,
     DollarSign, Receipt, CreditCard, TrendingUp, Store,
     Calendar, XCircle, ChevronLeft, ChevronRight, Banknote,
-    RefreshCw, ShieldOff, Settings2, ListChecks, Pencil
+    RefreshCw, ShieldOff, Settings2, ListChecks, Pencil, Download, Table2
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ function ConfirmModal({ message, onConfirm, onCancel, danger = false }: {
 
 // ─── Main Component ───────────────────────────────────────────────
 export default function BillingHub({ stats, invoices, collections, overdueRestaurants, restaurants, filters }: Props) {
-    const [activeTab, setActiveTab] = useState<'overview' | 'invoices' | 'collections' | 'overdue'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'invoices' | 'collections' | 'overdue' | 'subscriptions'>('overview');
     const [confirm, setConfirm] = useState<{ msg: string; action: () => void; danger?: boolean } | null>(null);
 
     // Forms
@@ -207,10 +207,11 @@ export default function BillingHub({ stats, invoices, collections, overdueRestau
     };
 
     const tabs = [
-        { id: 'overview',     label: 'لوحة التحكم',      icon: Settings2 },
-        { id: 'invoices',     label: 'الفواتير',          icon: Receipt },
-        { id: 'collections',  label: 'سجل التحصيل',       icon: CreditCard },
-        { id: 'overdue',      label: `المتأخرون (${overdueRestaurants.length})`, icon: AlertTriangle },
+        { id: 'overview',       label: 'لوحة التحكم',         icon: Settings2 },
+        { id: 'subscriptions',  label: 'جدول الاشتراكات',      icon: Table2 },
+        { id: 'invoices',       label: 'الفواتير',             icon: Receipt },
+        { id: 'collections',    label: 'سجل التحصيل',          icon: CreditCard },
+        { id: 'overdue',        label: `المتأخرون (${overdueRestaurants.length})`, icon: AlertTriangle },
     ] as const;
 
     return (
@@ -540,6 +541,16 @@ export default function BillingHub({ stats, invoices, collections, overdueRestau
                                                     </td>
                                                     <td className="px-5 py-3">
                                                         <div className="flex items-center gap-1.5">
+                                                            {/* زر تحميل الفاتورة - دائماً متاح */}
+                                                            <a
+                                                                href={`/admin/billing/invoice/${inv.id}/download`}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                title="عرض وطباعة الفاتورة"
+                                                                className="p-1.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/40 text-orange-400 transition"
+                                                            >
+                                                                <Download className="w-3.5 h-3.5" />
+                                                            </a>
                                                             {/* زر تعديل الفاتورة - متاح طالما لم تسدد */}
                                                             {!isPaid && (
                                                                 <button
@@ -589,6 +600,92 @@ export default function BillingHub({ stats, invoices, collections, overdueRestau
                                     onChange={p => router.get('/admin/billing', { ...filters, inv_page: p }, { preserveState: true })}
                                 />
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* ─────────────────────────────── TAB: Subscriptions ── */}
+                {activeTab === 'subscriptions' && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-white font-bold text-lg flex items-center gap-2">
+                                    <Table2 className="w-5 h-5 text-orange-400" />
+                                    جدول الاشتراكات الشهرية
+                                </h2>
+                                <p className="text-stone-400 text-xs mt-1">المبلغ الثابت الذي يجب أن يدفعه كل مطعم شهرياً</p>
+                            </div>
+                            <div className="text-orange-400 font-black text-2xl">
+                                {fmt(restaurants.reduce((s, r) => s + (r.monthly_subscription_fee ?? 0), 0))} ج
+                                <p className="text-stone-400 text-xs font-normal">الإجمالي الشهري المتوقع</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="border-b border-white/10">
+                                        <tr className="text-stone-400 text-right">
+                                            <th className="px-5 py-3.5 font-medium">#</th>
+                                            <th className="px-5 py-3.5 font-medium">اسم المطعم</th>
+                                            <th className="px-5 py-3.5 font-medium">نوع الاشتراك</th>
+                                            <th className="px-5 py-3.5 font-medium">المبلغ الشهري</th>
+                                            <th className="px-5 py-3.5 font-medium">الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {restaurants.map((r, idx) => {
+                                            const fee = r.monthly_subscription_fee ?? 0;
+                                            const isSuspended = r.status === 'SUSPENDED';
+                                            const isActive = r.status === 'ACTIVE';
+                                            return (
+                                                <tr key={r.id} className={`hover:bg-white/5 transition-colors ${isSuspended ? 'bg-red-500/5' : ''}`}>
+                                                    <td className="px-5 py-3.5 text-stone-500 text-xs">{idx + 1}</td>
+                                                    <td className="px-5 py-3.5">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center shrink-0">
+                                                                <Store className="w-4 h-4 text-orange-400" />
+                                                            </div>
+                                                            <span className="text-white font-semibold">{r.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-5 py-3.5">
+                                                        <span className="px-2.5 py-1 rounded-full text-xs font-bold border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                                                            {r.commission_type === 'SUBSCRIPTION' ? 'اشتراك شهري' : r.commission_type === 'COMMISSION' ? 'عمولة' : 'مدمج'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-5 py-3.5">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className={`text-lg font-black ${fee > 0 ? 'text-amber-400' : 'text-stone-500'}`}>
+                                                                {fee > 0 ? fmt(fee) : '—'}
+                                                            </span>
+                                                            {fee > 0 && <span className="text-stone-400 text-xs">ج.م / شهر</span>}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-5 py-3.5">
+                                                        {isSuspended ? (
+                                                            <span className="px-2.5 py-1 rounded-full text-xs font-bold border bg-red-500/15 text-red-400 border-red-500/25">موقوف ⛔</span>
+                                                        ) : isActive ? (
+                                                            <span className="px-2.5 py-1 rounded-full text-xs font-bold border bg-emerald-500/15 text-emerald-400 border-emerald-500/25">نشط ✓</span>
+                                                        ) : (
+                                                            <span className="px-2.5 py-1 rounded-full text-xs font-bold border bg-stone-500/15 text-stone-400 border-stone-500/25">{r.status}</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                    <tfoot className="border-t-2 border-orange-500/30">
+                                        <tr className="bg-orange-500/5">
+                                            <td colSpan={3} className="px-5 py-3.5 text-stone-400 text-sm font-bold">الإجمالي الشهري المتوقع</td>
+                                            <td className="px-5 py-3.5 text-amber-400 text-lg font-black">
+                                                {fmt(restaurants.reduce((s, r) => s + (r.monthly_subscription_fee ?? 0), 0))} ج.م
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 )}

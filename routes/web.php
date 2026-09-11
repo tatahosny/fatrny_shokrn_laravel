@@ -183,6 +183,7 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
     Route::post('/billing/invoice/{id}/mark-paid', [AdminBillingHub::class, 'markInvoicePaid'])->name('billing.invoice.mark-paid');
     Route::post('/billing/invoice/{id}/suspend', [AdminBillingHub::class, 'suspendRestaurant'])->name('billing.invoice.suspend');
     Route::post('/billing/invoice/{id}/cancel', [AdminBillingHub::class, 'cancelInvoice'])->name('billing.invoice.cancel');
+    Route::get('/billing/invoice/{id}/download', [AdminBillingHub::class, 'downloadInvoice'])->name('billing.invoice.download');
 
     // Analytics
     Route::get('/analytics', [AdminAnalytics::class, 'index'])->name('analytics');

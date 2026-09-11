@@ -378,4 +378,195 @@ class BillingHubController extends Controller
 
         return back()->with('success', "✅ تم تعديل الفاتورة {$invoice->invoice_number} بنجاح.");
     }
+
+    // ─────────────────────────────────────────────────────────────
+    //  Download / Print invoice as HTML page (open in new tab)
+    // ─────────────────────────────────────────────────────────────
+    public function downloadInvoice(int $id)
+    {
+        $invoice = Invoice::with(['restaurant', 'items'])->findOrFail($id);
+        $restaurant = $invoice->restaurant;
+
+        // Valid until = one month after issue date
+        $validUntil = \Carbon\Carbon::parse($invoice->due_date)->addMonth()->format('Y-m-d');
+        $issueDate  = \Carbon\Carbon::parse($invoice->issue_date)->format('d/m/Y');
+        $dueDate    = \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y');
+        $validUntilFmt = \Carbon\Carbon::parse($validUntil)->format('d/m/Y');
+        $amount     = number_format((float) $invoice->total_amount, 2);
+        $paidAmount = number_format((float) $invoice->paid_amount, 2);
+        $dayOfMonth = \Carbon\Carbon::parse($invoice->issue_date)->format('d');
+
+        $paymentMethodLabel = match($invoice->invoice_type) {
+            'SUBSCRIPTION' => 'اشتراك شهري',
+            'COMMISSION'   => 'عمولة مبيعات',
+            'MANUAL'       => 'يدوي',
+            default        => $invoice->invoice_type,
+        };
+
+        $statusLabel = match($invoice->status) {
+            'PAID'           => 'مدفوعة ✅',
+            'PARTIALLY_PAID' => 'مدفوعة جزئياً',
+            'OVERDUE'        => 'متأخرة ⚠️',
+            'ISSUED'         => 'صادرة',
+            'CANCELLED'      => 'ملغاة',
+            default          => $invoice->status,
+        };
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فاتورة {$invoice->invoice_number} — فطرنا شكراً</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Cairo', sans-serif; background: #f8f4ef; color: #1a1009; direction: rtl; }
+  .page { max-width: 760px; margin: 2rem auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.12); }
+  .header { background: linear-gradient(135deg, #ea580c, #c2410c); color: white; padding: 2rem 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
+  .brand { display: flex; flex-direction: column; gap: 4px; }
+  .brand-name { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; }
+  .brand-sub { font-size: 0.72rem; opacity: 0.85; font-weight: 600; letter-spacing: 0.1em; }
+  .invoice-meta { text-align: left; }
+  .invoice-num { font-size: 1.1rem; font-weight: 900; font-family: monospace; letter-spacing: 0.05em; }
+  .invoice-date { font-size: 0.75rem; opacity: 0.85; margin-top: 4px; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: rgba(255,255,255,0.2); margin-top: 8px; }
+  .body { padding: 2.5rem; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+  .party-box { background: #fdf6ee; border: 1px solid #f5dfc0; border-radius: 12px; padding: 1.25rem; }
+  .party-label { font-size: 0.62rem; font-weight: 800; color: #c2410c; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .party-name { font-size: 1rem; font-weight: 900; color: #1a1009; }
+  .party-detail { font-size: 0.78rem; color: #7c5c3a; margin-top: 4px; }
+  .divider { border: none; border-top: 1px solid #f0e4d4; margin: 1.5rem 0; }
+  .items-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+  .items-table th { background: #1a1009; color: #fed7aa; font-size: 0.72rem; font-weight: 700; padding: 0.75rem 1rem; text-align: right; }
+  .items-table td { padding: 0.85rem 1rem; font-size: 0.85rem; border-bottom: 1px solid #f0e4d4; }
+  .items-table tr:last-child td { border-bottom: none; }
+  .totals { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; background: #fdf6ee; border-radius: 12px; padding: 1.25rem; }
+  .totals-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.85rem; }
+  .totals-row.grand { font-size: 1.1rem; font-weight: 900; color: #c2410c; border-top: 2px solid #f5dfc0; padding-top: 10px; margin-top: 4px; }
+  .dates-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .date-card { background: #fdf6ee; border: 1px solid #f5dfc0; border-radius: 10px; padding: 1rem; text-align: center; }
+  .date-card .label { font-size: 0.62rem; font-weight: 800; color: #c2410c; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+  .date-card .val { font-size: 0.95rem; font-weight: 900; color: #1a1009; }
+  .footer { background: #1a1009; color: #a8916b; padding: 1.25rem 2.5rem; text-align: center; font-size: 0.72rem; }
+  .status-paid { color: #166534; background: #dcfce7; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+  .status-overdue { color: #991b1b; background: #fee2e2; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+  .status-other { color: #92400e; background: #fef3c7; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+  .watermark { color: #ea580c; font-size: 0.7rem; font-weight: 700; text-align: center; margin-top: 1.5rem; opacity: 0.6; }
+  @media print {
+    body { background: white; }
+    .page { box-shadow: none; margin: 0; border-radius: 0; }
+    .print-btn { display: none !important; }
+  }
+  .print-btn { display: block; text-align: center; margin-bottom: 1rem; }
+  .print-btn button { background: #ea580c; color: white; border: none; padding: 10px 28px; border-radius: 10px; font-family: 'Cairo', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="print-btn"><button onclick="window.print()">🖨️ طباعة / تحميل PDF</button></div>
+<div class="page">
+  <div class="header">
+    <div class="brand">
+      <div class="brand-name">🍽️ فطرنا شكراً</div>
+      <div class="brand-sub">منصة توصيل الطعام — برج العرب</div>
+      <div class="badge">{$paymentMethodLabel}</div>
+    </div>
+    <div class="invoice-meta">
+      <div class="invoice-num">{$invoice->invoice_number}</div>
+      <div class="invoice-date">تاريخ الإصدار: {$issueDate}</div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="parties">
+      <div class="party-box">
+        <div class="party-label">إلى / المطعم</div>
+        <div class="party-name">{$restaurant->name}</div>
+        <div class="party-detail">معرّف المطعم: #{$restaurant->id}</div>
+      </div>
+      <div class="party-box">
+        <div class="party-label">من / المُصدِر</div>
+        <div class="party-name">منصة فطرنا شكراً</div>
+        <div class="party-detail">النظام الإلكتروني الرسمي</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>البيان</th>
+          <th style="text-align:center">النوع</th>
+          <th style="text-align:left">المبلغ (ج.م)</th>
+        </tr>
+      </thead>
+      <tbody>
+HTML;
+
+        foreach ($invoice->items as $item) {
+            $itemAmount = number_format((float) $item->amount, 2);
+            $html .= "<tr><td>{$item->description}</td><td style='text-align:center'>{$paymentMethodLabel}</td><td style='text-align:left;font-weight:700'>{$itemAmount}</td></tr>";
+        }
+
+        $html .= <<<HTML
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="totals-row"><span>المجموع</span><span>{$amount} ج.م</span></div>
+      <div class="totals-row"><span>المدفوع</span><span style="color:#166534;font-weight:700">{$paidAmount} ج.م</span></div>
+      <div class="totals-row grand"><span>الإجمالي المستحق</span><span>{$amount} ج.م</span></div>
+    </div>
+
+    <div class="dates-grid">
+      <div class="date-card">
+        <div class="label">تاريخ الإصدار</div>
+        <div class="val">{$issueDate}</div>
+      </div>
+      <div class="date-card">
+        <div class="label">تاريخ الاستحقاق</div>
+        <div class="val">{$dueDate}</div>
+      </div>
+      <div class="date-card">
+        <div class="label">صالحة حتى</div>
+        <div class="val">{$validUntilFmt}</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:0.8rem;color:#7c5c3a;">
+        <strong>ملاحظات:</strong> {$invoice->notes}
+      </div>
+      <div>
+HTML;
+        if ($invoice->status === 'PAID') {
+            $html .= '<span class="status-paid">مدفوعة ✅</span>';
+        } elseif ($invoice->status === 'OVERDUE') {
+            $html .= '<span class="status-overdue">متأخرة ⚠️</span>';
+        } else {
+            $html .= "<span class=\"status-other\">{$statusLabel}</span>";
+        }
+
+        $html .= <<<HTML
+      </div>
+    </div>
+
+    <div class="watermark">هذه فاتورة إلكترونية رسمية صادرة من منصة فطرنا شكراً · يوم الإصدار: {$dayOfMonth} من الشهر</div>
+  </div>
+
+  <div class="footer">
+    جميع الحقوق محفوظة &copy; منصة فطرنا شكراً · {$invoice->invoice_number}
+  </div>
+</div>
+</body>
+</html>
+HTML;
+
+        return response($html, 200)->header('Content-Type', 'text/html; charset=utf-8');
+    }
 }
