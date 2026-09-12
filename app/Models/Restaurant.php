@@ -35,7 +35,8 @@ class Restaurant extends Model
         'commission_type',
         'commission_percentage',
         'monthly_subscription_fee',
-        'billing_cycle',
+        'billing_cycle',        // day-of-month (1-28) when the monthly invoice is generated
+        'billing_day',          // integer: actual day-of-month for auto-invoice (1-28)
         'payment_due_date',
         'billing_suspended_at',
         'suspension_reason',
@@ -120,5 +121,38 @@ class Restaurant extends Model
     public function isBillingSuspended(): bool
     {
         return $this->status === 'SUSPENDED' && $this->billing_suspended_at !== null;
+    }
+
+    /**
+     * Returns true when the restaurant has at least one invoice that is NOT cancelled.
+     * A restaurant without any active invoice is considered "unlinked" and will be purged.
+     */
+    public function hasActiveInvoice(): bool
+    {
+        return $this->invoices()->where('status', '!=', 'CANCELLED')->exists();
+    }
+
+    public function getLogoAttribute($value): ?string
+    {
+        $val = $value ?: ($this->attributes['cover_image'] ?? null);
+        if (!$val) {
+            return null;
+        }
+        if (str_starts_with($val, 'http://') || str_starts_with($val, 'https://') || str_starts_with($val, '/')) {
+            return $val;
+        }
+        return '/storage/' . $val;
+    }
+
+    public function getCoverImageAttribute($value): ?string
+    {
+        $val = $value ?: ($this->attributes['logo'] ?? null);
+        if (!$val) {
+            return null;
+        }
+        if (str_starts_with($val, 'http://') || str_starts_with($val, 'https://') || str_starts_with($val, '/')) {
+            return $val;
+        }
+        return '/storage/' . $val;
     }
 }

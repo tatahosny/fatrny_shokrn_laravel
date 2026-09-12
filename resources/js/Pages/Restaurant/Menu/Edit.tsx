@@ -1,12 +1,14 @@
 import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, GraduationCap } from 'lucide-react';
 
 interface MenuItem {
     id: number;
     name: string;
     description: string | null;
     price: number;
+    discount_price?: number | null;
+    student_price?: number | null;
     category_id: number;
     is_available: boolean;
     is_featured: boolean;
@@ -29,7 +31,9 @@ export default function MenuItemEdit({ menuItem, categories }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         name: menuItem.name,
         description: menuItem.description ?? '',
-        price: (menuItem.price / 100).toFixed(2),
+        price: String(menuItem.price),
+        discount_price: menuItem.discount_price ? String(menuItem.discount_price) : '',
+        student_price: menuItem.student_price ? String(menuItem.student_price) : '',
         category_id: String(menuItem.category_id),
         is_available: menuItem.is_available,
         is_featured: menuItem.is_featured,
@@ -78,9 +82,30 @@ export default function MenuItemEdit({ menuItem, categories }: Props) {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm text-stone-400 mb-1">السعر (ج.م) *</label>
+                                <label className="block text-sm text-stone-400 mb-1">السعر الأصلي (ج.م) *</label>
                                 <input type="number" step="0.01" min="0" value={data.price} onChange={e => setData('price', e.target.value)}
                                     className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors" />
+                                {errors.price && <p className="text-red-400 text-xs mt-1">{errors.price}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm text-stone-400 mb-1">سعر الخصم / العرض (اختياري)</label>
+                                <input type="number" step="0.01" min="0" value={data.discount_price} onChange={e => setData('discount_price', e.target.value)}
+                                    placeholder="0.00"
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors" />
+                                {errors.discount_price && <p className="text-red-400 text-xs mt-1">{errors.discount_price}</p>}
+                            </div>
+
+                            <div className="col-span-2 p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-1.5">
+                                <label className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                                    <GraduationCap className="w-4 h-4 text-indigo-400" />
+                                    <span>سعر خاص للطلاب الجامعيين (اختياري) 🎓</span>
+                                </label>
+                                <input type="number" step="0.01" min="0" value={data.student_price} onChange={e => setData('student_price', e.target.value)}
+                                    placeholder="مثال: 25.00 (اتركه فارغاً لإلغاء سعر الطالب)"
+                                    className="w-full bg-white/5 border border-indigo-500/30 rounded-lg px-4 py-2.5 text-white placeholder-stone-500 focus:outline-none focus:border-indigo-500 transition-colors text-xs" />
+                                <p className="text-[11px] text-stone-400">إذا تم تحديد هذا السعر، سيظهر هذا السندوتش/الطبق بسعر مخفض خصيصاً للطلاب المعتمدين.</p>
+                                {errors.student_price && <p className="text-red-400 text-xs mt-1">{errors.student_price}</p>}
                             </div>
 
                             <div>

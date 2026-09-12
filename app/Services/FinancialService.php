@@ -24,31 +24,50 @@ class FinancialService
             ->whereBetween('created_at', [$start, $end])
             ->sum('total_amount');
 
-        // Platform Paid Invoices & Collections
-        $paidInvoicesQuery = Invoice::where('status', 'PAID')
-            ->whereBetween('created_at', [$start, $end]);
+        // Commission from delivered orders
+        $orderCommissionQuery = Order::where('status', 'DELIVERED');
+        if ($startDate && $endDate) {
+            $orderCommissionQuery->whereBetween('created_at', [$start, $end]);
+        }
+        $orderCommissions = (float) $orderCommissionQuery->sum('platform_commission_amount');
 
-        $commissionRevenue = (float) (clone $paidInvoicesQuery)
+        // Platform Paid Invoices & Collections
+        $paidInvoicesQuery = Invoice::where('status', 'PAID');
+        if ($startDate && $endDate) {
+            $paidInvoicesQuery->whereBetween('created_at', [$start, $end]);
+        }
+
+        $commissionInvoices = (float) (clone $paidInvoicesQuery)
             ->where('invoice_type', 'COMMISSION')
-            ->sum('total_amount');
+            ->sum('paid_amount');
 
         $subscriptionRevenue = (float) (clone $paidInvoicesQuery)
             ->where('invoice_type', 'SUBSCRIPTION')
-            ->sum('total_amount');
+            ->sum('paid_amount');
 
-        // Total revenue collected (Paid invoices + Collections)
-        $totalRevenue = (float) Invoice::where('status', 'PAID')
-            ->whereBetween('created_at', [$start, $end])
-            ->sum('total_amount');
-        if ($totalRevenue <= 0) {
-            $totalRevenue = (float) Collection::whereBetween('collection_date', [$start->toDateString(), $end->toDateString()])->sum('amount');
+        $commissionRevenue = max($orderCommissions, $commissionInvoices);
+
+        // Collections directly recorded
+        $colQuery = Collection::query();
+        if ($startDate && $endDate) {
+            $colQuery->whereBetween('collection_date', [$start->toDateString(), $end->toDateString()]);
+        }
+        $totalDirectCollections = (float) $colQuery->sum('amount');
+
+        // Total platform revenue earned (Commissions earned + Subscriptions paid)
+        $totalRevenue = (float) ($commissionRevenue + $subscriptionRevenue);
+        if ($totalRevenue <= 0 && $totalDirectCollections > 0) {
+            $totalRevenue = $totalDirectCollections;
         }
 
         // Platform Expenses
-        $totalExpenses = (float) Expense::whereBetween('expense_date', [$start->toDateString(), $end->toDateString()])
-            ->sum('amount');
+        $expenseQuery = Expense::query();
+        if ($startDate && $endDate) {
+            $expenseQuery->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()]);
+        }
+        $totalExpenses = (float) $expenseQuery->sum('amount');
 
-        // Outstanding Receivables from unpaid invoices (strictly matching Billing Hub)
+        // Outstanding Receivables from unpaid invoices
         $outstandingReceivables = (float) Invoice::whereNotIn('status', ['PAID', 'CANCELLED'])->sum('total_amount')
             - (float) Invoice::whereNotIn('status', ['PAID', 'CANCELLED'])->sum('paid_amount');
         $outstandingReceivables = max(0, $outstandingReceivables);
@@ -142,13 +161,20 @@ class FinancialService
             $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
             $monthLabel = $monthStart->translatedFormat('F Y');
 
-            $revenue = (float) Invoice::where('status', 'PAID')
+            $orderComm = (float) Order::where('status', 'DELIVERED')
                 ->whereBetween('created_at', [$monthStart, $monthEnd])
-                ->sum('total_amount');
+                ->sum('platform_commission_amount');
 
-            if ($revenue <= 0) {
-                $revenue = (float) Collection::whereBetween('collection_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-                    ->sum('amount');
+            $invPaid = (float) Invoice::where('status', 'PAID')
+                ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->sum('paid_amount');
+
+            $colPaid = (float) Collection::whereBetween('collection_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->sum('amount');
+
+            $revenue = $invPaid + $orderComm;
+            if ($revenue <= 0 && $colPaid > 0) {
+                $revenue = $colPaid;
             }
 
             $expense = (float) Expense::whereBetween('expense_date', [$monthStart->toDateString(), $monthEnd->toDateString()])

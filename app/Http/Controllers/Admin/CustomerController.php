@@ -59,16 +59,21 @@ class CustomerController extends Controller
         $customer->update([
             'student_status'      => 'APPROVED',
             'student_verified_at' => now(),
+            'rejection_reason'    => null,
         ]);
         ActivityLog::log('STUDENT_VERIFIED', 'Customer', $customer->id);
-        return back()->with('success', 'تم تأكيد هوية الطالب وتفعيل الخصم.');
+        return back()->with('success', 'تم قبول وتوثيق الكارنيه الجامعي للطالب. تم تفعيل خصم الطلاب على حسابه.');
     }
 
-    public function rejectStudent(int $id): RedirectResponse
+    public function rejectStudent(Request $request, int $id): RedirectResponse
     {
         $customer = Customer::findOrFail($id);
-        $customer->update(['student_status' => 'REJECTED']);
-        ActivityLog::log('STUDENT_REJECTED', 'Customer', $customer->id);
-        return back()->with('success', 'تم رفض طلب التحقق من الهوية الطلابية.');
+        $reason = $request->input('rejection_reason', 'لم يتم التحقق من صحة الكارنيه.');
+        $customer->update([
+            'student_status'   => 'REJECTED',
+            'rejection_reason' => $reason,
+        ]);
+        ActivityLog::log('STUDENT_REJECTED', 'Customer', $customer->id, null, ['reason' => $reason]);
+        return back()->with('success', 'تم رفض طلب توثيق الكارنيه. تم إبلاغ الطالب بسبب الرفض.');
     }
 }

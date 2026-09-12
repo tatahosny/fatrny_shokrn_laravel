@@ -266,19 +266,60 @@ class BillingHubController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────
-    //  Cancel invoice (Permanent removal so it never shows up)
+    //  Cancel invoice — if unpaid & restaurant has no paid invoices
+    //  → hard-delete the entire restaurant from the system
     // ─────────────────────────────────────────────────────────────
     public function cancelInvoice(int $id): RedirectResponse
     {
-        $invoice = Invoice::findOrFail($id);
+        $invoice    = Invoice::with('restaurant')->findOrFail($id);
         $restaurant = $invoice->restaurant;
         $restaurantId = $invoice->restaurant_id;
+        $restaurantName = $restaurant?->name ?? 'غير معروف';
 
+        // Only unpaid invoices can be cancelled
+        if ($invoice->status === 'PAID') {
+            return back()->with('error', 'لا يمكن إلغاء فاتورة تم سدادها بالفعل.');
+        }
+
+        // Delete invoice items & collections first
         $invoice->items()->delete();
         $invoice->collections()->delete();
         $invoice->delete();
 
         if ($restaurant) {
+            // Check if the restaurant has ANY paid invoice (excluding this one we just deleted)
+            $hasPaid = Invoice::where('restaurant_id', $restaurantId)
+                ->where('status', 'PAID')
+                ->exists();
+
+            if (!$hasPaid) {
+                // ── No paid history at all → permanently delete the restaurant ──
+                $staffEntries = \App\Models\RestaurantStaff::where('restaurant_id', $restaurant->id)->with('user')->get();
+                $usersToClean = [];
+                foreach ($staffEntries as $staff) {
+                    if ($staff->user && in_array($staff->user->role, ['RESTAURANT_OWNER', 'RESTAURANT_STAFF'])) {
+                        $usersToClean[] = $staff->user;
+                    }
+                }
+
+                // cascade deletes: categories, menu_items, offers, staff, orders, etc.
+                $restaurant->forceDelete();
+
+                foreach ($usersToClean as $user) {
+                    if (!\App\Models\RestaurantStaff::where('user_id', $user->id)->exists()) {
+                        $user->forceDelete();
+                    }
+                }
+
+                ActivityLog::log('RESTAURANT_DELETED_NO_PAYMENT', 'Restaurant', $restaurantId, null, [
+                    'name'   => $restaurantName,
+                    'reason' => 'إلغاء الفاتورة الوحيدة غير المسددة',
+                ]);
+
+                return back()->with('success', "🗑️ تم إلغاء الفاتورة وحذف حساب المطعم «{$restaurantName}» نهائياً من النظام.");
+            }
+
+            // Restaurant has other paid invoices → just lift any active suspension
             $hasOtherOverdue = Invoice::where('restaurant_id', $restaurantId)
                 ->whereNotIn('status', ['PAID', 'CANCELLED'])
                 ->exists();
@@ -292,8 +333,11 @@ class BillingHubController extends Controller
             }
         }
 
-        ActivityLog::log('INVOICE_CANCELLED', 'Invoice', $id);
-        return back()->with('success', '🗑️ تم إلغاء وحذف الفاتورة نهائياً.');
+        ActivityLog::log('INVOICE_CANCELLED', 'Invoice', $id, null, [
+            'restaurant_id' => $restaurantId,
+        ]);
+
+        return back()->with('success', '🗑️ تم إلغاء الفاتورة نهائياً.');
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -309,6 +353,8 @@ class BillingHubController extends Controller
             'notes'         => 'nullable|string',
         ]);
 
+        $status = \Carbon\Carbon::parse($validated['due_date'])->isPast() ? 'OVERDUE' : 'ISSUED';
+
         $invoice = Invoice::create([
             'invoice_number' => 'INV-' . date('Ymd') . '-' . str_pad(Invoice::count() + 1, 4, '0', STR_PAD_LEFT),
             'restaurant_id'  => $validated['restaurant_id'],
@@ -318,7 +364,7 @@ class BillingHubController extends Controller
             'tax_amount'     => 0,
             'total_amount'   => $validated['subtotal'],
             'paid_amount'    => 0,
-            'status'         => 'OVERDUE',
+            'status'         => $status,
             'invoice_type'   => $validated['invoice_type'],
             'notes'          => $validated['notes'] ?? null,
         ]);

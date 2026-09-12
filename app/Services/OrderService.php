@@ -48,7 +48,9 @@ class OrderService
                     ->where('is_available', true)
                     ->findOrFail($itemInput['menu_item_id']);
 
-                $unitPrice = $menuItem->effective_price;
+                $unitPrice = $customer->isVerifiedStudent()
+                    ? $menuItem->effective_student_price
+                    : $menuItem->effective_price;
                 $optionsPrice = 0.00;
                 $addonsPrice = 0.00;
 

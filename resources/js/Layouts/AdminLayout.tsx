@@ -44,7 +44,7 @@ const navGroups = [
     {
         label: 'المال',
         items: [
-            { label: 'الأرباح والتدفقات', href: '/admin/finance', icon: DollarSign },
+            { label: 'المالية والأرباح', href: '/admin/finance', icon: DollarSign },
             { label: 'مركز التحصيل', href: '/admin/billing', icon: Receipt },
             { label: 'المؤشرات', href: '/admin/analytics', icon: BarChart3 },
         ],

@@ -19,6 +19,7 @@ class MenuItem extends Model
         'description',
         'price',
         'discount_price',
+        'student_price',  // سعر خاص للطلاب المعتمدين
         'image',
         'is_available',
         'is_featured',
@@ -29,12 +30,13 @@ class MenuItem extends Model
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
+            'price'          => 'decimal:2',
             'discount_price' => 'decimal:2',
-            'is_available' => 'boolean',
-            'is_featured' => 'boolean',
+            'student_price'  => 'decimal:2',
+            'is_available'   => 'boolean',
+            'is_featured'    => 'boolean',
             'preparation_time' => 'integer',
-            'sort_order' => 'integer',
+            'sort_order'     => 'integer',
         ];
     }
 
@@ -61,5 +63,17 @@ class MenuItem extends Model
     public function getEffectivePriceAttribute(): float
     {
         return (float) ($this->discount_price && $this->discount_price > 0 ? $this->discount_price : $this->price);
+    }
+
+    /**
+     * Returns the effective price for a verified student.
+     * If student_price is set, it overrides both price and discount_price.
+     */
+    public function getEffectiveStudentPriceAttribute(): float
+    {
+        if ($this->student_price && (float) $this->student_price > 0) {
+            return (float) $this->student_price;
+        }
+        return $this->effective_price;
     }
 }

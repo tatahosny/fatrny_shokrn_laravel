@@ -31,9 +31,18 @@ class AnalyticsController extends Controller
             ->groupBy('status')->get();
 
         // Hourly order distribution (to find peak hours)
-        $hourlyDistribution = Order::selectRaw('EXTRACT(HOUR FROM created_at) as hour, count(*) as count')
+        $driver = \Illuminate\Support\Facades\DB::getDriverName();
+        if ($driver === 'sqlite') {
+            $hourExpr = "CAST(strftime('%H', created_at) AS INTEGER)";
+        } elseif ($driver === 'pgsql') {
+            $hourExpr = "EXTRACT(HOUR FROM created_at)";
+        } else {
+            $hourExpr = "HOUR(created_at)";
+        }
+
+        $hourlyDistribution = Order::selectRaw("{$hourExpr} as hour, count(*) as count")
             ->where('created_at', '>=', now()->subDays(30))
-            ->groupByRaw('EXTRACT(HOUR FROM created_at)')
+            ->groupByRaw($hourExpr)
             ->orderBy('hour')
             ->get();
 

@@ -16,6 +16,7 @@ class Customer extends Model
         'university_name',
         'university_id_number',
         'university_id_card_image',
+        'university_id_card_back_image', // ظهر الكارنيه
         'student_status', // NONE, PENDING, APPROVED, REJECTED
         'student_verified_at',
         'rejection_reason',

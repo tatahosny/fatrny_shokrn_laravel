@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import GuestLayout from '../../Layouts/GuestLayout';
-import { Restaurant, Offer } from '../../Types';
+import { Restaurant, Offer, MenuItem } from '../../Types';
 import {
   Store,
   Flame,
@@ -20,6 +20,9 @@ import {
   UtensilsCrossed,
   Search,
   Percent,
+  Tag,
+  BadgePercent,
+  FileCheck2,
 } from 'lucide-react';
 
 interface LeaderboardRanking {
@@ -34,6 +37,7 @@ interface HomeProps {
   restaurants: (Restaurant & { menu_items_count?: number; offers_count?: number })[];
   featuredRestaurants?: (Restaurant & { menu_items_count?: number })[];
   totalDishes?: number;
+  studentDishes?: (MenuItem & { restaurant?: Restaurant })[];
   activeOffers?: Offer[];
   leaderboard?: {
     rankings: LeaderboardRanking[];
@@ -50,6 +54,7 @@ interface HomeProps {
     orders: number;
     drivers: number;
     customers: number;
+    verifiedStudents?: number;
     totalDishes?: number;
   };
 }
@@ -58,6 +63,7 @@ export default function Home({
   restaurants = [],
   featuredRestaurants = [],
   totalDishes = 88,
+  studentDishes = [],
   activeOffers = [],
   leaderboard = {
     rankings: [],
@@ -167,7 +173,7 @@ export default function Home({
                 {featured ? (
                   <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-orange-500/20 border-4 border-white dark:border-stone-800 group">
                     <img
-                      src={featured.cover_image || featured.logo || '/images/gareemat-akl.jpg'}
+                      src={featured.cover_image || featured.logo || '/images/sandwich-falafel.jpg'}
                       alt={featured.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
@@ -175,14 +181,21 @@ export default function Home({
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-stone-950/95 via-stone-950/40 to-stone-950/20" />
 
-                    {/* Top Floating Badge: Verified Campus Partner */}
+                    {/* Top Floating Badge: Most Popular / Best Seller */}
                     <div className="absolute top-4 right-4 bg-stone-900/90 backdrop-blur-md border border-amber-500/40 px-3.5 py-2 rounded-2xl shadow-xl flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                        <CheckCircle2 className="w-4 h-4 text-amber-400" />
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500/30 to-orange-500/30 text-amber-400 flex items-center justify-center">
+                        <Flame className="w-4 h-4 text-orange-400 animate-pulse" />
                       </div>
                       <div>
-                        <div className="text-[10px] text-amber-300 font-bold">شريك معتمد</div>
-                        <div className="text-xs font-black text-white">جامعة برج العرب</div>
+                        <div className="text-[10px] text-amber-300 font-black flex items-center gap-1">
+                          <span>الأكثر مبيعاً وطلباً</span>
+                          <Flame className="w-3 h-3 text-orange-400" />
+                        </div>
+                        <div className="text-xs font-black text-white">
+                          {(featured as any).completed_orders_count > 0 || (featured as any).orders_count > 0
+                            ? `الأعلى مبيعاً (${(featured as any).completed_orders_count || (featured as any).orders_count} طلب)`
+                            : 'المطعم الأبرز في الجامعة 🏆'}
+                        </div>
                       </div>
                     </div>
 
@@ -192,12 +205,18 @@ export default function Home({
                         href={`/restaurants/${secondary.slug}`}
                         className="absolute top-4 left-4 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200 dark:border-stone-700/80 p-2 rounded-2xl shadow-lg flex items-center gap-2.5 max-w-[170px] hover:scale-105 transition-all"
                       >
-                        <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-orange-200 dark:border-stone-700">
-                          <img
-                            src={secondary.logo || secondary.cover_image || '/images/lagwza.jpg'}
-                            alt={secondary.name}
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-orange-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                          {secondary.logo || secondary.cover_image ? (
+                            <img
+                              src={secondary.logo || secondary.cover_image}
+                              alt={secondary.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-xs flex items-center justify-center">
+                              {secondary.name.trim().charAt(0)}
+                            </div>
+                          )}
                         </div>
                         <div className="truncate">
                           <div className="text-[10px] font-extrabold text-stone-900 dark:text-white truncate">
@@ -213,13 +232,17 @@ export default function Home({
                     {/* Bottom Details Card for Featured Restaurant */}
                     <div className="absolute bottom-4 left-4 right-4 bg-stone-900/95 backdrop-blur-md p-4 rounded-2xl border border-stone-800 shadow-2xl space-y-2">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/30 flex items-center gap-1">
+                            <Flame className="w-3 h-3 text-amber-400" />
+                            <span>الأكثر مبيعاً وطلباً</span>
+                          </span>
                           <span className="px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-extrabold border border-orange-500/30">
-                            {featured.menu_items_count || 40}+ صنف متاح
+                            {featured.menu_items_count || 40}+ صنف
                           </span>
                           <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            مفتوح للطلب الآن
+                            مفتوح للطلب
                           </span>
                         </div>
                         {featured.student_discount_percentage > 0 && (
@@ -310,10 +333,8 @@ export default function Home({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredRestaurants.map((restaurant) => {
-                const discount = restaurant.student_discount_percentage > 0 
-                  ? Number(restaurant.student_discount_percentage) 
-                  : (restaurant.slug === 'gareemat-akl' ? 20 : (restaurant.slug === 'laghwasa' ? 15 : 20));
+              {filteredRestaurants.map((restaurant, idx) => {
+                const discount = Number(restaurant.student_discount_percentage || 0);
                 const count = restaurant.menu_items_count || 25;
 
                 return (
@@ -338,13 +359,22 @@ export default function Home({
                             <span>خصم للطلاب %{discount}</span>
                           </span>
                         ) : (
-                          <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-black/50 backdrop-blur-md text-white/90 border border-white/10">
-                            مطعم شريك
+                          <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-black/60 backdrop-blur-md text-white/90 border border-white/10 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span>مطعم شريك معتمد</span>
+                          </span>
+                        )}
+
+                        {/* Most Popular Tag for #1 best-seller */}
+                        {idx === 0 && (
+                          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-black bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg flex items-center gap-1 border border-white/20">
+                            <Flame className="w-3.5 h-3.5 animate-pulse" />
+                            <span>الأكثر طلباً 🔥</span>
                           </span>
                         )}
 
                         {/* Available Count Badge */}
-                        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/90 dark:bg-stone-900/90 backdrop-blur-md text-stone-800 dark:text-stone-200 border border-white/20">
+                        <span className={`absolute ${idx === 0 ? 'top-10' : 'top-3'} left-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/90 dark:bg-stone-900/90 backdrop-blur-md text-stone-800 dark:text-stone-200 border border-white/20`}>
                           {count} صنف
                         </span>
 
@@ -402,30 +432,185 @@ export default function Home({
         </section>
 
         {/* =====================================================
-            3. STUDENT CALLOUT BANNER
+            SPECIAL STUDENT OFFERS & SANDWICHES SECTION
             ===================================================== */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 p-6 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-3 text-center md:text-right">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>مبادرة دعم الطلاب — جامعة برج العرب التكنولوجية</span>
+        {studentDishes && studentDishes.length > 0 && (
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">
+                  <GraduationCap className="w-4 h-4" />
+                  <span>عروض وسندوتشات بأسعار خاصة للطلاب</span>
+                </div>
+                <h2 className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-white flex items-center gap-2.5 flex-wrap">
+                  <span>سندوتشات ووجبات مخفضة للطلاب المعتمدين 🎓</span>
+                  <span className="text-xs font-black bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">
+                    عروض حصرية
+                  </span>
+                </h2>
+                <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  أصناف تم تخصيص سعر طالب خاص ومخفض عليها من قبل المطاعم، متاحة لجميع الطلاب بعد توثيق الكارنيه.
+                </p>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-black leading-snug">
-                أنت طالب بالجامعة؟ احصل على خصومات حصرية تصل لـ 25%!
-              </h3>
-              <p className="text-xs sm:text-sm text-indigo-100 max-w-xl leading-relaxed">
-                سجل حسابك كطالب وارفع صورة كرنيهك الجامعي. بعد اعتماد الكرنيه، ستظهر لك أسعار الوجبات المخفضة تلقائياً في منيو جميع المطاعم الشريكة.
-              </p>
+
+              <Link
+                href="/customer/profile#student-id"
+                className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:underline shrink-0"
+              >
+                <span>خطوات توثيق الكارنيه الجامعي</span>
+                <ChevronLeft className="w-4 h-4" />
+              </Link>
             </div>
 
-            <Link
-              href="/register"
-              className="px-7 py-4 rounded-2xl bg-white text-indigo-950 hover:bg-indigo-50 font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0 flex items-center gap-2"
-            >
-              <GraduationCap className="w-5 h-5 text-indigo-600" />
-              <span>سجل كطالب واحصل على الخصم 🎓</span>
-            </Link>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {studentDishes.map((dish) => {
+                const regularPrice = Number(dish.discount_price && dish.discount_price > 0 ? dish.discount_price : dish.price);
+                const sPrice = Number(dish.student_price);
+                const savings = Math.max(0, regularPrice - sPrice);
+
+                return (
+                  <div
+                    key={dish.id}
+                    className="group rounded-3xl bg-white dark:bg-stone-900 border border-indigo-100 dark:border-indigo-950/70 hover:border-indigo-400 dark:hover:border-indigo-500 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all overflow-hidden flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Image Box */}
+                      <div className="relative w-full h-44 bg-stone-100 dark:bg-stone-800 overflow-hidden">
+                        <img
+                          src={dish.image ? (dish.image.startsWith('http') ? dish.image : `/storage/${dish.image}`) : '/images/sandwich-foul.jpg'}
+                          alt={dish.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/20" />
+
+                        {/* Student Exclusive Badge */}
+                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-black bg-indigo-600 text-white shadow-md flex items-center gap-1">
+                          <GraduationCap className="w-3.5 h-3.5" />
+                          <span>سعر الطالب</span>
+                        </span>
+
+                        {savings > 0 && (
+                          <span className="absolute top-3 left-3 px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500 text-white shadow-md">
+                            وفر {savings.toFixed(0)} ج.م
+                          </span>
+                        )}
+
+                        {/* Restaurant Name Overlay */}
+                        {dish.restaurant && (
+                          <div className="absolute bottom-2.5 right-3 left-3 flex items-center justify-between text-white">
+                            <span className="text-xs font-bold truncate drop-shadow-md text-stone-200">
+                              {dish.restaurant.name}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-4 space-y-2">
+                        <h3 className="text-base font-black text-stone-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          {dish.name}
+                        </h3>
+                        {dish.description && (
+                          <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 leading-relaxed">
+                            {dish.description}
+                          </p>
+                        )}
+
+                        {/* Pricing Box */}
+                        <div className="pt-2 flex items-baseline justify-between border-t border-stone-100 dark:border-stone-800">
+                          <div>
+                            <span className="text-[10px] text-stone-400 block">سعر الطالب الجامعي</span>
+                            <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                              {sPrice.toFixed(2)} ج.م
+                            </span>
+                          </div>
+                          <div className="text-left">
+                            <span className="text-[10px] text-stone-400 block">السعر الأصلي</span>
+                            <span className="text-xs text-stone-400 line-through">
+                              {regularPrice.toFixed(2)} ج.م
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Order Action */}
+                    <div className="p-4 pt-0">
+                      <Link
+                        href={`/restaurants/${dish.restaurant?.slug || ''}`}
+                        className="w-full py-2.5 px-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 border border-indigo-200 dark:border-indigo-800 hover:border-transparent"
+                      >
+                        <UtensilsCrossed className="w-3.5 h-3.5" />
+                        <span>اطلب من {dish.restaurant?.name || 'المطعم'}</span>
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* =====================================================
+            3. STUDENT VERIFICATION CALLOUT BANNER
+            ===================================================== */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="rounded-3xl bg-gradient-to-r from-indigo-700 via-purple-700 to-orange-600 p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden">
+            {/* Decorative background blurs */}
+            <div className="absolute -top-10 -left-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-orange-400/20 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+              <div className="space-y-4 text-center lg:text-right max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black">
+                  <GraduationCap className="w-4 h-4 text-amber-300" />
+                  <span>نظام توثيق الطلاب المعتمد — جامعة برج العرب والجامعات الشريكة</span>
+                </div>
+                
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">
+                  ارفع كارنيهك الجامعي (وجه وظهر) واحصل على خصومات حصرية! 🎓
+                </h3>
+                
+                <p className="text-xs sm:text-sm text-indigo-100 leading-relaxed">
+                  للحد من الطلبات الوهمية وضمان وصول الخصومات لمستحقيها، يقوم الطالب برفع صورتين واضحتين لكارنيه كليته (الأمام والخلف) ورقم قيده. تقوم إدارة المنصة بمراجعة الكارنيه وتفعيله مباشرة لتستمتع بأسعار مخفضة على كامل المنيو!
+                </p>
+
+                {/* Micro Steps */}
+                <div className="grid grid-cols-3 gap-2.5 pt-2 text-right">
+                  <div className="p-2.5 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/15">
+                    <span className="text-amber-300 font-black text-xs block">1. حدد جامعتك</span>
+                    <span className="text-[10px] text-indigo-100">برج العرب التكنولوجية أو شريكة</span>
+                  </div>
+                  <div className="p-2.5 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/15">
+                    <span className="text-amber-300 font-black text-xs block">2. وجه وظهر الكارنيه</span>
+                    <span className="text-[10px] text-indigo-100">صورتان واضحتان من هاتفك</span>
+                  </div>
+                  <div className="p-2.5 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/15">
+                    <span className="text-amber-300 font-black text-xs block">3. فحص واعتماد فوري</span>
+                    <span className="text-[10px] text-indigo-100">تفعيل تلقائي للخصم بكل مطعم</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full sm:w-auto">
+                <Link
+                  href="/customer/profile#student-id"
+                  className="px-8 py-4 rounded-2xl bg-white text-indigo-950 hover:bg-amber-300 hover:text-stone-950 font-black text-sm shadow-xl hover:scale-105 active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                >
+                  <FileCheck2 className="w-5 h-5 text-indigo-600" />
+                  <span>توثيق الكارنيه الجامعي الآن 🎓</span>
+                </Link>
+
+                <Link
+                  href="/register"
+                  className="px-6 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs border border-white/30 text-center transition-all flex items-center justify-center gap-2"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>إنشاء حساب جديد كطالب</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -467,7 +652,7 @@ export default function Home({
                 </div>
                 <h3 className="text-lg font-black text-stone-900 dark:text-white">حدد أصنافك وسجل طلبك</h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed max-w-xs">
-                  أضف الوجبات التي تفضلها إلى سلة التسوق، واستفد من خصم الطلاب التلقائي المعتمد
+                  أضف وجباتك لسلة المشتريات، وسيطبق خصم الطلاب وسعر السندوتشات المخفضة تلقائياً على حسابك الموثق
                 </p>
               </div>
 

@@ -12,7 +12,8 @@ import {
     Upload, 
     CheckCircle2, 
     Clock, 
-    AlertCircle 
+    AlertCircle,
+    Image as ImageIcon
 } from 'lucide-react';
 import ConfirmModal from '../../Components/ConfirmModal';
 
@@ -59,12 +60,19 @@ export default function Profile({ customer }: ProfileProps) {
     };
 
     // Student verification form
+    const [frontPreview, setFrontPreview] = useState<string | null>(null);
+    const [backPreview, setBackPreview] = useState<string | null>(null);
+
     const studentForm = useForm<{
         university_name: string;
-        student_id_image: File | null;
+        university_id_number: string;
+        student_id_front: File | null;
+        student_id_back: File | null;
     }>({
-        university_name: customer?.university_name || 'جامعة برج العرب التكنولوجية',
-        student_id_image: null,
+        university_name: customer?.university_name || 'جامعة برج العرب التكنولوجية (BATU)',
+        university_id_number: customer?.university_id_number || '',
+        student_id_front: null,
+        student_id_back: null,
     });
 
     const handleStudentSubmit = (e: React.FormEvent) => {
@@ -159,69 +167,158 @@ export default function Profile({ customer }: ProfileProps) {
                             </p>
                         </div>
                     ) : (
-                        <form onSubmit={handleStudentSubmit} className="space-y-4 max-w-lg">
-                            <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300 space-y-1">
-                                <p className="font-bold">🎓 كيف تحصل على خصم الطلاب والعروض الحصرية؟</p>
-                                <p className="text-[11px] leading-relaxed">
-                                    ارفع صورة واضحة لكارنيه كليتك أو جامعتك (سواء جامعة برج العرب التكنولوجية، الجامعة اليابانية، جامعة سنجور، أو أي جامعة مصرية). فور قبول الكارنيه من إدارة الموقع يتم تفعيل الخصم مباشرة.
-                                </p>
-                            </div>
+                        <div className="space-y-4 max-w-2xl">
+                            {customer.student_status === 'REJECTED' && customer.rejection_reason && (
+                                <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-xs text-red-800 dark:text-red-300 space-y-1">
+                                    <p className="font-bold flex items-center gap-1.5 text-sm">
+                                        <AlertCircle className="w-4 h-4 text-red-500" />
+                                        <span>سبب رفض الطلب السابق:</span>
+                                    </p>
+                                    <p className="text-xs pr-5 text-red-700 dark:text-red-300">{customer.rejection_reason}</p>
+                                    <p className="text-[11px] text-stone-500 dark:text-stone-400 pr-5">يرجى تعديل البيانات وإعادة رفع صورتي الكارنيه (وجه وظهر) بوضوح أدناه.</p>
+                                </div>
+                            )}
 
-                            <div>
-                                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-                                    الجامعة المقيد بها
-                                </label>
-                                <select
-                                    value={studentForm.data.university_name}
-                                    onChange={(e) => studentForm.setData('university_name', e.target.value)}
-                                    className="w-full p-3 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white focus:outline-none focus:border-orange-500"
+                            {customer.student_status === 'PENDING' && (
+                                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300 space-y-2">
+                                    <p className="font-bold flex items-center gap-1.5 text-sm">
+                                        <Clock className="w-4 h-4 text-amber-600" />
+                                        <span>طلبك قيد المراجعة حالياً من قبل الإدارة</span>
+                                    </p>
+                                    <p className="text-[11px]">
+                                        الجامعة: <strong>{customer.university_name}</strong> {customer.university_id_number ? `— رقم الكارنيه: ${customer.university_id_number}` : ''}
+                                    </p>
+                                    <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                                        يمكنك إعادة رفع صور الكارنيه أو تعديل البيانات أدناه إذا أردت تحديث الطلب المرسل للإدارة:
+                                    </p>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleStudentSubmit} className="space-y-5">
+                                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+                                    <p className="font-bold">🎓 كيف تحصل على خصم الطلاب والعروض الحصرية؟</p>
+                                    <p className="text-[11px] leading-relaxed">
+                                        ارفع صورتين واضحتين لكارنيه كليتك أو جامعتك (وجه الكارنيه وظهر الكارنيه). فور مراجعة الكارنيه واعتماده من إدارة الموقع، سيتم تطبيق الخصومات تلقائياً على حسابك.
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                                            الجامعة المقيد بها <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={studentForm.data.university_name}
+                                            onChange={(e) => studentForm.setData('university_name', e.target.value)}
+                                            className="w-full p-3 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white focus:outline-none focus:border-orange-500"
+                                        >
+                                            <optgroup label="جامعات برج العرب">
+                                                <option value="جامعة برج العرب التكنولوجية (BATU)">جامعة برج العرب التكنولوجية (BATU)</option>
+                                                <option value="الجامعة المصرية اليابانية للعلوم والتكنولوجيا (E-JUST)">الجامعة المصرية اليابانية للعلوم والتكنولوجيا (E-JUST)</option>
+                                                <option value="جامعة سنجور الدولية (Senghor University)">جامعة سنجور الدولية (Senghor University)</option>
+                                            </optgroup>
+                                            <optgroup label="جامعات ومعاهد أخرى">
+                                                <option value="جامعة الإسكندرية">جامعة الإسكندرية</option>
+                                                <option value="جامعة مطروح">جامعة مطروح</option>
+                                                <option value="الأكاديمية العربية للعلوم والتكنولوجيا (AASTMT)">الأكاديمية العربية للعلوم والتكنولوجيا (AASTMT)</option>
+                                                <option value="جامعة فاروس (PUA)">جامعة فاروس (PUA)</option>
+                                                <option value="جامعة العلمين الدولية (AIU)">جامعة العلمين الدولية (AIU)</option>
+                                                <option value="المعهد العالي للهندسة والتكنولوجيا ببرج العرب">المعهد العالي للهندسة والتكنولوجيا ببرج العرب</option>
+                                                <option value="جامعة / معهد آخر في مصر">جامعة / معهد آخر في مصر</option>
+                                            </optgroup>
+                                        </select>
+                                        {studentForm.errors.university_name && (
+                                            <p className="text-[11px] text-red-500 mt-1">{studentForm.errors.university_name}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                                            رقم الكارنيه / رقم القيد (اختياري)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="مثال: 2024101234"
+                                            value={studentForm.data.university_id_number}
+                                            onChange={(e) => studentForm.setData('university_id_number', e.target.value)}
+                                            className="w-full p-3 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white focus:outline-none focus:border-orange-500"
+                                        />
+                                        {studentForm.errors.university_id_number && (
+                                            <p className="text-[11px] text-red-500 mt-1">{studentForm.errors.university_id_number}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Front Image */}
+                                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/80 space-y-2">
+                                        <label className="block text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                                            <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
+                                            <span>وجه الكارنيه (الأمام) <span className="text-red-500">*</span></span>
+                                        </label>
+                                        <input
+                                            type="file"
+                                            required
+                                            accept="image/jpeg,image/png,image/webp"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    const file = e.target.files[0];
+                                                    studentForm.setData('student_id_front', file);
+                                                    setFrontPreview(URL.createObjectURL(file));
+                                                }
+                                            }}
+                                            className="w-full text-xs text-stone-600 dark:text-stone-300 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-600 file:text-white cursor-pointer"
+                                        />
+                                        {frontPreview && (
+                                            <div className="mt-2 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 h-32 bg-stone-100 dark:bg-stone-900">
+                                                <img src={frontPreview} alt="معاينة وجه الكارنيه" className="w-full h-full object-contain" />
+                                            </div>
+                                        )}
+                                        {studentForm.errors.student_id_front && (
+                                            <p className="text-[11px] text-red-500">{studentForm.errors.student_id_front}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Back Image */}
+                                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/80 space-y-2">
+                                        <label className="block text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                                            <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
+                                            <span>ظهر الكارنيه (الخلف) <span className="text-red-500">*</span></span>
+                                        </label>
+                                        <input
+                                            type="file"
+                                            required
+                                            accept="image/jpeg,image/png,image/webp"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    const file = e.target.files[0];
+                                                    studentForm.setData('student_id_back', file);
+                                                    setBackPreview(URL.createObjectURL(file));
+                                                }
+                                            }}
+                                            className="w-full text-xs text-stone-600 dark:text-stone-300 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-600 file:text-white cursor-pointer"
+                                        />
+                                        {backPreview && (
+                                            <div className="mt-2 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 h-32 bg-stone-100 dark:bg-stone-900">
+                                                <img src={backPreview} alt="معاينة ظهر الكارنيه" className="w-full h-full object-contain" />
+                                            </div>
+                                        )}
+                                        {studentForm.errors.student_id_back && (
+                                            <p className="text-[11px] text-red-500">{studentForm.errors.student_id_back}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={studentForm.processing}
+                                    className="py-3 px-8 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 text-white font-bold text-xs shadow-md transition disabled:opacity-60 flex items-center gap-2 cursor-pointer"
                                 >
-                                    <optgroup label="جامعات برج العرب">
-                                        <option value="جامعة برج العرب التكنولوجية (BATU)">جامعة برج العرب التكنولوجية (BATU)</option>
-                                        <option value="الجامعة المصرية اليابانية للعلوم والتكنولوجيا (E-JUST)">الجامعة المصرية اليابانية للعلوم والتكنولوجيا (E-JUST)</option>
-                                        <option value="جامعة سنجور الدولية (Senghor University)">جامعة سنجور الدولية (Senghor University)</option>
-                                    </optgroup>
-                                    <optgroup label="جامعات ومعاهد أخرى">
-                                        <option value="جامعة الإسكندرية">جامعة الإسكندرية</option>
-                                        <option value="جامعة مطروح">جامعة مطروح</option>
-                                        <option value="الأكاديمية العربية للعلوم والتكنولوجيا (AASTMT)">الأكاديمية العربية للعلوم والتكنولوجيا (AASTMT)</option>
-                                        <option value="جامعة فاروس (PUA)">جامعة فاروس (PUA)</option>
-                                        <option value="جامعة العلمين الدولية (AIU)">جامعة العلمين الدولية (AIU)</option>
-                                        <option value="المعهد العالي للهندسة والتكنولوجيا ببرج العرب">المعهد العالي للهندسة والتكنولوجيا ببرج العرب</option>
-                                        <option value="جامعة / معهد آخر في مصر">جامعة / معهد آخر في مصر</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-                                    صورة كارنيه الجامعة (JPG أو PNG أو PDF)
-                                </label>
-                                <input
-                                    type="file"
-                                    required
-                                    accept="image/*,.pdf"
-                                    onChange={(e) => {
-                                        if (e.target.files && e.target.files[0]) {
-                                            studentForm.setData('student_id_image', e.target.files[0]);
-                                        }
-                                    }}
-                                    className="w-full p-2.5 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-600 file:text-white cursor-pointer"
-                                />
-                                {studentForm.errors.student_id_image && (
-                                    <p className="text-[11px] text-red-500 mt-1">{studentForm.errors.student_id_image}</p>
-                                )}
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={studentForm.processing}
-                                className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 text-white font-bold text-xs shadow transition disabled:opacity-60 flex items-center gap-1.5 cursor-pointer"
-                            >
-                                <Upload className="w-3.5 h-3.5" />
-                                <span>{studentForm.processing ? 'جارٍ رفع الكارنيه للإدارة...' : 'إرسال الكارنيه للمراجعة والتفعيل'}</span>
-                            </button>
-                        </form>
+                                    <Upload className="w-4 h-4" />
+                                    <span>{studentForm.processing ? 'جارٍ رفع الكارنيه للإدارة...' : 'إرسال الكارنيه (وجه وظهر) للمراجعة والتفعيل'}</span>
+                                </button>
+                            </form>
+                        </div>
                     )}
                 </div>
 

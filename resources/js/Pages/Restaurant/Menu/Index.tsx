@@ -16,7 +16,8 @@ import {
     Table as TableIcon,
     Camera,
     Flame,
-    X
+    X,
+    GraduationCap
 } from 'lucide-react';
 import ConfirmModal from '../../../Components/ConfirmModal';
 
@@ -44,6 +45,7 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
         category_id: categories[0]?.id ? String(categories[0].id) : '',
         price: '',
         discount_price: '',
+        student_price: '',
         description: '',
         is_available: true,
         is_featured: false,
@@ -59,6 +61,7 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
         category_id: '',
         price: '',
         discount_price: '',
+        student_price: '',
         description: '',
         is_available: true,
         is_featured: false,
@@ -100,6 +103,7 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
             category_id: String(item.category_id),
             price: String(item.price),
             discount_price: item.discount_price ? String(item.discount_price) : '',
+            student_price: item.student_price ? String(item.student_price) : '',
             description: item.description || '',
             is_available: item.is_available,
             is_featured: item.is_featured,
@@ -351,10 +355,18 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
                                         </button>
 
                                         {/* Price overlay */}
-                                        <div className="absolute bottom-3 right-3 flex items-baseline gap-1.5 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-xl border border-white/10 text-white">
-                                            <span className="text-sm font-black text-amber-400">{basePrice} ج.م</span>
-                                            {hasDiscount && (
-                                                <span className="text-[10px] text-stone-400 line-through">{item.price} ج.م</span>
+                                        <div className="absolute bottom-3 right-3 flex flex-col items-end gap-0.5 bg-stone-950/85 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-white">
+                                            <div className="flex items-baseline gap-1.5">
+                                                <span className="text-sm font-black text-amber-400">{basePrice} ج.م</span>
+                                                {hasDiscount && (
+                                                    <span className="text-[10px] text-stone-400 line-through">{item.price} ج.م</span>
+                                                )}
+                                            </div>
+                                            {item.student_price && Number(item.student_price) > 0 && (
+                                                <span className="text-[10px] font-bold text-indigo-300 flex items-center gap-1">
+                                                    <GraduationCap className="w-3 h-3 text-indigo-400" />
+                                                    {item.student_price} ج.م للطلاب
+                                                </span>
                                             )}
                                         </div>
                                     </div>
@@ -469,7 +481,15 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
                                                 {item.category?.name || '—'}
                                             </td>
                                             <td className="py-4 px-4 font-black text-stone-900 dark:text-white">
-                                                {item.price} ج.م
+                                                <div className="flex flex-col">
+                                                    <span>{item.price} ج.م</span>
+                                                    {item.student_price && Number(item.student_price) > 0 && (
+                                                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-0.5">
+                                                            <GraduationCap className="w-3 h-3" />
+                                                            {item.student_price} ج.م (طالب)
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="py-4 px-4 text-emerald-600 font-black">
                                                 {item.discount_price ? `${item.discount_price} ج.م` : '—'}
@@ -653,6 +673,31 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
                                 </div>
                             </div>
 
+                            {/* Student Special Price Box */}
+                            <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/40 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-black text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+                                        <GraduationCap className="w-4 h-4 text-indigo-500" />
+                                        <span>سعر خاص للطلاب الجامعيين (اختياري) 🎓</span>
+                                    </label>
+                                    <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-100/70 dark:bg-indigo-900/50 px-2 py-0.5 rounded-full">
+                                        تخصيص عرض طلابي
+                                    </span>
+                                </div>
+                                <input
+                                    type="number"
+                                    step="0.5"
+                                    min="0"
+                                    value={createForm.data.student_price}
+                                    onChange={(e) => createForm.setData('student_price', e.target.value)}
+                                    placeholder="مثال: 25 (يطبق فقط على الطلاب المعتمدين)"
+                                    className="w-full p-2.5 text-xs font-bold rounded-xl bg-white dark:bg-stone-800 border border-indigo-200 dark:border-indigo-800 text-stone-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                                />
+                                <p className="text-[10px] text-stone-500 dark:text-stone-400">
+                                    إذا أردت تخصيص هذا السندوتش/الطبق بعرض طلابي مخفض، اكتب سعره هنا للطلاب فقط.
+                                </p>
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-black mb-1.5">الوصف والمكونات</label>
                                 <textarea
@@ -824,6 +869,31 @@ export default function Index({ menu_items, categories = [], restaurant }: MenuI
                                         className="w-full p-3 text-xs font-bold rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 focus:outline-none focus:border-orange-500"
                                     />
                                 </div>
+                            </div>
+
+                            {/* Student Special Price Box */}
+                            <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/40 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-black text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+                                        <GraduationCap className="w-4 h-4 text-indigo-500" />
+                                        <span>سعر خاص للطلاب الجامعيين (اختياري) 🎓</span>
+                                    </label>
+                                    <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-100/70 dark:bg-indigo-900/50 px-2 py-0.5 rounded-full">
+                                        تخصيص عرض طلابي
+                                    </span>
+                                </div>
+                                <input
+                                    type="number"
+                                    step="0.5"
+                                    min="0"
+                                    value={editForm.data.student_price}
+                                    onChange={(e) => editForm.setData('student_price', e.target.value)}
+                                    placeholder="مثال: 25 (اتركه فارغاً لإلغاء سعر الطالب)"
+                                    className="w-full p-2.5 text-xs font-bold rounded-xl bg-white dark:bg-stone-800 border border-indigo-200 dark:border-indigo-800 text-stone-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                                />
+                                <p className="text-[10px] text-stone-500 dark:text-stone-400">
+                                    إذا تم تحديد هذا السعر، سيظهر هذا السندوتش/الطبق بسعر مخفض خصيصاً للطلاب المعتمدين.
+                                </p>
                             </div>
 
                             <div>

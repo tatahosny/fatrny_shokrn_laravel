@@ -43,19 +43,30 @@ class CustomerProfileController extends Controller
         abort_if(!$customer, 403);
 
         $request->validate([
-            'university_name' => 'required|string|max:255',
-            'student_id_image'=> 'required|file|mimes:jpg,jpeg,png,pdf|max:4096',
+            'university_name'     => 'required|string|max:255',
+            'university_id_number'=> 'nullable|string|max:100',
+            'student_id_front'    => 'required|file|mimes:jpg,jpeg,png,webp|max:5120',
+            'student_id_back'     => 'required|file|mimes:jpg,jpeg,png,webp|max:5120',
+        ], [
+            'student_id_front.required' => 'يرجى رفع صورة وجه الكارنيه الجامعي.',
+            'student_id_front.mimes'    => 'يجب أن تكون الصورة بصيغة JPG أو PNG أو WEBP.',
+            'student_id_back.required'  => 'يرجى رفع صورة ظهر الكارنيه الجامعي.',
+            'student_id_back.mimes'     => 'يجب أن تكون الصورة بصيغة JPG أو PNG أو WEBP.',
         ]);
 
-        $path = $request->file('student_id_image')->store('student-ids', 'public');
+        $frontPath = $request->file('student_id_front')->store('student-ids', 'public');
+        $backPath  = $request->file('student_id_back')->store('student-ids', 'public');
 
         $customer->update([
-            'university_name'           => $request->university_name,
-            'university_id_card_image'  => $path,
-            'student_status'            => 'PENDING',
+            'university_name'               => $request->university_name,
+            'university_id_number'          => $request->university_id_number,
+            'university_id_card_image'      => $frontPath,
+            'university_id_card_back_image' => $backPath,
+            'student_status'                => 'PENDING',
+            'rejection_reason'              => null,
         ]);
 
-        return back()->with('success', 'تم إرسال طلب التحقق من الهوية الطلابية. سيتم مراجعته قريباً.');
+        return back()->with('success', 'تم إرسال طلب توثيق الكارنيه الجامعي. سيتم مراجعته قريباً وستصلك النتيجة.');
     }
 
     public function storeAddress(Request $request): RedirectResponse

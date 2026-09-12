@@ -82,6 +82,8 @@ export interface MenuItem {
     description?: string;
     price: number;
     discount_price?: number;
+    student_price?: number;
+    effective_student_price?: number;
     effective_price: number;
     image?: string;
     is_available: boolean;
@@ -221,6 +223,7 @@ export interface Customer {
     university_name?: string;
     university_id_number?: string;
     university_id_card_image?: string;
+    university_id_card_back_image?: string;
     student_status?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED' | string;
     student_verification_status?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
     student_verified_at?: string;

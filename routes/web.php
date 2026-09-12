@@ -130,14 +130,18 @@ Route::middleware(['auth', 'portal:ADMIN'])->prefix('admin')->name('admin.')->gr
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
     // Restaurants
-    Route::resource('restaurants', AdminRestaurant::class);
-    Route::post('/restaurants/{id}/suspend', [AdminRestaurant::class, 'suspend'])->name('restaurants.suspend');
-    Route::post('/restaurants/{id}/activate', [AdminRestaurant::class, 'activate'])->name('restaurants.activate');
+    Route::match(['post', 'patch'], '/restaurants/{id}/suspend', [AdminRestaurant::class, 'suspend'])->name('restaurants.suspend');
+    Route::match(['post', 'patch'], '/restaurants/{id}/activate', [AdminRestaurant::class, 'activate'])->name('restaurants.activate');
+    Route::match(['post', 'patch'], '/restaurants/{id}/toggle-status', [AdminRestaurant::class, 'toggleStatus'])->name('restaurants.toggle-status');
+    Route::delete('/restaurants/{id}/account', [AdminRestaurant::class, 'destroyAccount'])->name('restaurants.destroy-account');
     Route::put('/restaurants/{id}/financial-config', [AdminRestaurant::class, 'updateFinancialConfig'])->name('restaurants.financial-config');
+    Route::resource('restaurants', AdminRestaurant::class);
 
     // Orders
     Route::get('/orders', [AdminOrder::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [AdminOrder::class, 'show'])->name('orders.show');
+    Route::match(['put', 'patch'], '/orders/{id}/status', [AdminOrder::class, 'updateStatus'])->name('orders.status');
+    Route::post('/orders/{id}/assign-driver', [AdminOrder::class, 'assignDriver'])->name('orders.assign-driver');
 
     // Customers
     Route::get('/customers', [AdminCustomer::class, 'index'])->name('customers.index');

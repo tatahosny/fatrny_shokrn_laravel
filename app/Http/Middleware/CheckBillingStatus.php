@@ -23,8 +23,20 @@ class CheckBillingStatus
             $restaurant = $staff?->restaurant;
 
             if ($restaurant) {
-                // Check if payment due date has passed with an unpaid invoice
-                if ($restaurant->status === 'ACTIVE' && $restaurant->payment_due_date && $restaurant->payment_due_date->isPast()) {
+                // Check if restaurant has any approved/paid invoice
+                $hasApprovedInvoice = Invoice::where('restaurant_id', $restaurant->id)
+                    ->where('status', 'PAID')
+                    ->exists();
+
+                if (!$hasApprovedInvoice) {
+                    if ($restaurant->status !== 'SUSPENDED') {
+                        $restaurant->update([
+                            'status' => 'SUSPENDED',
+                            'billing_suspended_at' => now(),
+                            'suspension_reason' => 'الحساب مقفول لعدم وجود فاتورة معتمدة ومسددة للمطعم',
+                        ]);
+                    }
+                } elseif ($restaurant->status === 'ACTIVE' && $restaurant->payment_due_date && $restaurant->payment_due_date->isPast()) {
                     $hasUnpaid = Invoice::where('restaurant_id', $restaurant->id)
                         ->whereNotIn('status', ['PAID', 'CANCELLED'])
                         ->where('due_date', '<=', now()->toDateString())
@@ -58,10 +70,20 @@ class CheckBillingStatus
         if ($user->isDeliveryDriver()) {
             $driver = $user->deliveryDriver;
             $restaurant = $driver?->restaurant;
-
             if ($restaurant) {
-                // Also check if restaurant is overdue
-                if ($restaurant->status === 'ACTIVE' && $restaurant->payment_due_date && $restaurant->payment_due_date->isPast()) {
+                $hasApprovedInvoice = Invoice::where('restaurant_id', $restaurant->id)
+                    ->where('status', 'PAID')
+                    ->exists();
+
+                if (!$hasApprovedInvoice) {
+                    if ($restaurant->status !== 'SUSPENDED') {
+                        $restaurant->update([
+                            'status' => 'SUSPENDED',
+                            'billing_suspended_at' => now(),
+                            'suspension_reason' => 'الحساب مقفول لعدم وجود فاتورة معتمدة ومسددة للمطعم',
+                        ]);
+                    }
+                } elseif ($restaurant->status === 'ACTIVE' && $restaurant->payment_due_date && $restaurant->payment_due_date->isPast()) {
                     $hasUnpaid = Invoice::where('restaurant_id', $restaurant->id)
                         ->whereNotIn('status', ['PAID', 'CANCELLED'])
                         ->where('due_date', '<=', now()->toDateString())

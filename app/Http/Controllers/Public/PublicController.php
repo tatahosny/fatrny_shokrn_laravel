@@ -28,7 +28,7 @@ class PublicController extends Controller
             ->take(12)
             ->get();
 
-        // Restaurants with item counts for landing page
+        // Restaurants with item counts for landing page - prioritized by best-selling (most completed & total orders)
         $restaurants = Restaurant::whereIn('status', ['ACTIVE', 'SUSPENDED'])
             ->select([
                 'id', 'name', 'slug', 'logo', 'cover_image', 'description',
@@ -38,7 +38,11 @@ class PublicController extends Controller
             ])
             ->withCount(['menuItems' => fn($q) => $q->where('is_available', true)])
             ->withCount(['offers' => fn($q) => $q->where('is_active', true)])
+            ->withCount(['orders as completed_orders_count' => fn($q) => $q->where('status', 'DELIVERED')])
+            ->withCount('orders')
             ->orderByRaw("CASE WHEN status = 'ACTIVE' THEN 0 ELSE 1 END")
+            ->orderByDesc('completed_orders_count')
+            ->orderByDesc('orders_count')
             ->latest()
             ->get();
 
@@ -84,19 +88,29 @@ class PublicController extends Controller
         // CMS / system settings for the landing page
         $cms = $this->cmsService->getPublicSettings();
 
+        // Dishes with dedicated student prices
+        $studentDishes = \App\Models\MenuItem::with(['restaurant:id,name,slug,logo,cover_image'])
+            ->where('is_available', true)
+            ->whereNotNull('student_price')
+            ->where('student_price', '>', 0)
+            ->take(8)
+            ->get();
+
         // Platform statistics
         $stats = [
-            'restaurants' => Restaurant::where('status', 'ACTIVE')->count(),
-            'orders'      => \App\Models\Order::where('status', 'DELIVERED')->count(),
-            'drivers'     => \App\Models\DeliveryDriver::where('is_active', true)->count(),
-            'customers'   => \App\Models\Customer::count(),
-            'totalDishes' => $totalDishes,
+            'restaurants'      => Restaurant::where('status', 'ACTIVE')->count(),
+            'orders'           => \App\Models\Order::where('status', 'DELIVERED')->count(),
+            'drivers'          => \App\Models\DeliveryDriver::where('is_active', true)->count(),
+            'customers'        => \App\Models\Customer::count(),
+            'verifiedStudents' => \App\Models\Customer::where('student_status', 'APPROVED')->count(),
+            'totalDishes'      => $totalDishes,
         ];
 
         return Inertia::render('Public/Home', [
             'restaurants'        => $restaurants,
             'featuredRestaurants'=> $restaurants,
             'totalDishes'        => $totalDishes,
+            'studentDishes'      => $studentDishes,
             'activeOffers'       => $activeOffers,
             'leaderboard'        => $leaderboard,
             'cms'                => $cms,

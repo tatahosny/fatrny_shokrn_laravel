@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MenuItem, MenuItemAddon, Restaurant } from '../Types';
 import { useCartStore } from '../Stores/cartStore';
 import { Plus, Minus, ShoppingCart, Heart, Check, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
@@ -70,10 +70,20 @@ export default function FoodCard({ food, restaurant, studentDiscountPercent = 0 
           </span>
         )}
 
+        {/* Student Special Badge */}
+        {food.student_price && Number(food.student_price) > 0 && (
+          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-600/95 text-white backdrop-blur-md shadow-md flex items-center gap-1">
+            🎓 خصم طلابي: {food.student_price} ج.م
+          </span>
+        )}
+
         {/* Price Tag */}
         {basePrice > 0 && (
-          <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-xl bg-stone-950/80 backdrop-blur-md border border-white/10 text-white text-xs font-black shadow-md">
-            {basePrice} ج.م
+          <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-xl bg-stone-950/80 backdrop-blur-md border border-white/10 text-white text-xs font-black shadow-md flex items-center gap-1.5">
+            <span>{basePrice} ج.م</span>
+            {food.discount_price && food.discount_price < food.price && (
+              <span className="text-[10px] text-stone-400 line-through">{food.price} ج.م</span>
+            )}
           </div>
         )}
 
